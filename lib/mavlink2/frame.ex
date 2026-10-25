@@ -24,8 +24,9 @@ defmodule MAVLink2.Frame do
   ## Signing
 
   `incompat_flags` bit 0 (`MAVLINK_IFLAG_SIGNED`) adds a 13-byte signature
-  after the checksum. Signed frames are skipped whole and reported as
-  `:signed_frame_unsupported`.
+  after the checksum. A signed frame decodes with `signature` set to
+  `{link_id, timestamp, signature, signed_bytes}`; checking it is
+  `MAVLink2.Signing.verify/2`. `MAVLink2.Signing.encode/4` sends one.
   """
 
   import Bitwise
@@ -47,7 +48,8 @@ defmodule MAVLink2.Frame do
     sysid: 1,
     compid: 1,
     incompat_flags: 0,
-    compat_flags: 0
+    compat_flags: 0,
+    signature: nil
   ]
 
   @type t :: %__MODULE__{
@@ -57,7 +59,9 @@ defmodule MAVLink2.Frame do
           sysid: 0..255,
           compid: 0..255,
           incompat_flags: 0..255,
-          compat_flags: 0..255
+          compat_flags: 0..255,
+          signature:
+            nil | {link_id :: 0..255, timestamp :: non_neg_integer(), <<_::48>>, binary()}
         }
 
   def stx_v2, do: @stx_v2
@@ -111,22 +115,13 @@ defmodule MAVLink2.Frame do
   def decode(<<@stx_v1, rest::binary>>, _dialect), do: {:error, :mavlink_v1_unsupported, rest}
   def decode(<<_junk, rest::binary>>, _dialect), do: {:error, :no_stx, rest}
 
-  defp decode_v2(bin, <<len, incompat, _::binary>>, _dialect)
-       when (incompat &&& @iflag_signed) == @iflag_signed do
-    total = 1 + @header_after_stx + len + 2 + @signature_bytes
-
-    case bin do
-      <<_::binary-size(^total), rest::binary>> -> {:error, :signed_frame_unsupported, rest}
-      _ -> {:incomplete, bin}
-    end
-  end
-
-  defp decode_v2(bin, <<len, _::binary>> = rest, dialect) do
-    need = @header_after_stx + len + 2
+  defp decode_v2(bin, <<len, incompat, _::binary>> = rest, dialect) do
+    sig_len = if (incompat &&& @iflag_signed) != 0, do: @signature_bytes, else: 0
+    need = @header_after_stx + len + 2 + sig_len
 
     case rest do
       <<header::binary-size(@header_after_stx), payload::binary-size(^len), crc::little-16,
-        tail::binary>> ->
+        sig_block::binary-size(^sig_len), tail::binary>> ->
         <<_len, incompat, compat, seq, sysid, compid, msgid::little-size(24)>> = header
 
         case dialect.crc_extra(msgid) do
@@ -142,7 +137,8 @@ defmodule MAVLink2.Frame do
                 sysid: sysid,
                 compid: compid,
                 incompat_flags: incompat,
-                compat_flags: compat
+                compat_flags: compat,
+                signature: signature(sig_block, bin, len)
               }
 
               {:ok, frame, tail}
@@ -158,6 +154,11 @@ defmodule MAVLink2.Frame do
   end
 
   defp decode_v2(bin, _rest, _dialect), do: {:incomplete, bin}
+
+  defp signature(<<>>, _bin, _len), do: nil
+
+  defp signature(<<link_id, ts::little-48, sig::binary-size(6)>>, bin, len),
+    do: {link_id, ts, sig, binary_part(bin, 0, 1 + @header_after_stx + len + 2 + 7)}
 
   @doc """
   Every complete frame in `bin`, as `{frames, errors, rest}`. Errors are

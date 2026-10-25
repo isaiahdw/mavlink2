@@ -73,11 +73,18 @@ defmodule MAVLink2.FrameTest do
              Frame.drain(<<0x00, 0x11>> <> a <> b <> partial, @d)
   end
 
-  test "v1 and signed frames are refused, a signed one skipped whole" do
+  test "v1 frames are refused" do
     assert {:error, :mavlink_v1_unsupported, _} = Frame.decode(<<0xFE, 4, 0, 0, 0>>, @d)
+  end
 
+  test "a signed frame waits for its signature, then decodes with it" do
     {:ok, wire} = Frame.encode(%Frame{msgid: 300, payload: <<1, 2, 3, 4>>, incompat_flags: 1}, @d)
-    signed = wire <> :binary.copy(<<0>>, 13)
-    assert Frame.decode(signed <> "x", @d) == {:error, :signed_frame_unsupported, "x"}
+    signed = wire <> <<9, 1::little-48, "abcdef">>
+    assert Frame.decode(wire, @d) == {:incomplete, wire}
+
+    assert {:ok, %Frame{signature: {9, 1, "abcdef", covered}}, "x"} =
+             Frame.decode(signed <> "x", @d)
+
+    assert covered == binary_part(signed, 0, byte_size(signed) - 6)
   end
 end

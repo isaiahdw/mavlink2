@@ -21,6 +21,8 @@ defmodule MAVLink2.Link do
   | `:transport` | a `MAVLink2.Transport` (default `MAVLink2.Transport.UART`); the rest of the options go to its `open/1` |
   | `:sendable` | the message ids the peer accepts; others are refused with `{:error, {:not_sendable, id}}`. Default: any id the dialect has |
   | `:sysid`, `:compid` | this end's ids (default 1, 1) |
+  | `:signing` | a `MAVLink2.Signing`: every frame sent is signed, and a frame received is delivered only if it verifies (counted as `:unsigned`, `:bad_signature` or `:replay` otherwise). Without it, frames are sent unsigned and every frame received is delivered, signed or not |
+  | `:clock` | Unix time in microseconds for signing timestamps (default `System.os_time(:microsecond)`) |
   | `:name` | registered name |
 
   A transport that does not open logs a warning and the link returns
@@ -41,13 +43,24 @@ defmodule MAVLink2.Link do
       :transport,
       :handle,
       :sendable,
+      :signing,
+      :clock,
       sysid: 1,
       compid: 1,
       buffer: <<>>,
       tx_seq: 0,
       peer_seq: nil,
       subscribers: MapSet.new(),
-      stats: %{rx: 0, tx: 0, errors: 0, dropped: 0, unknown: 0}
+      stats: %{
+        rx: 0,
+        tx: 0,
+        errors: 0,
+        dropped: 0,
+        unknown: 0,
+        unsigned: 0,
+        bad_signature: 0,
+        replay: 0
+      }
     ]
   end
 
@@ -73,7 +86,7 @@ defmodule MAVLink2.Link do
       when is_integer(msgid) and is_binary(payload),
       do: GenServer.call(link, {:send, msgid, payload, opts})
 
-  @doc "Counts: `:rx`, `:tx`, `:errors`, `:dropped`, `:unknown`."
+  @doc "Counts: `:rx`, `:tx`, `:errors`, `:dropped`, `:unknown`, `:unsigned`, `:bad_signature`, `:replay`."
   def stats(link), do: GenServer.call(link, :stats)
 
   @impl true
@@ -90,6 +103,8 @@ defmodule MAVLink2.Link do
            transport: transport,
            handle: handle,
            sendable: Keyword.get(opts, :sendable),
+           signing: Keyword.get(opts, :signing),
+           clock: Keyword.get(opts, :clock, fn -> System.os_time(:microsecond) end),
            sysid: Keyword.get(opts, :sysid, 1),
            compid: Keyword.get(opts, :compid, 1)
          }}
@@ -124,7 +139,7 @@ defmodule MAVLink2.Link do
         compid: Keyword.get(opts, :compid, state.compid)
       }
 
-      with {:ok, bytes} <- Frame.encode(frame, state.dialect),
+      with {:ok, bytes, state} <- encode(frame, state),
            :ok <- state.transport.write(state.handle, bytes) do
         {:reply, :ok, state |> Map.update!(:tx_seq, &rem(&1 + 1, 256)) |> bump(:tx)}
       else
@@ -158,7 +173,28 @@ defmodule MAVLink2.Link do
   def terminate(_reason, %State{transport: t, handle: h}) when h != nil, do: t.close(h)
   def terminate(_reason, _state), do: :ok
 
+  defp encode(frame, %{signing: nil} = state) do
+    with {:ok, bytes} <- Frame.encode(frame, state.dialect), do: {:ok, bytes, state}
+  end
+
+  defp encode(frame, state) do
+    now = MAVLink2.Signing.timestamp(state.clock.())
+
+    with {:ok, bytes, signing} <-
+           MAVLink2.Signing.encode(state.signing, frame, state.dialect, now),
+         do: {:ok, bytes, %{state | signing: signing}}
+  end
+
+  defp deliver(%Frame{} = frame, %{signing: nil} = state), do: fan_out(frame, state)
+
   defp deliver(%Frame{} = frame, state) do
+    case MAVLink2.Signing.verify(state.signing, frame) do
+      {:ok, signing} -> fan_out(frame, %{state | signing: signing})
+      {:error, reason} -> bump(state, reason)
+    end
+  end
+
+  defp fan_out(frame, state) do
     state = track_peer_seq(state, frame.seq)
     for pid <- state.subscribers, do: send(pid, {__MODULE__, state.name, frame})
     bump(state, :rx)

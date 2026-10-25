@@ -55,4 +55,46 @@ defmodule MAVLink2.LinkTest do
 
     assert :ignore = Link.init(dialect: TestDialect, transport: Closed)
   end
+
+  describe "signed" do
+    @key :binary.copy(<<1>>, 32)
+
+    test "frames go out signed and come back verified" do
+      signing = MAVLink2.Signing.new(@key, link_id: 3)
+      link = link(echo: true, signing: signing)
+      :ok = Link.subscribe(link)
+
+      assert :ok = Link.send_message(link, 300, <<1, 2, 3, 4>>)
+      assert :ok = Link.send_message(link, 300, <<5, 6, 7, 8>>)
+      assert_receive {Link, ^link, %Frame{signature: {3, t1, _, _}}}
+      assert_receive {Link, ^link, %Frame{signature: {3, t2, _, _}}}
+      assert t2 > t1
+      assert %{rx: 2, unsigned: 0, bad_signature: 0, replay: 0} = Link.stats(link)
+    end
+
+    test "unsigned, wrongly signed and replayed frames are dropped and counted" do
+      link = link(signing: MAVLink2.Signing.new(@key))
+      :ok = Link.subscribe(link)
+      frame = %Frame{msgid: 300, payload: <<1, 1, 1, 1>>}
+      now = MAVLink2.Signing.timestamp(System.os_time(:microsecond))
+
+      {:ok, unsigned} = Frame.encode(frame, TestDialect)
+
+      {:ok, other, _} =
+        MAVLink2.Signing.encode(
+          MAVLink2.Signing.new(:binary.copy(<<2>>, 32)),
+          frame,
+          TestDialect,
+          now
+        )
+
+      {:ok, good, _} =
+        MAVLink2.Signing.encode(MAVLink2.Signing.new(@key), frame, TestDialect, now)
+
+      send(link, {:mavlink_data, unsigned <> other <> good <> good})
+      assert_receive {Link, ^link, %Frame{signature: {0, ^now, _, _}}}
+      refute_receive {Link, ^link, _}, 50
+      assert %{rx: 1, unsigned: 1, bad_signature: 1, replay: 1} = Link.stats(link)
+    end
+  end
 end
