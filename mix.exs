@@ -12,7 +12,7 @@ defmodule MAVLink2.MixProject do
     ]
   end
 
-  def application, do: [extra_applications: [:logger, :crypto]]
+  def application, do: [extra_applications: [:logger, :crypto, :xmerl]]
 
   defp elixirc_paths(:test), do: ["lib", "test/support"]
   defp elixirc_paths(_), do: ["lib"]

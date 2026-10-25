@@ -1,0 +1,8096 @@
+{
+ "messages": {
+  "0": {
+   "name": "HEARTBEAT",
+   "crc_extra": 50,
+   "length": 9,
+   "wire_order": [
+    "custom_mode",
+    "type",
+    "autopilot",
+    "base_mode",
+    "system_status",
+    "mavlink_version"
+   ],
+   "types": {
+    "type": "uint8_t",
+    "autopilot": "uint8_t",
+    "base_mode": "uint8_t",
+    "custom_mode": "uint32_t",
+    "system_status": "uint8_t",
+    "mavlink_version": "uint8_t"
+   },
+   "array_lengths": {
+    "custom_mode": 0,
+    "type": 0,
+    "autopilot": 0,
+    "base_mode": 0,
+    "system_status": 0,
+    "mavlink_version": 0
+   }
+  },
+  "1": {
+   "name": "SYS_STATUS",
+   "crc_extra": 124,
+   "length": 43,
+   "wire_order": [
+    "onboard_control_sensors_present",
+    "onboard_control_sensors_enabled",
+    "onboard_control_sensors_health",
+    "load",
+    "voltage_battery",
+    "current_battery",
+    "drop_rate_comm",
+    "errors_comm",
+    "errors_count1",
+    "errors_count2",
+    "errors_count3",
+    "errors_count4",
+    "battery_remaining",
+    "onboard_control_sensors_present_extended",
+    "onboard_control_sensors_enabled_extended",
+    "onboard_control_sensors_health_extended"
+   ],
+   "types": {
+    "onboard_control_sensors_present": "uint32_t",
+    "onboard_control_sensors_enabled": "uint32_t",
+    "onboard_control_sensors_health": "uint32_t",
+    "load": "uint16_t",
+    "voltage_battery": "uint16_t",
+    "current_battery": "int16_t",
+    "battery_remaining": "int8_t",
+    "drop_rate_comm": "uint16_t",
+    "errors_comm": "uint16_t",
+    "errors_count1": "uint16_t",
+    "errors_count2": "uint16_t",
+    "errors_count3": "uint16_t",
+    "errors_count4": "uint16_t",
+    "onboard_control_sensors_present_extended": "uint32_t",
+    "onboard_control_sensors_enabled_extended": "uint32_t",
+    "onboard_control_sensors_health_extended": "uint32_t"
+   },
+   "array_lengths": {
+    "onboard_control_sensors_present": 0,
+    "onboard_control_sensors_enabled": 0,
+    "onboard_control_sensors_health": 0,
+    "load": 0,
+    "voltage_battery": 0,
+    "current_battery": 0,
+    "drop_rate_comm": 0,
+    "errors_comm": 0,
+    "errors_count1": 0,
+    "errors_count2": 0,
+    "errors_count3": 0,
+    "errors_count4": 0,
+    "battery_remaining": 0,
+    "onboard_control_sensors_present_extended": 0,
+    "onboard_control_sensors_enabled_extended": 0,
+    "onboard_control_sensors_health_extended": 0
+   }
+  },
+  "2": {
+   "name": "SYSTEM_TIME",
+   "crc_extra": 137,
+   "length": 12,
+   "wire_order": [
+    "time_unix_usec",
+    "time_boot_ms"
+   ],
+   "types": {
+    "time_unix_usec": "uint64_t",
+    "time_boot_ms": "uint32_t"
+   },
+   "array_lengths": {
+    "time_unix_usec": 0,
+    "time_boot_ms": 0
+   }
+  },
+  "4": {
+   "name": "PING",
+   "crc_extra": 237,
+   "length": 14,
+   "wire_order": [
+    "time_usec",
+    "seq",
+    "target_system",
+    "target_component"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "seq": "uint32_t",
+    "target_system": "uint8_t",
+    "target_component": "uint8_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "seq": 0,
+    "target_system": 0,
+    "target_component": 0
+   }
+  },
+  "5": {
+   "name": "CHANGE_OPERATOR_CONTROL",
+   "crc_extra": 217,
+   "length": 28,
+   "wire_order": [
+    "target_system",
+    "control_request",
+    "version",
+    "passkey"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "control_request": "uint8_t",
+    "version": "uint8_t",
+    "passkey": "char"
+   },
+   "array_lengths": {
+    "target_system": 0,
+    "control_request": 0,
+    "version": 0,
+    "passkey": 25
+   }
+  },
+  "6": {
+   "name": "CHANGE_OPERATOR_CONTROL_ACK",
+   "crc_extra": 104,
+   "length": 3,
+   "wire_order": [
+    "gcs_system_id",
+    "control_request",
+    "ack"
+   ],
+   "types": {
+    "gcs_system_id": "uint8_t",
+    "control_request": "uint8_t",
+    "ack": "uint8_t"
+   },
+   "array_lengths": {
+    "gcs_system_id": 0,
+    "control_request": 0,
+    "ack": 0
+   }
+  },
+  "7": {
+   "name": "AUTH_KEY",
+   "crc_extra": 119,
+   "length": 32,
+   "wire_order": [
+    "key"
+   ],
+   "types": {
+    "key": "char"
+   },
+   "array_lengths": {
+    "key": 32
+   }
+  },
+  "11": {
+   "name": "SET_MODE",
+   "crc_extra": 89,
+   "length": 6,
+   "wire_order": [
+    "custom_mode",
+    "target_system",
+    "base_mode"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "base_mode": "uint8_t",
+    "custom_mode": "uint32_t"
+   },
+   "array_lengths": {
+    "custom_mode": 0,
+    "target_system": 0,
+    "base_mode": 0
+   }
+  },
+  "20": {
+   "name": "PARAM_REQUEST_READ",
+   "crc_extra": 214,
+   "length": 20,
+   "wire_order": [
+    "param_index",
+    "target_system",
+    "target_component",
+    "param_id"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "param_id": "char",
+    "param_index": "int16_t"
+   },
+   "array_lengths": {
+    "param_index": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "param_id": 16
+   }
+  },
+  "21": {
+   "name": "PARAM_REQUEST_LIST",
+   "crc_extra": 159,
+   "length": 2,
+   "wire_order": [
+    "target_system",
+    "target_component"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t"
+   },
+   "array_lengths": {
+    "target_system": 0,
+    "target_component": 0
+   }
+  },
+  "22": {
+   "name": "PARAM_VALUE",
+   "crc_extra": 220,
+   "length": 25,
+   "wire_order": [
+    "param_value",
+    "param_count",
+    "param_index",
+    "param_id",
+    "param_type"
+   ],
+   "types": {
+    "param_id": "char",
+    "param_value": "float",
+    "param_type": "uint8_t",
+    "param_count": "uint16_t",
+    "param_index": "uint16_t"
+   },
+   "array_lengths": {
+    "param_value": 0,
+    "param_count": 0,
+    "param_index": 0,
+    "param_id": 16,
+    "param_type": 0
+   }
+  },
+  "23": {
+   "name": "PARAM_SET",
+   "crc_extra": 168,
+   "length": 23,
+   "wire_order": [
+    "param_value",
+    "target_system",
+    "target_component",
+    "param_id",
+    "param_type"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "param_id": "char",
+    "param_value": "float",
+    "param_type": "uint8_t"
+   },
+   "array_lengths": {
+    "param_value": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "param_id": 16,
+    "param_type": 0
+   }
+  },
+  "24": {
+   "name": "GPS_RAW_INT",
+   "crc_extra": 24,
+   "length": 52,
+   "wire_order": [
+    "time_usec",
+    "lat",
+    "lon",
+    "alt",
+    "eph",
+    "epv",
+    "vel",
+    "cog",
+    "fix_type",
+    "satellites_visible",
+    "alt_ellipsoid",
+    "h_acc",
+    "v_acc",
+    "vel_acc",
+    "hdg_acc",
+    "yaw"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "fix_type": "uint8_t",
+    "lat": "int32_t",
+    "lon": "int32_t",
+    "alt": "int32_t",
+    "eph": "uint16_t",
+    "epv": "uint16_t",
+    "vel": "uint16_t",
+    "cog": "uint16_t",
+    "satellites_visible": "uint8_t",
+    "alt_ellipsoid": "int32_t",
+    "h_acc": "uint32_t",
+    "v_acc": "uint32_t",
+    "vel_acc": "uint32_t",
+    "hdg_acc": "uint32_t",
+    "yaw": "uint16_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "lat": 0,
+    "lon": 0,
+    "alt": 0,
+    "eph": 0,
+    "epv": 0,
+    "vel": 0,
+    "cog": 0,
+    "fix_type": 0,
+    "satellites_visible": 0,
+    "alt_ellipsoid": 0,
+    "h_acc": 0,
+    "v_acc": 0,
+    "vel_acc": 0,
+    "hdg_acc": 0,
+    "yaw": 0
+   }
+  },
+  "25": {
+   "name": "GPS_STATUS",
+   "crc_extra": 23,
+   "length": 101,
+   "wire_order": [
+    "satellites_visible",
+    "satellite_prn",
+    "satellite_used",
+    "satellite_elevation",
+    "satellite_azimuth",
+    "satellite_snr"
+   ],
+   "types": {
+    "satellites_visible": "uint8_t",
+    "satellite_prn": "uint8_t",
+    "satellite_used": "uint8_t",
+    "satellite_elevation": "uint8_t",
+    "satellite_azimuth": "uint8_t",
+    "satellite_snr": "uint8_t"
+   },
+   "array_lengths": {
+    "satellites_visible": 0,
+    "satellite_prn": 20,
+    "satellite_used": 20,
+    "satellite_elevation": 20,
+    "satellite_azimuth": 20,
+    "satellite_snr": 20
+   }
+  },
+  "26": {
+   "name": "SCALED_IMU",
+   "crc_extra": 170,
+   "length": 24,
+   "wire_order": [
+    "time_boot_ms",
+    "xacc",
+    "yacc",
+    "zacc",
+    "xgyro",
+    "ygyro",
+    "zgyro",
+    "xmag",
+    "ymag",
+    "zmag",
+    "temperature"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "xacc": "int16_t",
+    "yacc": "int16_t",
+    "zacc": "int16_t",
+    "xgyro": "int16_t",
+    "ygyro": "int16_t",
+    "zgyro": "int16_t",
+    "xmag": "int16_t",
+    "ymag": "int16_t",
+    "zmag": "int16_t",
+    "temperature": "int16_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "xacc": 0,
+    "yacc": 0,
+    "zacc": 0,
+    "xgyro": 0,
+    "ygyro": 0,
+    "zgyro": 0,
+    "xmag": 0,
+    "ymag": 0,
+    "zmag": 0,
+    "temperature": 0
+   }
+  },
+  "27": {
+   "name": "RAW_IMU",
+   "crc_extra": 144,
+   "length": 29,
+   "wire_order": [
+    "time_usec",
+    "xacc",
+    "yacc",
+    "zacc",
+    "xgyro",
+    "ygyro",
+    "zgyro",
+    "xmag",
+    "ymag",
+    "zmag",
+    "id",
+    "temperature"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "xacc": "int16_t",
+    "yacc": "int16_t",
+    "zacc": "int16_t",
+    "xgyro": "int16_t",
+    "ygyro": "int16_t",
+    "zgyro": "int16_t",
+    "xmag": "int16_t",
+    "ymag": "int16_t",
+    "zmag": "int16_t",
+    "id": "uint8_t",
+    "temperature": "int16_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "xacc": 0,
+    "yacc": 0,
+    "zacc": 0,
+    "xgyro": 0,
+    "ygyro": 0,
+    "zgyro": 0,
+    "xmag": 0,
+    "ymag": 0,
+    "zmag": 0,
+    "id": 0,
+    "temperature": 0
+   }
+  },
+  "28": {
+   "name": "RAW_PRESSURE",
+   "crc_extra": 67,
+   "length": 16,
+   "wire_order": [
+    "time_usec",
+    "press_abs",
+    "press_diff1",
+    "press_diff2",
+    "temperature"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "press_abs": "int16_t",
+    "press_diff1": "int16_t",
+    "press_diff2": "int16_t",
+    "temperature": "int16_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "press_abs": 0,
+    "press_diff1": 0,
+    "press_diff2": 0,
+    "temperature": 0
+   }
+  },
+  "29": {
+   "name": "SCALED_PRESSURE",
+   "crc_extra": 115,
+   "length": 16,
+   "wire_order": [
+    "time_boot_ms",
+    "press_abs",
+    "press_diff",
+    "temperature",
+    "temperature_press_diff"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "press_abs": "float",
+    "press_diff": "float",
+    "temperature": "int16_t",
+    "temperature_press_diff": "int16_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "press_abs": 0,
+    "press_diff": 0,
+    "temperature": 0,
+    "temperature_press_diff": 0
+   }
+  },
+  "30": {
+   "name": "ATTITUDE",
+   "crc_extra": 39,
+   "length": 28,
+   "wire_order": [
+    "time_boot_ms",
+    "roll",
+    "pitch",
+    "yaw",
+    "rollspeed",
+    "pitchspeed",
+    "yawspeed"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "roll": "float",
+    "pitch": "float",
+    "yaw": "float",
+    "rollspeed": "float",
+    "pitchspeed": "float",
+    "yawspeed": "float"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "roll": 0,
+    "pitch": 0,
+    "yaw": 0,
+    "rollspeed": 0,
+    "pitchspeed": 0,
+    "yawspeed": 0
+   }
+  },
+  "31": {
+   "name": "ATTITUDE_QUATERNION",
+   "crc_extra": 246,
+   "length": 48,
+   "wire_order": [
+    "time_boot_ms",
+    "q1",
+    "q2",
+    "q3",
+    "q4",
+    "rollspeed",
+    "pitchspeed",
+    "yawspeed",
+    "repr_offset_q"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "q1": "float",
+    "q2": "float",
+    "q3": "float",
+    "q4": "float",
+    "rollspeed": "float",
+    "pitchspeed": "float",
+    "yawspeed": "float",
+    "repr_offset_q": "float"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "q1": 0,
+    "q2": 0,
+    "q3": 0,
+    "q4": 0,
+    "rollspeed": 0,
+    "pitchspeed": 0,
+    "yawspeed": 0,
+    "repr_offset_q": 4
+   }
+  },
+  "32": {
+   "name": "LOCAL_POSITION_NED",
+   "crc_extra": 185,
+   "length": 28,
+   "wire_order": [
+    "time_boot_ms",
+    "x",
+    "y",
+    "z",
+    "vx",
+    "vy",
+    "vz"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "x": "float",
+    "y": "float",
+    "z": "float",
+    "vx": "float",
+    "vy": "float",
+    "vz": "float"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "vx": 0,
+    "vy": 0,
+    "vz": 0
+   }
+  },
+  "33": {
+   "name": "GLOBAL_POSITION_INT",
+   "crc_extra": 104,
+   "length": 28,
+   "wire_order": [
+    "time_boot_ms",
+    "lat",
+    "lon",
+    "alt",
+    "relative_alt",
+    "vx",
+    "vy",
+    "vz",
+    "hdg"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "lat": "int32_t",
+    "lon": "int32_t",
+    "alt": "int32_t",
+    "relative_alt": "int32_t",
+    "vx": "int16_t",
+    "vy": "int16_t",
+    "vz": "int16_t",
+    "hdg": "uint16_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "lat": 0,
+    "lon": 0,
+    "alt": 0,
+    "relative_alt": 0,
+    "vx": 0,
+    "vy": 0,
+    "vz": 0,
+    "hdg": 0
+   }
+  },
+  "34": {
+   "name": "RC_CHANNELS_SCALED",
+   "crc_extra": 237,
+   "length": 22,
+   "wire_order": [
+    "time_boot_ms",
+    "chan1_scaled",
+    "chan2_scaled",
+    "chan3_scaled",
+    "chan4_scaled",
+    "chan5_scaled",
+    "chan6_scaled",
+    "chan7_scaled",
+    "chan8_scaled",
+    "port",
+    "rssi"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "port": "uint8_t",
+    "chan1_scaled": "int16_t",
+    "chan2_scaled": "int16_t",
+    "chan3_scaled": "int16_t",
+    "chan4_scaled": "int16_t",
+    "chan5_scaled": "int16_t",
+    "chan6_scaled": "int16_t",
+    "chan7_scaled": "int16_t",
+    "chan8_scaled": "int16_t",
+    "rssi": "uint8_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "chan1_scaled": 0,
+    "chan2_scaled": 0,
+    "chan3_scaled": 0,
+    "chan4_scaled": 0,
+    "chan5_scaled": 0,
+    "chan6_scaled": 0,
+    "chan7_scaled": 0,
+    "chan8_scaled": 0,
+    "port": 0,
+    "rssi": 0
+   }
+  },
+  "35": {
+   "name": "RC_CHANNELS_RAW",
+   "crc_extra": 244,
+   "length": 22,
+   "wire_order": [
+    "time_boot_ms",
+    "chan1_raw",
+    "chan2_raw",
+    "chan3_raw",
+    "chan4_raw",
+    "chan5_raw",
+    "chan6_raw",
+    "chan7_raw",
+    "chan8_raw",
+    "port",
+    "rssi"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "port": "uint8_t",
+    "chan1_raw": "uint16_t",
+    "chan2_raw": "uint16_t",
+    "chan3_raw": "uint16_t",
+    "chan4_raw": "uint16_t",
+    "chan5_raw": "uint16_t",
+    "chan6_raw": "uint16_t",
+    "chan7_raw": "uint16_t",
+    "chan8_raw": "uint16_t",
+    "rssi": "uint8_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "chan1_raw": 0,
+    "chan2_raw": 0,
+    "chan3_raw": 0,
+    "chan4_raw": 0,
+    "chan5_raw": 0,
+    "chan6_raw": 0,
+    "chan7_raw": 0,
+    "chan8_raw": 0,
+    "port": 0,
+    "rssi": 0
+   }
+  },
+  "36": {
+   "name": "SERVO_OUTPUT_RAW",
+   "crc_extra": 222,
+   "length": 37,
+   "wire_order": [
+    "time_usec",
+    "servo1_raw",
+    "servo2_raw",
+    "servo3_raw",
+    "servo4_raw",
+    "servo5_raw",
+    "servo6_raw",
+    "servo7_raw",
+    "servo8_raw",
+    "port",
+    "servo9_raw",
+    "servo10_raw",
+    "servo11_raw",
+    "servo12_raw",
+    "servo13_raw",
+    "servo14_raw",
+    "servo15_raw",
+    "servo16_raw"
+   ],
+   "types": {
+    "time_usec": "uint32_t",
+    "port": "uint8_t",
+    "servo1_raw": "uint16_t",
+    "servo2_raw": "uint16_t",
+    "servo3_raw": "uint16_t",
+    "servo4_raw": "uint16_t",
+    "servo5_raw": "uint16_t",
+    "servo6_raw": "uint16_t",
+    "servo7_raw": "uint16_t",
+    "servo8_raw": "uint16_t",
+    "servo9_raw": "uint16_t",
+    "servo10_raw": "uint16_t",
+    "servo11_raw": "uint16_t",
+    "servo12_raw": "uint16_t",
+    "servo13_raw": "uint16_t",
+    "servo14_raw": "uint16_t",
+    "servo15_raw": "uint16_t",
+    "servo16_raw": "uint16_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "servo1_raw": 0,
+    "servo2_raw": 0,
+    "servo3_raw": 0,
+    "servo4_raw": 0,
+    "servo5_raw": 0,
+    "servo6_raw": 0,
+    "servo7_raw": 0,
+    "servo8_raw": 0,
+    "port": 0,
+    "servo9_raw": 0,
+    "servo10_raw": 0,
+    "servo11_raw": 0,
+    "servo12_raw": 0,
+    "servo13_raw": 0,
+    "servo14_raw": 0,
+    "servo15_raw": 0,
+    "servo16_raw": 0
+   }
+  },
+  "37": {
+   "name": "MISSION_REQUEST_PARTIAL_LIST",
+   "crc_extra": 212,
+   "length": 7,
+   "wire_order": [
+    "start_index",
+    "end_index",
+    "target_system",
+    "target_component",
+    "mission_type"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "start_index": "int16_t",
+    "end_index": "int16_t",
+    "mission_type": "uint8_t"
+   },
+   "array_lengths": {
+    "start_index": 0,
+    "end_index": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "mission_type": 0
+   }
+  },
+  "38": {
+   "name": "MISSION_WRITE_PARTIAL_LIST",
+   "crc_extra": 9,
+   "length": 7,
+   "wire_order": [
+    "start_index",
+    "end_index",
+    "target_system",
+    "target_component",
+    "mission_type"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "start_index": "int16_t",
+    "end_index": "int16_t",
+    "mission_type": "uint8_t"
+   },
+   "array_lengths": {
+    "start_index": 0,
+    "end_index": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "mission_type": 0
+   }
+  },
+  "39": {
+   "name": "MISSION_ITEM",
+   "crc_extra": 254,
+   "length": 38,
+   "wire_order": [
+    "param1",
+    "param2",
+    "param3",
+    "param4",
+    "x",
+    "y",
+    "z",
+    "seq",
+    "command",
+    "target_system",
+    "target_component",
+    "frame",
+    "current",
+    "autocontinue",
+    "mission_type"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "seq": "uint16_t",
+    "frame": "uint8_t",
+    "command": "uint16_t",
+    "current": "uint8_t",
+    "autocontinue": "uint8_t",
+    "param1": "float",
+    "param2": "float",
+    "param3": "float",
+    "param4": "float",
+    "x": "float",
+    "y": "float",
+    "z": "float",
+    "mission_type": "uint8_t"
+   },
+   "array_lengths": {
+    "param1": 0,
+    "param2": 0,
+    "param3": 0,
+    "param4": 0,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "seq": 0,
+    "command": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "frame": 0,
+    "current": 0,
+    "autocontinue": 0,
+    "mission_type": 0
+   }
+  },
+  "40": {
+   "name": "MISSION_REQUEST",
+   "crc_extra": 230,
+   "length": 5,
+   "wire_order": [
+    "seq",
+    "target_system",
+    "target_component",
+    "mission_type"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "seq": "uint16_t",
+    "mission_type": "uint8_t"
+   },
+   "array_lengths": {
+    "seq": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "mission_type": 0
+   }
+  },
+  "41": {
+   "name": "MISSION_SET_CURRENT",
+   "crc_extra": 28,
+   "length": 4,
+   "wire_order": [
+    "seq",
+    "target_system",
+    "target_component"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "seq": "uint16_t"
+   },
+   "array_lengths": {
+    "seq": 0,
+    "target_system": 0,
+    "target_component": 0
+   }
+  },
+  "42": {
+   "name": "MISSION_CURRENT",
+   "crc_extra": 28,
+   "length": 6,
+   "wire_order": [
+    "seq",
+    "total",
+    "mission_state",
+    "mission_mode"
+   ],
+   "types": {
+    "seq": "uint16_t",
+    "total": "uint16_t",
+    "mission_state": "uint8_t",
+    "mission_mode": "uint8_t"
+   },
+   "array_lengths": {
+    "seq": 0,
+    "total": 0,
+    "mission_state": 0,
+    "mission_mode": 0
+   }
+  },
+  "43": {
+   "name": "MISSION_REQUEST_LIST",
+   "crc_extra": 132,
+   "length": 3,
+   "wire_order": [
+    "target_system",
+    "target_component",
+    "mission_type"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "mission_type": "uint8_t"
+   },
+   "array_lengths": {
+    "target_system": 0,
+    "target_component": 0,
+    "mission_type": 0
+   }
+  },
+  "44": {
+   "name": "MISSION_COUNT",
+   "crc_extra": 221,
+   "length": 5,
+   "wire_order": [
+    "count",
+    "target_system",
+    "target_component",
+    "mission_type"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "count": "uint16_t",
+    "mission_type": "uint8_t"
+   },
+   "array_lengths": {
+    "count": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "mission_type": 0
+   }
+  },
+  "45": {
+   "name": "MISSION_CLEAR_ALL",
+   "crc_extra": 232,
+   "length": 3,
+   "wire_order": [
+    "target_system",
+    "target_component",
+    "mission_type"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "mission_type": "uint8_t"
+   },
+   "array_lengths": {
+    "target_system": 0,
+    "target_component": 0,
+    "mission_type": 0
+   }
+  },
+  "46": {
+   "name": "MISSION_ITEM_REACHED",
+   "crc_extra": 11,
+   "length": 2,
+   "wire_order": [
+    "seq"
+   ],
+   "types": {
+    "seq": "uint16_t"
+   },
+   "array_lengths": {
+    "seq": 0
+   }
+  },
+  "47": {
+   "name": "MISSION_ACK",
+   "crc_extra": 153,
+   "length": 4,
+   "wire_order": [
+    "target_system",
+    "target_component",
+    "type",
+    "mission_type"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "type": "uint8_t",
+    "mission_type": "uint8_t"
+   },
+   "array_lengths": {
+    "target_system": 0,
+    "target_component": 0,
+    "type": 0,
+    "mission_type": 0
+   }
+  },
+  "48": {
+   "name": "SET_GPS_GLOBAL_ORIGIN",
+   "crc_extra": 41,
+   "length": 21,
+   "wire_order": [
+    "latitude",
+    "longitude",
+    "altitude",
+    "target_system",
+    "time_usec"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "latitude": "int32_t",
+    "longitude": "int32_t",
+    "altitude": "int32_t",
+    "time_usec": "uint64_t"
+   },
+   "array_lengths": {
+    "latitude": 0,
+    "longitude": 0,
+    "altitude": 0,
+    "target_system": 0,
+    "time_usec": 0
+   }
+  },
+  "49": {
+   "name": "GPS_GLOBAL_ORIGIN",
+   "crc_extra": 39,
+   "length": 20,
+   "wire_order": [
+    "latitude",
+    "longitude",
+    "altitude",
+    "time_usec"
+   ],
+   "types": {
+    "latitude": "int32_t",
+    "longitude": "int32_t",
+    "altitude": "int32_t",
+    "time_usec": "uint64_t"
+   },
+   "array_lengths": {
+    "latitude": 0,
+    "longitude": 0,
+    "altitude": 0,
+    "time_usec": 0
+   }
+  },
+  "50": {
+   "name": "PARAM_MAP_RC",
+   "crc_extra": 78,
+   "length": 37,
+   "wire_order": [
+    "param_value0",
+    "scale",
+    "param_value_min",
+    "param_value_max",
+    "param_index",
+    "target_system",
+    "target_component",
+    "param_id",
+    "parameter_rc_channel_index"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "param_id": "char",
+    "param_index": "int16_t",
+    "parameter_rc_channel_index": "uint8_t",
+    "param_value0": "float",
+    "scale": "float",
+    "param_value_min": "float",
+    "param_value_max": "float"
+   },
+   "array_lengths": {
+    "param_value0": 0,
+    "scale": 0,
+    "param_value_min": 0,
+    "param_value_max": 0,
+    "param_index": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "param_id": 16,
+    "parameter_rc_channel_index": 0
+   }
+  },
+  "51": {
+   "name": "MISSION_REQUEST_INT",
+   "crc_extra": 196,
+   "length": 5,
+   "wire_order": [
+    "seq",
+    "target_system",
+    "target_component",
+    "mission_type"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "seq": "uint16_t",
+    "mission_type": "uint8_t"
+   },
+   "array_lengths": {
+    "seq": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "mission_type": 0
+   }
+  },
+  "54": {
+   "name": "SAFETY_SET_ALLOWED_AREA",
+   "crc_extra": 15,
+   "length": 27,
+   "wire_order": [
+    "p1x",
+    "p1y",
+    "p1z",
+    "p2x",
+    "p2y",
+    "p2z",
+    "target_system",
+    "target_component",
+    "frame"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "frame": "uint8_t",
+    "p1x": "float",
+    "p1y": "float",
+    "p1z": "float",
+    "p2x": "float",
+    "p2y": "float",
+    "p2z": "float"
+   },
+   "array_lengths": {
+    "p1x": 0,
+    "p1y": 0,
+    "p1z": 0,
+    "p2x": 0,
+    "p2y": 0,
+    "p2z": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "frame": 0
+   }
+  },
+  "55": {
+   "name": "SAFETY_ALLOWED_AREA",
+   "crc_extra": 3,
+   "length": 25,
+   "wire_order": [
+    "p1x",
+    "p1y",
+    "p1z",
+    "p2x",
+    "p2y",
+    "p2z",
+    "frame"
+   ],
+   "types": {
+    "frame": "uint8_t",
+    "p1x": "float",
+    "p1y": "float",
+    "p1z": "float",
+    "p2x": "float",
+    "p2y": "float",
+    "p2z": "float"
+   },
+   "array_lengths": {
+    "p1x": 0,
+    "p1y": 0,
+    "p1z": 0,
+    "p2x": 0,
+    "p2y": 0,
+    "p2z": 0,
+    "frame": 0
+   }
+  },
+  "61": {
+   "name": "ATTITUDE_QUATERNION_COV",
+   "crc_extra": 167,
+   "length": 72,
+   "wire_order": [
+    "time_usec",
+    "q",
+    "rollspeed",
+    "pitchspeed",
+    "yawspeed",
+    "covariance"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "q": "float",
+    "rollspeed": "float",
+    "pitchspeed": "float",
+    "yawspeed": "float",
+    "covariance": "float"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "q": 4,
+    "rollspeed": 0,
+    "pitchspeed": 0,
+    "yawspeed": 0,
+    "covariance": 9
+   }
+  },
+  "62": {
+   "name": "NAV_CONTROLLER_OUTPUT",
+   "crc_extra": 183,
+   "length": 26,
+   "wire_order": [
+    "nav_roll",
+    "nav_pitch",
+    "alt_error",
+    "aspd_error",
+    "xtrack_error",
+    "nav_bearing",
+    "target_bearing",
+    "wp_dist"
+   ],
+   "types": {
+    "nav_roll": "float",
+    "nav_pitch": "float",
+    "nav_bearing": "int16_t",
+    "target_bearing": "int16_t",
+    "wp_dist": "uint16_t",
+    "alt_error": "float",
+    "aspd_error": "float",
+    "xtrack_error": "float"
+   },
+   "array_lengths": {
+    "nav_roll": 0,
+    "nav_pitch": 0,
+    "alt_error": 0,
+    "aspd_error": 0,
+    "xtrack_error": 0,
+    "nav_bearing": 0,
+    "target_bearing": 0,
+    "wp_dist": 0
+   }
+  },
+  "63": {
+   "name": "GLOBAL_POSITION_INT_COV",
+   "crc_extra": 119,
+   "length": 181,
+   "wire_order": [
+    "time_usec",
+    "lat",
+    "lon",
+    "alt",
+    "relative_alt",
+    "vx",
+    "vy",
+    "vz",
+    "covariance",
+    "estimator_type"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "estimator_type": "uint8_t",
+    "lat": "int32_t",
+    "lon": "int32_t",
+    "alt": "int32_t",
+    "relative_alt": "int32_t",
+    "vx": "float",
+    "vy": "float",
+    "vz": "float",
+    "covariance": "float"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "lat": 0,
+    "lon": 0,
+    "alt": 0,
+    "relative_alt": 0,
+    "vx": 0,
+    "vy": 0,
+    "vz": 0,
+    "covariance": 36,
+    "estimator_type": 0
+   }
+  },
+  "64": {
+   "name": "LOCAL_POSITION_NED_COV",
+   "crc_extra": 191,
+   "length": 225,
+   "wire_order": [
+    "time_usec",
+    "x",
+    "y",
+    "z",
+    "vx",
+    "vy",
+    "vz",
+    "ax",
+    "ay",
+    "az",
+    "covariance",
+    "estimator_type"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "estimator_type": "uint8_t",
+    "x": "float",
+    "y": "float",
+    "z": "float",
+    "vx": "float",
+    "vy": "float",
+    "vz": "float",
+    "ax": "float",
+    "ay": "float",
+    "az": "float",
+    "covariance": "float"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "vx": 0,
+    "vy": 0,
+    "vz": 0,
+    "ax": 0,
+    "ay": 0,
+    "az": 0,
+    "covariance": 45,
+    "estimator_type": 0
+   }
+  },
+  "65": {
+   "name": "RC_CHANNELS",
+   "crc_extra": 118,
+   "length": 42,
+   "wire_order": [
+    "time_boot_ms",
+    "chan1_raw",
+    "chan2_raw",
+    "chan3_raw",
+    "chan4_raw",
+    "chan5_raw",
+    "chan6_raw",
+    "chan7_raw",
+    "chan8_raw",
+    "chan9_raw",
+    "chan10_raw",
+    "chan11_raw",
+    "chan12_raw",
+    "chan13_raw",
+    "chan14_raw",
+    "chan15_raw",
+    "chan16_raw",
+    "chan17_raw",
+    "chan18_raw",
+    "chancount",
+    "rssi"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "chancount": "uint8_t",
+    "chan1_raw": "uint16_t",
+    "chan2_raw": "uint16_t",
+    "chan3_raw": "uint16_t",
+    "chan4_raw": "uint16_t",
+    "chan5_raw": "uint16_t",
+    "chan6_raw": "uint16_t",
+    "chan7_raw": "uint16_t",
+    "chan8_raw": "uint16_t",
+    "chan9_raw": "uint16_t",
+    "chan10_raw": "uint16_t",
+    "chan11_raw": "uint16_t",
+    "chan12_raw": "uint16_t",
+    "chan13_raw": "uint16_t",
+    "chan14_raw": "uint16_t",
+    "chan15_raw": "uint16_t",
+    "chan16_raw": "uint16_t",
+    "chan17_raw": "uint16_t",
+    "chan18_raw": "uint16_t",
+    "rssi": "uint8_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "chan1_raw": 0,
+    "chan2_raw": 0,
+    "chan3_raw": 0,
+    "chan4_raw": 0,
+    "chan5_raw": 0,
+    "chan6_raw": 0,
+    "chan7_raw": 0,
+    "chan8_raw": 0,
+    "chan9_raw": 0,
+    "chan10_raw": 0,
+    "chan11_raw": 0,
+    "chan12_raw": 0,
+    "chan13_raw": 0,
+    "chan14_raw": 0,
+    "chan15_raw": 0,
+    "chan16_raw": 0,
+    "chan17_raw": 0,
+    "chan18_raw": 0,
+    "chancount": 0,
+    "rssi": 0
+   }
+  },
+  "66": {
+   "name": "REQUEST_DATA_STREAM",
+   "crc_extra": 148,
+   "length": 6,
+   "wire_order": [
+    "req_message_rate",
+    "target_system",
+    "target_component",
+    "req_stream_id",
+    "start_stop"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "req_stream_id": "uint8_t",
+    "req_message_rate": "uint16_t",
+    "start_stop": "uint8_t"
+   },
+   "array_lengths": {
+    "req_message_rate": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "req_stream_id": 0,
+    "start_stop": 0
+   }
+  },
+  "67": {
+   "name": "DATA_STREAM",
+   "crc_extra": 21,
+   "length": 4,
+   "wire_order": [
+    "message_rate",
+    "stream_id",
+    "on_off"
+   ],
+   "types": {
+    "stream_id": "uint8_t",
+    "message_rate": "uint16_t",
+    "on_off": "uint8_t"
+   },
+   "array_lengths": {
+    "message_rate": 0,
+    "stream_id": 0,
+    "on_off": 0
+   }
+  },
+  "69": {
+   "name": "MANUAL_CONTROL",
+   "crc_extra": 243,
+   "length": 30,
+   "wire_order": [
+    "x",
+    "y",
+    "z",
+    "r",
+    "buttons",
+    "target",
+    "buttons2",
+    "enabled_extensions",
+    "s",
+    "t",
+    "aux1",
+    "aux2",
+    "aux3",
+    "aux4",
+    "aux5",
+    "aux6"
+   ],
+   "types": {
+    "target": "uint8_t",
+    "x": "int16_t",
+    "y": "int16_t",
+    "z": "int16_t",
+    "r": "int16_t",
+    "buttons": "uint16_t",
+    "buttons2": "uint16_t",
+    "enabled_extensions": "uint8_t",
+    "s": "int16_t",
+    "t": "int16_t",
+    "aux1": "int16_t",
+    "aux2": "int16_t",
+    "aux3": "int16_t",
+    "aux4": "int16_t",
+    "aux5": "int16_t",
+    "aux6": "int16_t"
+   },
+   "array_lengths": {
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "r": 0,
+    "buttons": 0,
+    "target": 0,
+    "buttons2": 0,
+    "enabled_extensions": 0,
+    "s": 0,
+    "t": 0,
+    "aux1": 0,
+    "aux2": 0,
+    "aux3": 0,
+    "aux4": 0,
+    "aux5": 0,
+    "aux6": 0
+   }
+  },
+  "70": {
+   "name": "RC_CHANNELS_OVERRIDE",
+   "crc_extra": 124,
+   "length": 38,
+   "wire_order": [
+    "chan1_raw",
+    "chan2_raw",
+    "chan3_raw",
+    "chan4_raw",
+    "chan5_raw",
+    "chan6_raw",
+    "chan7_raw",
+    "chan8_raw",
+    "target_system",
+    "target_component",
+    "chan9_raw",
+    "chan10_raw",
+    "chan11_raw",
+    "chan12_raw",
+    "chan13_raw",
+    "chan14_raw",
+    "chan15_raw",
+    "chan16_raw",
+    "chan17_raw",
+    "chan18_raw"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "chan1_raw": "uint16_t",
+    "chan2_raw": "uint16_t",
+    "chan3_raw": "uint16_t",
+    "chan4_raw": "uint16_t",
+    "chan5_raw": "uint16_t",
+    "chan6_raw": "uint16_t",
+    "chan7_raw": "uint16_t",
+    "chan8_raw": "uint16_t",
+    "chan9_raw": "uint16_t",
+    "chan10_raw": "uint16_t",
+    "chan11_raw": "uint16_t",
+    "chan12_raw": "uint16_t",
+    "chan13_raw": "uint16_t",
+    "chan14_raw": "uint16_t",
+    "chan15_raw": "uint16_t",
+    "chan16_raw": "uint16_t",
+    "chan17_raw": "uint16_t",
+    "chan18_raw": "uint16_t"
+   },
+   "array_lengths": {
+    "chan1_raw": 0,
+    "chan2_raw": 0,
+    "chan3_raw": 0,
+    "chan4_raw": 0,
+    "chan5_raw": 0,
+    "chan6_raw": 0,
+    "chan7_raw": 0,
+    "chan8_raw": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "chan9_raw": 0,
+    "chan10_raw": 0,
+    "chan11_raw": 0,
+    "chan12_raw": 0,
+    "chan13_raw": 0,
+    "chan14_raw": 0,
+    "chan15_raw": 0,
+    "chan16_raw": 0,
+    "chan17_raw": 0,
+    "chan18_raw": 0
+   }
+  },
+  "73": {
+   "name": "MISSION_ITEM_INT",
+   "crc_extra": 38,
+   "length": 38,
+   "wire_order": [
+    "param1",
+    "param2",
+    "param3",
+    "param4",
+    "x",
+    "y",
+    "z",
+    "seq",
+    "command",
+    "target_system",
+    "target_component",
+    "frame",
+    "current",
+    "autocontinue",
+    "mission_type"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "seq": "uint16_t",
+    "frame": "uint8_t",
+    "command": "uint16_t",
+    "current": "uint8_t",
+    "autocontinue": "uint8_t",
+    "param1": "float",
+    "param2": "float",
+    "param3": "float",
+    "param4": "float",
+    "x": "int32_t",
+    "y": "int32_t",
+    "z": "float",
+    "mission_type": "uint8_t"
+   },
+   "array_lengths": {
+    "param1": 0,
+    "param2": 0,
+    "param3": 0,
+    "param4": 0,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "seq": 0,
+    "command": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "frame": 0,
+    "current": 0,
+    "autocontinue": 0,
+    "mission_type": 0
+   }
+  },
+  "74": {
+   "name": "VFR_HUD",
+   "crc_extra": 20,
+   "length": 20,
+   "wire_order": [
+    "airspeed",
+    "groundspeed",
+    "alt",
+    "climb",
+    "heading",
+    "throttle"
+   ],
+   "types": {
+    "airspeed": "float",
+    "groundspeed": "float",
+    "heading": "int16_t",
+    "throttle": "uint16_t",
+    "alt": "float",
+    "climb": "float"
+   },
+   "array_lengths": {
+    "airspeed": 0,
+    "groundspeed": 0,
+    "alt": 0,
+    "climb": 0,
+    "heading": 0,
+    "throttle": 0
+   }
+  },
+  "75": {
+   "name": "COMMAND_INT",
+   "crc_extra": 158,
+   "length": 35,
+   "wire_order": [
+    "param1",
+    "param2",
+    "param3",
+    "param4",
+    "x",
+    "y",
+    "z",
+    "command",
+    "target_system",
+    "target_component",
+    "frame",
+    "current",
+    "autocontinue"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "frame": "uint8_t",
+    "command": "uint16_t",
+    "current": "uint8_t",
+    "autocontinue": "uint8_t",
+    "param1": "float",
+    "param2": "float",
+    "param3": "float",
+    "param4": "float",
+    "x": "int32_t",
+    "y": "int32_t",
+    "z": "float"
+   },
+   "array_lengths": {
+    "param1": 0,
+    "param2": 0,
+    "param3": 0,
+    "param4": 0,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "command": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "frame": 0,
+    "current": 0,
+    "autocontinue": 0
+   }
+  },
+  "76": {
+   "name": "COMMAND_LONG",
+   "crc_extra": 152,
+   "length": 33,
+   "wire_order": [
+    "param1",
+    "param2",
+    "param3",
+    "param4",
+    "param5",
+    "param6",
+    "param7",
+    "command",
+    "target_system",
+    "target_component",
+    "confirmation"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "command": "uint16_t",
+    "confirmation": "uint8_t",
+    "param1": "float",
+    "param2": "float",
+    "param3": "float",
+    "param4": "float",
+    "param5": "float",
+    "param6": "float",
+    "param7": "float"
+   },
+   "array_lengths": {
+    "param1": 0,
+    "param2": 0,
+    "param3": 0,
+    "param4": 0,
+    "param5": 0,
+    "param6": 0,
+    "param7": 0,
+    "command": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "confirmation": 0
+   }
+  },
+  "77": {
+   "name": "COMMAND_ACK",
+   "crc_extra": 143,
+   "length": 10,
+   "wire_order": [
+    "command",
+    "result",
+    "progress",
+    "result_param2",
+    "target_system",
+    "target_component"
+   ],
+   "types": {
+    "command": "uint16_t",
+    "result": "uint8_t",
+    "progress": "uint8_t",
+    "result_param2": "int32_t",
+    "target_system": "uint8_t",
+    "target_component": "uint8_t"
+   },
+   "array_lengths": {
+    "command": 0,
+    "result": 0,
+    "progress": 0,
+    "result_param2": 0,
+    "target_system": 0,
+    "target_component": 0
+   }
+  },
+  "81": {
+   "name": "MANUAL_SETPOINT",
+   "crc_extra": 106,
+   "length": 22,
+   "wire_order": [
+    "time_boot_ms",
+    "roll",
+    "pitch",
+    "yaw",
+    "thrust",
+    "mode_switch",
+    "manual_override_switch"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "roll": "float",
+    "pitch": "float",
+    "yaw": "float",
+    "thrust": "float",
+    "mode_switch": "uint8_t",
+    "manual_override_switch": "uint8_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "roll": 0,
+    "pitch": 0,
+    "yaw": 0,
+    "thrust": 0,
+    "mode_switch": 0,
+    "manual_override_switch": 0
+   }
+  },
+  "82": {
+   "name": "SET_ATTITUDE_TARGET",
+   "crc_extra": 49,
+   "length": 39,
+   "wire_order": [
+    "time_boot_ms",
+    "q",
+    "body_roll_rate",
+    "body_pitch_rate",
+    "body_yaw_rate",
+    "thrust",
+    "target_system",
+    "target_component",
+    "type_mask"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "type_mask": "uint8_t",
+    "q": "float",
+    "body_roll_rate": "float",
+    "body_pitch_rate": "float",
+    "body_yaw_rate": "float",
+    "thrust": "float"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "q": 4,
+    "body_roll_rate": 0,
+    "body_pitch_rate": 0,
+    "body_yaw_rate": 0,
+    "thrust": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "type_mask": 0
+   }
+  },
+  "83": {
+   "name": "ATTITUDE_TARGET",
+   "crc_extra": 22,
+   "length": 37,
+   "wire_order": [
+    "time_boot_ms",
+    "q",
+    "body_roll_rate",
+    "body_pitch_rate",
+    "body_yaw_rate",
+    "thrust",
+    "type_mask"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "type_mask": "uint8_t",
+    "q": "float",
+    "body_roll_rate": "float",
+    "body_pitch_rate": "float",
+    "body_yaw_rate": "float",
+    "thrust": "float"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "q": 4,
+    "body_roll_rate": 0,
+    "body_pitch_rate": 0,
+    "body_yaw_rate": 0,
+    "thrust": 0,
+    "type_mask": 0
+   }
+  },
+  "84": {
+   "name": "SET_POSITION_TARGET_LOCAL_NED",
+   "crc_extra": 143,
+   "length": 53,
+   "wire_order": [
+    "time_boot_ms",
+    "x",
+    "y",
+    "z",
+    "vx",
+    "vy",
+    "vz",
+    "afx",
+    "afy",
+    "afz",
+    "yaw",
+    "yaw_rate",
+    "type_mask",
+    "target_system",
+    "target_component",
+    "coordinate_frame"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "coordinate_frame": "uint8_t",
+    "type_mask": "uint16_t",
+    "x": "float",
+    "y": "float",
+    "z": "float",
+    "vx": "float",
+    "vy": "float",
+    "vz": "float",
+    "afx": "float",
+    "afy": "float",
+    "afz": "float",
+    "yaw": "float",
+    "yaw_rate": "float"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "vx": 0,
+    "vy": 0,
+    "vz": 0,
+    "afx": 0,
+    "afy": 0,
+    "afz": 0,
+    "yaw": 0,
+    "yaw_rate": 0,
+    "type_mask": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "coordinate_frame": 0
+   }
+  },
+  "85": {
+   "name": "POSITION_TARGET_LOCAL_NED",
+   "crc_extra": 140,
+   "length": 51,
+   "wire_order": [
+    "time_boot_ms",
+    "x",
+    "y",
+    "z",
+    "vx",
+    "vy",
+    "vz",
+    "afx",
+    "afy",
+    "afz",
+    "yaw",
+    "yaw_rate",
+    "type_mask",
+    "coordinate_frame"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "coordinate_frame": "uint8_t",
+    "type_mask": "uint16_t",
+    "x": "float",
+    "y": "float",
+    "z": "float",
+    "vx": "float",
+    "vy": "float",
+    "vz": "float",
+    "afx": "float",
+    "afy": "float",
+    "afz": "float",
+    "yaw": "float",
+    "yaw_rate": "float"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "vx": 0,
+    "vy": 0,
+    "vz": 0,
+    "afx": 0,
+    "afy": 0,
+    "afz": 0,
+    "yaw": 0,
+    "yaw_rate": 0,
+    "type_mask": 0,
+    "coordinate_frame": 0
+   }
+  },
+  "86": {
+   "name": "SET_POSITION_TARGET_GLOBAL_INT",
+   "crc_extra": 5,
+   "length": 53,
+   "wire_order": [
+    "time_boot_ms",
+    "lat_int",
+    "lon_int",
+    "alt",
+    "vx",
+    "vy",
+    "vz",
+    "afx",
+    "afy",
+    "afz",
+    "yaw",
+    "yaw_rate",
+    "type_mask",
+    "target_system",
+    "target_component",
+    "coordinate_frame"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "coordinate_frame": "uint8_t",
+    "type_mask": "uint16_t",
+    "lat_int": "int32_t",
+    "lon_int": "int32_t",
+    "alt": "float",
+    "vx": "float",
+    "vy": "float",
+    "vz": "float",
+    "afx": "float",
+    "afy": "float",
+    "afz": "float",
+    "yaw": "float",
+    "yaw_rate": "float"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "lat_int": 0,
+    "lon_int": 0,
+    "alt": 0,
+    "vx": 0,
+    "vy": 0,
+    "vz": 0,
+    "afx": 0,
+    "afy": 0,
+    "afz": 0,
+    "yaw": 0,
+    "yaw_rate": 0,
+    "type_mask": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "coordinate_frame": 0
+   }
+  },
+  "87": {
+   "name": "POSITION_TARGET_GLOBAL_INT",
+   "crc_extra": 150,
+   "length": 51,
+   "wire_order": [
+    "time_boot_ms",
+    "lat_int",
+    "lon_int",
+    "alt",
+    "vx",
+    "vy",
+    "vz",
+    "afx",
+    "afy",
+    "afz",
+    "yaw",
+    "yaw_rate",
+    "type_mask",
+    "coordinate_frame"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "coordinate_frame": "uint8_t",
+    "type_mask": "uint16_t",
+    "lat_int": "int32_t",
+    "lon_int": "int32_t",
+    "alt": "float",
+    "vx": "float",
+    "vy": "float",
+    "vz": "float",
+    "afx": "float",
+    "afy": "float",
+    "afz": "float",
+    "yaw": "float",
+    "yaw_rate": "float"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "lat_int": 0,
+    "lon_int": 0,
+    "alt": 0,
+    "vx": 0,
+    "vy": 0,
+    "vz": 0,
+    "afx": 0,
+    "afy": 0,
+    "afz": 0,
+    "yaw": 0,
+    "yaw_rate": 0,
+    "type_mask": 0,
+    "coordinate_frame": 0
+   }
+  },
+  "89": {
+   "name": "LOCAL_POSITION_NED_SYSTEM_GLOBAL_OFFSET",
+   "crc_extra": 231,
+   "length": 28,
+   "wire_order": [
+    "time_boot_ms",
+    "x",
+    "y",
+    "z",
+    "roll",
+    "pitch",
+    "yaw"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "x": "float",
+    "y": "float",
+    "z": "float",
+    "roll": "float",
+    "pitch": "float",
+    "yaw": "float"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "roll": 0,
+    "pitch": 0,
+    "yaw": 0
+   }
+  },
+  "90": {
+   "name": "HIL_STATE",
+   "crc_extra": 183,
+   "length": 56,
+   "wire_order": [
+    "time_usec",
+    "roll",
+    "pitch",
+    "yaw",
+    "rollspeed",
+    "pitchspeed",
+    "yawspeed",
+    "lat",
+    "lon",
+    "alt",
+    "vx",
+    "vy",
+    "vz",
+    "xacc",
+    "yacc",
+    "zacc"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "roll": "float",
+    "pitch": "float",
+    "yaw": "float",
+    "rollspeed": "float",
+    "pitchspeed": "float",
+    "yawspeed": "float",
+    "lat": "int32_t",
+    "lon": "int32_t",
+    "alt": "int32_t",
+    "vx": "int16_t",
+    "vy": "int16_t",
+    "vz": "int16_t",
+    "xacc": "int16_t",
+    "yacc": "int16_t",
+    "zacc": "int16_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "roll": 0,
+    "pitch": 0,
+    "yaw": 0,
+    "rollspeed": 0,
+    "pitchspeed": 0,
+    "yawspeed": 0,
+    "lat": 0,
+    "lon": 0,
+    "alt": 0,
+    "vx": 0,
+    "vy": 0,
+    "vz": 0,
+    "xacc": 0,
+    "yacc": 0,
+    "zacc": 0
+   }
+  },
+  "91": {
+   "name": "HIL_CONTROLS",
+   "crc_extra": 63,
+   "length": 42,
+   "wire_order": [
+    "time_usec",
+    "roll_ailerons",
+    "pitch_elevator",
+    "yaw_rudder",
+    "throttle",
+    "aux1",
+    "aux2",
+    "aux3",
+    "aux4",
+    "mode",
+    "nav_mode"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "roll_ailerons": "float",
+    "pitch_elevator": "float",
+    "yaw_rudder": "float",
+    "throttle": "float",
+    "aux1": "float",
+    "aux2": "float",
+    "aux3": "float",
+    "aux4": "float",
+    "mode": "uint8_t",
+    "nav_mode": "uint8_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "roll_ailerons": 0,
+    "pitch_elevator": 0,
+    "yaw_rudder": 0,
+    "throttle": 0,
+    "aux1": 0,
+    "aux2": 0,
+    "aux3": 0,
+    "aux4": 0,
+    "mode": 0,
+    "nav_mode": 0
+   }
+  },
+  "92": {
+   "name": "HIL_RC_INPUTS_RAW",
+   "crc_extra": 54,
+   "length": 33,
+   "wire_order": [
+    "time_usec",
+    "chan1_raw",
+    "chan2_raw",
+    "chan3_raw",
+    "chan4_raw",
+    "chan5_raw",
+    "chan6_raw",
+    "chan7_raw",
+    "chan8_raw",
+    "chan9_raw",
+    "chan10_raw",
+    "chan11_raw",
+    "chan12_raw",
+    "rssi"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "chan1_raw": "uint16_t",
+    "chan2_raw": "uint16_t",
+    "chan3_raw": "uint16_t",
+    "chan4_raw": "uint16_t",
+    "chan5_raw": "uint16_t",
+    "chan6_raw": "uint16_t",
+    "chan7_raw": "uint16_t",
+    "chan8_raw": "uint16_t",
+    "chan9_raw": "uint16_t",
+    "chan10_raw": "uint16_t",
+    "chan11_raw": "uint16_t",
+    "chan12_raw": "uint16_t",
+    "rssi": "uint8_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "chan1_raw": 0,
+    "chan2_raw": 0,
+    "chan3_raw": 0,
+    "chan4_raw": 0,
+    "chan5_raw": 0,
+    "chan6_raw": 0,
+    "chan7_raw": 0,
+    "chan8_raw": 0,
+    "chan9_raw": 0,
+    "chan10_raw": 0,
+    "chan11_raw": 0,
+    "chan12_raw": 0,
+    "rssi": 0
+   }
+  },
+  "93": {
+   "name": "HIL_ACTUATOR_CONTROLS",
+   "crc_extra": 47,
+   "length": 81,
+   "wire_order": [
+    "time_usec",
+    "flags",
+    "controls",
+    "mode"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "controls": "float",
+    "mode": "uint8_t",
+    "flags": "uint64_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "flags": 0,
+    "controls": 16,
+    "mode": 0
+   }
+  },
+  "100": {
+   "name": "OPTICAL_FLOW",
+   "crc_extra": 175,
+   "length": 34,
+   "wire_order": [
+    "time_usec",
+    "flow_comp_m_x",
+    "flow_comp_m_y",
+    "ground_distance",
+    "flow_x",
+    "flow_y",
+    "sensor_id",
+    "quality",
+    "flow_rate_x",
+    "flow_rate_y"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "sensor_id": "uint8_t",
+    "flow_x": "int16_t",
+    "flow_y": "int16_t",
+    "flow_comp_m_x": "float",
+    "flow_comp_m_y": "float",
+    "quality": "uint8_t",
+    "ground_distance": "float",
+    "flow_rate_x": "float",
+    "flow_rate_y": "float"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "flow_comp_m_x": 0,
+    "flow_comp_m_y": 0,
+    "ground_distance": 0,
+    "flow_x": 0,
+    "flow_y": 0,
+    "sensor_id": 0,
+    "quality": 0,
+    "flow_rate_x": 0,
+    "flow_rate_y": 0
+   }
+  },
+  "101": {
+   "name": "GLOBAL_VISION_POSITION_ESTIMATE",
+   "crc_extra": 102,
+   "length": 117,
+   "wire_order": [
+    "usec",
+    "x",
+    "y",
+    "z",
+    "roll",
+    "pitch",
+    "yaw",
+    "covariance",
+    "reset_counter"
+   ],
+   "types": {
+    "usec": "uint64_t",
+    "x": "float",
+    "y": "float",
+    "z": "float",
+    "roll": "float",
+    "pitch": "float",
+    "yaw": "float",
+    "covariance": "float",
+    "reset_counter": "uint8_t"
+   },
+   "array_lengths": {
+    "usec": 0,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "roll": 0,
+    "pitch": 0,
+    "yaw": 0,
+    "covariance": 21,
+    "reset_counter": 0
+   }
+  },
+  "102": {
+   "name": "VISION_POSITION_ESTIMATE",
+   "crc_extra": 158,
+   "length": 117,
+   "wire_order": [
+    "usec",
+    "x",
+    "y",
+    "z",
+    "roll",
+    "pitch",
+    "yaw",
+    "covariance",
+    "reset_counter"
+   ],
+   "types": {
+    "usec": "uint64_t",
+    "x": "float",
+    "y": "float",
+    "z": "float",
+    "roll": "float",
+    "pitch": "float",
+    "yaw": "float",
+    "covariance": "float",
+    "reset_counter": "uint8_t"
+   },
+   "array_lengths": {
+    "usec": 0,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "roll": 0,
+    "pitch": 0,
+    "yaw": 0,
+    "covariance": 21,
+    "reset_counter": 0
+   }
+  },
+  "103": {
+   "name": "VISION_SPEED_ESTIMATE",
+   "crc_extra": 208,
+   "length": 57,
+   "wire_order": [
+    "usec",
+    "x",
+    "y",
+    "z",
+    "covariance",
+    "reset_counter"
+   ],
+   "types": {
+    "usec": "uint64_t",
+    "x": "float",
+    "y": "float",
+    "z": "float",
+    "covariance": "float",
+    "reset_counter": "uint8_t"
+   },
+   "array_lengths": {
+    "usec": 0,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "covariance": 9,
+    "reset_counter": 0
+   }
+  },
+  "104": {
+   "name": "VICON_POSITION_ESTIMATE",
+   "crc_extra": 56,
+   "length": 116,
+   "wire_order": [
+    "usec",
+    "x",
+    "y",
+    "z",
+    "roll",
+    "pitch",
+    "yaw",
+    "covariance"
+   ],
+   "types": {
+    "usec": "uint64_t",
+    "x": "float",
+    "y": "float",
+    "z": "float",
+    "roll": "float",
+    "pitch": "float",
+    "yaw": "float",
+    "covariance": "float"
+   },
+   "array_lengths": {
+    "usec": 0,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "roll": 0,
+    "pitch": 0,
+    "yaw": 0,
+    "covariance": 21
+   }
+  },
+  "105": {
+   "name": "HIGHRES_IMU",
+   "crc_extra": 93,
+   "length": 63,
+   "wire_order": [
+    "time_usec",
+    "xacc",
+    "yacc",
+    "zacc",
+    "xgyro",
+    "ygyro",
+    "zgyro",
+    "xmag",
+    "ymag",
+    "zmag",
+    "abs_pressure",
+    "diff_pressure",
+    "pressure_alt",
+    "temperature",
+    "fields_updated",
+    "id"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "xacc": "float",
+    "yacc": "float",
+    "zacc": "float",
+    "xgyro": "float",
+    "ygyro": "float",
+    "zgyro": "float",
+    "xmag": "float",
+    "ymag": "float",
+    "zmag": "float",
+    "abs_pressure": "float",
+    "diff_pressure": "float",
+    "pressure_alt": "float",
+    "temperature": "float",
+    "fields_updated": "uint16_t",
+    "id": "uint8_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "xacc": 0,
+    "yacc": 0,
+    "zacc": 0,
+    "xgyro": 0,
+    "ygyro": 0,
+    "zgyro": 0,
+    "xmag": 0,
+    "ymag": 0,
+    "zmag": 0,
+    "abs_pressure": 0,
+    "diff_pressure": 0,
+    "pressure_alt": 0,
+    "temperature": 0,
+    "fields_updated": 0,
+    "id": 0
+   }
+  },
+  "106": {
+   "name": "OPTICAL_FLOW_RAD",
+   "crc_extra": 138,
+   "length": 44,
+   "wire_order": [
+    "time_usec",
+    "integration_time_us",
+    "integrated_x",
+    "integrated_y",
+    "integrated_xgyro",
+    "integrated_ygyro",
+    "integrated_zgyro",
+    "time_delta_distance_us",
+    "distance",
+    "temperature",
+    "sensor_id",
+    "quality"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "sensor_id": "uint8_t",
+    "integration_time_us": "uint32_t",
+    "integrated_x": "float",
+    "integrated_y": "float",
+    "integrated_xgyro": "float",
+    "integrated_ygyro": "float",
+    "integrated_zgyro": "float",
+    "temperature": "int16_t",
+    "quality": "uint8_t",
+    "time_delta_distance_us": "uint32_t",
+    "distance": "float"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "integration_time_us": 0,
+    "integrated_x": 0,
+    "integrated_y": 0,
+    "integrated_xgyro": 0,
+    "integrated_ygyro": 0,
+    "integrated_zgyro": 0,
+    "time_delta_distance_us": 0,
+    "distance": 0,
+    "temperature": 0,
+    "sensor_id": 0,
+    "quality": 0
+   }
+  },
+  "107": {
+   "name": "HIL_SENSOR",
+   "crc_extra": 108,
+   "length": 65,
+   "wire_order": [
+    "time_usec",
+    "xacc",
+    "yacc",
+    "zacc",
+    "xgyro",
+    "ygyro",
+    "zgyro",
+    "xmag",
+    "ymag",
+    "zmag",
+    "abs_pressure",
+    "diff_pressure",
+    "pressure_alt",
+    "temperature",
+    "fields_updated",
+    "id"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "xacc": "float",
+    "yacc": "float",
+    "zacc": "float",
+    "xgyro": "float",
+    "ygyro": "float",
+    "zgyro": "float",
+    "xmag": "float",
+    "ymag": "float",
+    "zmag": "float",
+    "abs_pressure": "float",
+    "diff_pressure": "float",
+    "pressure_alt": "float",
+    "temperature": "float",
+    "fields_updated": "uint32_t",
+    "id": "uint8_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "xacc": 0,
+    "yacc": 0,
+    "zacc": 0,
+    "xgyro": 0,
+    "ygyro": 0,
+    "zgyro": 0,
+    "xmag": 0,
+    "ymag": 0,
+    "zmag": 0,
+    "abs_pressure": 0,
+    "diff_pressure": 0,
+    "pressure_alt": 0,
+    "temperature": 0,
+    "fields_updated": 0,
+    "id": 0
+   }
+  },
+  "108": {
+   "name": "SIM_STATE",
+   "crc_extra": 32,
+   "length": 92,
+   "wire_order": [
+    "q1",
+    "q2",
+    "q3",
+    "q4",
+    "roll",
+    "pitch",
+    "yaw",
+    "xacc",
+    "yacc",
+    "zacc",
+    "xgyro",
+    "ygyro",
+    "zgyro",
+    "lat",
+    "lon",
+    "alt",
+    "std_dev_horz",
+    "std_dev_vert",
+    "vn",
+    "ve",
+    "vd",
+    "lat_int",
+    "lon_int"
+   ],
+   "types": {
+    "q1": "float",
+    "q2": "float",
+    "q3": "float",
+    "q4": "float",
+    "roll": "float",
+    "pitch": "float",
+    "yaw": "float",
+    "xacc": "float",
+    "yacc": "float",
+    "zacc": "float",
+    "xgyro": "float",
+    "ygyro": "float",
+    "zgyro": "float",
+    "lat": "float",
+    "lon": "float",
+    "alt": "float",
+    "std_dev_horz": "float",
+    "std_dev_vert": "float",
+    "vn": "float",
+    "ve": "float",
+    "vd": "float",
+    "lat_int": "int32_t",
+    "lon_int": "int32_t"
+   },
+   "array_lengths": {
+    "q1": 0,
+    "q2": 0,
+    "q3": 0,
+    "q4": 0,
+    "roll": 0,
+    "pitch": 0,
+    "yaw": 0,
+    "xacc": 0,
+    "yacc": 0,
+    "zacc": 0,
+    "xgyro": 0,
+    "ygyro": 0,
+    "zgyro": 0,
+    "lat": 0,
+    "lon": 0,
+    "alt": 0,
+    "std_dev_horz": 0,
+    "std_dev_vert": 0,
+    "vn": 0,
+    "ve": 0,
+    "vd": 0,
+    "lat_int": 0,
+    "lon_int": 0
+   }
+  },
+  "109": {
+   "name": "RADIO_STATUS",
+   "crc_extra": 185,
+   "length": 9,
+   "wire_order": [
+    "rxerrors",
+    "fixed",
+    "rssi",
+    "remrssi",
+    "txbuf",
+    "noise",
+    "remnoise"
+   ],
+   "types": {
+    "rssi": "uint8_t",
+    "remrssi": "uint8_t",
+    "txbuf": "uint8_t",
+    "noise": "uint8_t",
+    "remnoise": "uint8_t",
+    "rxerrors": "uint16_t",
+    "fixed": "uint16_t"
+   },
+   "array_lengths": {
+    "rxerrors": 0,
+    "fixed": 0,
+    "rssi": 0,
+    "remrssi": 0,
+    "txbuf": 0,
+    "noise": 0,
+    "remnoise": 0
+   }
+  },
+  "110": {
+   "name": "FILE_TRANSFER_PROTOCOL",
+   "crc_extra": 84,
+   "length": 254,
+   "wire_order": [
+    "target_network",
+    "target_system",
+    "target_component",
+    "payload"
+   ],
+   "types": {
+    "target_network": "uint8_t",
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "payload": "uint8_t"
+   },
+   "array_lengths": {
+    "target_network": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "payload": 251
+   }
+  },
+  "111": {
+   "name": "TIMESYNC",
+   "crc_extra": 34,
+   "length": 16,
+   "wire_order": [
+    "tc1",
+    "ts1"
+   ],
+   "types": {
+    "tc1": "int64_t",
+    "ts1": "int64_t"
+   },
+   "array_lengths": {
+    "tc1": 0,
+    "ts1": 0
+   }
+  },
+  "112": {
+   "name": "CAMERA_TRIGGER",
+   "crc_extra": 174,
+   "length": 12,
+   "wire_order": [
+    "time_usec",
+    "seq"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "seq": "uint32_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "seq": 0
+   }
+  },
+  "113": {
+   "name": "HIL_GPS",
+   "crc_extra": 124,
+   "length": 39,
+   "wire_order": [
+    "time_usec",
+    "lat",
+    "lon",
+    "alt",
+    "eph",
+    "epv",
+    "vel",
+    "vn",
+    "ve",
+    "vd",
+    "cog",
+    "fix_type",
+    "satellites_visible",
+    "id",
+    "yaw"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "fix_type": "uint8_t",
+    "lat": "int32_t",
+    "lon": "int32_t",
+    "alt": "int32_t",
+    "eph": "uint16_t",
+    "epv": "uint16_t",
+    "vel": "uint16_t",
+    "vn": "int16_t",
+    "ve": "int16_t",
+    "vd": "int16_t",
+    "cog": "uint16_t",
+    "satellites_visible": "uint8_t",
+    "id": "uint8_t",
+    "yaw": "uint16_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "lat": 0,
+    "lon": 0,
+    "alt": 0,
+    "eph": 0,
+    "epv": 0,
+    "vel": 0,
+    "vn": 0,
+    "ve": 0,
+    "vd": 0,
+    "cog": 0,
+    "fix_type": 0,
+    "satellites_visible": 0,
+    "id": 0,
+    "yaw": 0
+   }
+  },
+  "114": {
+   "name": "HIL_OPTICAL_FLOW",
+   "crc_extra": 237,
+   "length": 44,
+   "wire_order": [
+    "time_usec",
+    "integration_time_us",
+    "integrated_x",
+    "integrated_y",
+    "integrated_xgyro",
+    "integrated_ygyro",
+    "integrated_zgyro",
+    "time_delta_distance_us",
+    "distance",
+    "temperature",
+    "sensor_id",
+    "quality"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "sensor_id": "uint8_t",
+    "integration_time_us": "uint32_t",
+    "integrated_x": "float",
+    "integrated_y": "float",
+    "integrated_xgyro": "float",
+    "integrated_ygyro": "float",
+    "integrated_zgyro": "float",
+    "temperature": "int16_t",
+    "quality": "uint8_t",
+    "time_delta_distance_us": "uint32_t",
+    "distance": "float"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "integration_time_us": 0,
+    "integrated_x": 0,
+    "integrated_y": 0,
+    "integrated_xgyro": 0,
+    "integrated_ygyro": 0,
+    "integrated_zgyro": 0,
+    "time_delta_distance_us": 0,
+    "distance": 0,
+    "temperature": 0,
+    "sensor_id": 0,
+    "quality": 0
+   }
+  },
+  "115": {
+   "name": "HIL_STATE_QUATERNION",
+   "crc_extra": 4,
+   "length": 64,
+   "wire_order": [
+    "time_usec",
+    "attitude_quaternion",
+    "rollspeed",
+    "pitchspeed",
+    "yawspeed",
+    "lat",
+    "lon",
+    "alt",
+    "vx",
+    "vy",
+    "vz",
+    "ind_airspeed",
+    "true_airspeed",
+    "xacc",
+    "yacc",
+    "zacc"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "attitude_quaternion": "float",
+    "rollspeed": "float",
+    "pitchspeed": "float",
+    "yawspeed": "float",
+    "lat": "int32_t",
+    "lon": "int32_t",
+    "alt": "int32_t",
+    "vx": "int16_t",
+    "vy": "int16_t",
+    "vz": "int16_t",
+    "ind_airspeed": "uint16_t",
+    "true_airspeed": "uint16_t",
+    "xacc": "int16_t",
+    "yacc": "int16_t",
+    "zacc": "int16_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "attitude_quaternion": 4,
+    "rollspeed": 0,
+    "pitchspeed": 0,
+    "yawspeed": 0,
+    "lat": 0,
+    "lon": 0,
+    "alt": 0,
+    "vx": 0,
+    "vy": 0,
+    "vz": 0,
+    "ind_airspeed": 0,
+    "true_airspeed": 0,
+    "xacc": 0,
+    "yacc": 0,
+    "zacc": 0
+   }
+  },
+  "116": {
+   "name": "SCALED_IMU2",
+   "crc_extra": 76,
+   "length": 24,
+   "wire_order": [
+    "time_boot_ms",
+    "xacc",
+    "yacc",
+    "zacc",
+    "xgyro",
+    "ygyro",
+    "zgyro",
+    "xmag",
+    "ymag",
+    "zmag",
+    "temperature"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "xacc": "int16_t",
+    "yacc": "int16_t",
+    "zacc": "int16_t",
+    "xgyro": "int16_t",
+    "ygyro": "int16_t",
+    "zgyro": "int16_t",
+    "xmag": "int16_t",
+    "ymag": "int16_t",
+    "zmag": "int16_t",
+    "temperature": "int16_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "xacc": 0,
+    "yacc": 0,
+    "zacc": 0,
+    "xgyro": 0,
+    "ygyro": 0,
+    "zgyro": 0,
+    "xmag": 0,
+    "ymag": 0,
+    "zmag": 0,
+    "temperature": 0
+   }
+  },
+  "117": {
+   "name": "LOG_REQUEST_LIST",
+   "crc_extra": 128,
+   "length": 6,
+   "wire_order": [
+    "start",
+    "end",
+    "target_system",
+    "target_component"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "start": "uint16_t",
+    "end": "uint16_t"
+   },
+   "array_lengths": {
+    "start": 0,
+    "end": 0,
+    "target_system": 0,
+    "target_component": 0
+   }
+  },
+  "118": {
+   "name": "LOG_ENTRY",
+   "crc_extra": 56,
+   "length": 14,
+   "wire_order": [
+    "time_utc",
+    "size",
+    "id",
+    "num_logs",
+    "last_log_num"
+   ],
+   "types": {
+    "id": "uint16_t",
+    "num_logs": "uint16_t",
+    "last_log_num": "uint16_t",
+    "time_utc": "uint32_t",
+    "size": "uint32_t"
+   },
+   "array_lengths": {
+    "time_utc": 0,
+    "size": 0,
+    "id": 0,
+    "num_logs": 0,
+    "last_log_num": 0
+   }
+  },
+  "119": {
+   "name": "LOG_REQUEST_DATA",
+   "crc_extra": 116,
+   "length": 12,
+   "wire_order": [
+    "ofs",
+    "count",
+    "id",
+    "target_system",
+    "target_component"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "id": "uint16_t",
+    "ofs": "uint32_t",
+    "count": "uint32_t"
+   },
+   "array_lengths": {
+    "ofs": 0,
+    "count": 0,
+    "id": 0,
+    "target_system": 0,
+    "target_component": 0
+   }
+  },
+  "120": {
+   "name": "LOG_DATA",
+   "crc_extra": 134,
+   "length": 97,
+   "wire_order": [
+    "ofs",
+    "id",
+    "count",
+    "data"
+   ],
+   "types": {
+    "id": "uint16_t",
+    "ofs": "uint32_t",
+    "count": "uint8_t",
+    "data": "uint8_t"
+   },
+   "array_lengths": {
+    "ofs": 0,
+    "id": 0,
+    "count": 0,
+    "data": 90
+   }
+  },
+  "121": {
+   "name": "LOG_ERASE",
+   "crc_extra": 237,
+   "length": 2,
+   "wire_order": [
+    "target_system",
+    "target_component"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t"
+   },
+   "array_lengths": {
+    "target_system": 0,
+    "target_component": 0
+   }
+  },
+  "122": {
+   "name": "LOG_REQUEST_END",
+   "crc_extra": 203,
+   "length": 2,
+   "wire_order": [
+    "target_system",
+    "target_component"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t"
+   },
+   "array_lengths": {
+    "target_system": 0,
+    "target_component": 0
+   }
+  },
+  "123": {
+   "name": "GPS_INJECT_DATA",
+   "crc_extra": 250,
+   "length": 113,
+   "wire_order": [
+    "target_system",
+    "target_component",
+    "len",
+    "data"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "len": "uint8_t",
+    "data": "uint8_t"
+   },
+   "array_lengths": {
+    "target_system": 0,
+    "target_component": 0,
+    "len": 0,
+    "data": 110
+   }
+  },
+  "124": {
+   "name": "GPS2_RAW",
+   "crc_extra": 87,
+   "length": 57,
+   "wire_order": [
+    "time_usec",
+    "lat",
+    "lon",
+    "alt",
+    "dgps_age",
+    "eph",
+    "epv",
+    "vel",
+    "cog",
+    "fix_type",
+    "satellites_visible",
+    "dgps_numch",
+    "yaw",
+    "alt_ellipsoid",
+    "h_acc",
+    "v_acc",
+    "vel_acc",
+    "hdg_acc"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "fix_type": "uint8_t",
+    "lat": "int32_t",
+    "lon": "int32_t",
+    "alt": "int32_t",
+    "eph": "uint16_t",
+    "epv": "uint16_t",
+    "vel": "uint16_t",
+    "cog": "uint16_t",
+    "satellites_visible": "uint8_t",
+    "dgps_numch": "uint8_t",
+    "dgps_age": "uint32_t",
+    "yaw": "uint16_t",
+    "alt_ellipsoid": "int32_t",
+    "h_acc": "uint32_t",
+    "v_acc": "uint32_t",
+    "vel_acc": "uint32_t",
+    "hdg_acc": "uint32_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "lat": 0,
+    "lon": 0,
+    "alt": 0,
+    "dgps_age": 0,
+    "eph": 0,
+    "epv": 0,
+    "vel": 0,
+    "cog": 0,
+    "fix_type": 0,
+    "satellites_visible": 0,
+    "dgps_numch": 0,
+    "yaw": 0,
+    "alt_ellipsoid": 0,
+    "h_acc": 0,
+    "v_acc": 0,
+    "vel_acc": 0,
+    "hdg_acc": 0
+   }
+  },
+  "125": {
+   "name": "POWER_STATUS",
+   "crc_extra": 203,
+   "length": 6,
+   "wire_order": [
+    "Vcc",
+    "Vservo",
+    "flags"
+   ],
+   "types": {
+    "Vcc": "uint16_t",
+    "Vservo": "uint16_t",
+    "flags": "uint16_t"
+   },
+   "array_lengths": {
+    "Vcc": 0,
+    "Vservo": 0,
+    "flags": 0
+   }
+  },
+  "126": {
+   "name": "SERIAL_CONTROL",
+   "crc_extra": 220,
+   "length": 79,
+   "wire_order": [
+    "baudrate",
+    "timeout",
+    "device",
+    "flags",
+    "count",
+    "data"
+   ],
+   "types": {
+    "device": "uint8_t",
+    "flags": "uint8_t",
+    "timeout": "uint16_t",
+    "baudrate": "uint32_t",
+    "count": "uint8_t",
+    "data": "uint8_t"
+   },
+   "array_lengths": {
+    "baudrate": 0,
+    "timeout": 0,
+    "device": 0,
+    "flags": 0,
+    "count": 0,
+    "data": 70
+   }
+  },
+  "127": {
+   "name": "GPS_RTK",
+   "crc_extra": 25,
+   "length": 35,
+   "wire_order": [
+    "time_last_baseline_ms",
+    "tow",
+    "baseline_a_mm",
+    "baseline_b_mm",
+    "baseline_c_mm",
+    "accuracy",
+    "iar_num_hypotheses",
+    "wn",
+    "rtk_receiver_id",
+    "rtk_health",
+    "rtk_rate",
+    "nsats",
+    "baseline_coords_type"
+   ],
+   "types": {
+    "time_last_baseline_ms": "uint32_t",
+    "rtk_receiver_id": "uint8_t",
+    "wn": "uint16_t",
+    "tow": "uint32_t",
+    "rtk_health": "uint8_t",
+    "rtk_rate": "uint8_t",
+    "nsats": "uint8_t",
+    "baseline_coords_type": "uint8_t",
+    "baseline_a_mm": "int32_t",
+    "baseline_b_mm": "int32_t",
+    "baseline_c_mm": "int32_t",
+    "accuracy": "uint32_t",
+    "iar_num_hypotheses": "int32_t"
+   },
+   "array_lengths": {
+    "time_last_baseline_ms": 0,
+    "tow": 0,
+    "baseline_a_mm": 0,
+    "baseline_b_mm": 0,
+    "baseline_c_mm": 0,
+    "accuracy": 0,
+    "iar_num_hypotheses": 0,
+    "wn": 0,
+    "rtk_receiver_id": 0,
+    "rtk_health": 0,
+    "rtk_rate": 0,
+    "nsats": 0,
+    "baseline_coords_type": 0
+   }
+  },
+  "128": {
+   "name": "GPS2_RTK",
+   "crc_extra": 226,
+   "length": 35,
+   "wire_order": [
+    "time_last_baseline_ms",
+    "tow",
+    "baseline_a_mm",
+    "baseline_b_mm",
+    "baseline_c_mm",
+    "accuracy",
+    "iar_num_hypotheses",
+    "wn",
+    "rtk_receiver_id",
+    "rtk_health",
+    "rtk_rate",
+    "nsats",
+    "baseline_coords_type"
+   ],
+   "types": {
+    "time_last_baseline_ms": "uint32_t",
+    "rtk_receiver_id": "uint8_t",
+    "wn": "uint16_t",
+    "tow": "uint32_t",
+    "rtk_health": "uint8_t",
+    "rtk_rate": "uint8_t",
+    "nsats": "uint8_t",
+    "baseline_coords_type": "uint8_t",
+    "baseline_a_mm": "int32_t",
+    "baseline_b_mm": "int32_t",
+    "baseline_c_mm": "int32_t",
+    "accuracy": "uint32_t",
+    "iar_num_hypotheses": "int32_t"
+   },
+   "array_lengths": {
+    "time_last_baseline_ms": 0,
+    "tow": 0,
+    "baseline_a_mm": 0,
+    "baseline_b_mm": 0,
+    "baseline_c_mm": 0,
+    "accuracy": 0,
+    "iar_num_hypotheses": 0,
+    "wn": 0,
+    "rtk_receiver_id": 0,
+    "rtk_health": 0,
+    "rtk_rate": 0,
+    "nsats": 0,
+    "baseline_coords_type": 0
+   }
+  },
+  "129": {
+   "name": "SCALED_IMU3",
+   "crc_extra": 46,
+   "length": 24,
+   "wire_order": [
+    "time_boot_ms",
+    "xacc",
+    "yacc",
+    "zacc",
+    "xgyro",
+    "ygyro",
+    "zgyro",
+    "xmag",
+    "ymag",
+    "zmag",
+    "temperature"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "xacc": "int16_t",
+    "yacc": "int16_t",
+    "zacc": "int16_t",
+    "xgyro": "int16_t",
+    "ygyro": "int16_t",
+    "zgyro": "int16_t",
+    "xmag": "int16_t",
+    "ymag": "int16_t",
+    "zmag": "int16_t",
+    "temperature": "int16_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "xacc": 0,
+    "yacc": 0,
+    "zacc": 0,
+    "xgyro": 0,
+    "ygyro": 0,
+    "zgyro": 0,
+    "xmag": 0,
+    "ymag": 0,
+    "zmag": 0,
+    "temperature": 0
+   }
+  },
+  "130": {
+   "name": "DATA_TRANSMISSION_HANDSHAKE",
+   "crc_extra": 29,
+   "length": 13,
+   "wire_order": [
+    "size",
+    "width",
+    "height",
+    "packets",
+    "type",
+    "payload",
+    "jpg_quality"
+   ],
+   "types": {
+    "type": "uint8_t",
+    "size": "uint32_t",
+    "width": "uint16_t",
+    "height": "uint16_t",
+    "packets": "uint16_t",
+    "payload": "uint8_t",
+    "jpg_quality": "uint8_t"
+   },
+   "array_lengths": {
+    "size": 0,
+    "width": 0,
+    "height": 0,
+    "packets": 0,
+    "type": 0,
+    "payload": 0,
+    "jpg_quality": 0
+   }
+  },
+  "131": {
+   "name": "ENCAPSULATED_DATA",
+   "crc_extra": 223,
+   "length": 255,
+   "wire_order": [
+    "seqnr",
+    "data"
+   ],
+   "types": {
+    "seqnr": "uint16_t",
+    "data": "uint8_t"
+   },
+   "array_lengths": {
+    "seqnr": 0,
+    "data": 253
+   }
+  },
+  "132": {
+   "name": "DISTANCE_SENSOR",
+   "crc_extra": 85,
+   "length": 39,
+   "wire_order": [
+    "time_boot_ms",
+    "min_distance",
+    "max_distance",
+    "current_distance",
+    "type",
+    "id",
+    "orientation",
+    "covariance",
+    "horizontal_fov",
+    "vertical_fov",
+    "quaternion",
+    "signal_quality"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "min_distance": "uint16_t",
+    "max_distance": "uint16_t",
+    "current_distance": "uint16_t",
+    "type": "uint8_t",
+    "id": "uint8_t",
+    "orientation": "uint8_t",
+    "covariance": "uint8_t",
+    "horizontal_fov": "float",
+    "vertical_fov": "float",
+    "quaternion": "float",
+    "signal_quality": "uint8_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "min_distance": 0,
+    "max_distance": 0,
+    "current_distance": 0,
+    "type": 0,
+    "id": 0,
+    "orientation": 0,
+    "covariance": 0,
+    "horizontal_fov": 0,
+    "vertical_fov": 0,
+    "quaternion": 4,
+    "signal_quality": 0
+   }
+  },
+  "133": {
+   "name": "TERRAIN_REQUEST",
+   "crc_extra": 6,
+   "length": 18,
+   "wire_order": [
+    "mask",
+    "lat",
+    "lon",
+    "grid_spacing"
+   ],
+   "types": {
+    "lat": "int32_t",
+    "lon": "int32_t",
+    "grid_spacing": "uint16_t",
+    "mask": "uint64_t"
+   },
+   "array_lengths": {
+    "mask": 0,
+    "lat": 0,
+    "lon": 0,
+    "grid_spacing": 0
+   }
+  },
+  "134": {
+   "name": "TERRAIN_DATA",
+   "crc_extra": 229,
+   "length": 43,
+   "wire_order": [
+    "lat",
+    "lon",
+    "grid_spacing",
+    "data",
+    "gridbit"
+   ],
+   "types": {
+    "lat": "int32_t",
+    "lon": "int32_t",
+    "grid_spacing": "uint16_t",
+    "gridbit": "uint8_t",
+    "data": "int16_t"
+   },
+   "array_lengths": {
+    "lat": 0,
+    "lon": 0,
+    "grid_spacing": 0,
+    "data": 16,
+    "gridbit": 0
+   }
+  },
+  "135": {
+   "name": "TERRAIN_CHECK",
+   "crc_extra": 203,
+   "length": 8,
+   "wire_order": [
+    "lat",
+    "lon"
+   ],
+   "types": {
+    "lat": "int32_t",
+    "lon": "int32_t"
+   },
+   "array_lengths": {
+    "lat": 0,
+    "lon": 0
+   }
+  },
+  "136": {
+   "name": "TERRAIN_REPORT",
+   "crc_extra": 1,
+   "length": 22,
+   "wire_order": [
+    "lat",
+    "lon",
+    "terrain_height",
+    "current_height",
+    "spacing",
+    "pending",
+    "loaded"
+   ],
+   "types": {
+    "lat": "int32_t",
+    "lon": "int32_t",
+    "spacing": "uint16_t",
+    "terrain_height": "float",
+    "current_height": "float",
+    "pending": "uint16_t",
+    "loaded": "uint16_t"
+   },
+   "array_lengths": {
+    "lat": 0,
+    "lon": 0,
+    "terrain_height": 0,
+    "current_height": 0,
+    "spacing": 0,
+    "pending": 0,
+    "loaded": 0
+   }
+  },
+  "137": {
+   "name": "SCALED_PRESSURE2",
+   "crc_extra": 195,
+   "length": 16,
+   "wire_order": [
+    "time_boot_ms",
+    "press_abs",
+    "press_diff",
+    "temperature",
+    "temperature_press_diff"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "press_abs": "float",
+    "press_diff": "float",
+    "temperature": "int16_t",
+    "temperature_press_diff": "int16_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "press_abs": 0,
+    "press_diff": 0,
+    "temperature": 0,
+    "temperature_press_diff": 0
+   }
+  },
+  "138": {
+   "name": "ATT_POS_MOCAP",
+   "crc_extra": 109,
+   "length": 120,
+   "wire_order": [
+    "time_usec",
+    "q",
+    "x",
+    "y",
+    "z",
+    "covariance"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "q": "float",
+    "x": "float",
+    "y": "float",
+    "z": "float",
+    "covariance": "float"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "q": 4,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "covariance": 21
+   }
+  },
+  "139": {
+   "name": "SET_ACTUATOR_CONTROL_TARGET",
+   "crc_extra": 168,
+   "length": 43,
+   "wire_order": [
+    "time_usec",
+    "controls",
+    "group_mlx",
+    "target_system",
+    "target_component"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "group_mlx": "uint8_t",
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "controls": "float"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "controls": 8,
+    "group_mlx": 0,
+    "target_system": 0,
+    "target_component": 0
+   }
+  },
+  "140": {
+   "name": "ACTUATOR_CONTROL_TARGET",
+   "crc_extra": 181,
+   "length": 41,
+   "wire_order": [
+    "time_usec",
+    "controls",
+    "group_mlx"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "group_mlx": "uint8_t",
+    "controls": "float"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "controls": 8,
+    "group_mlx": 0
+   }
+  },
+  "141": {
+   "name": "ALTITUDE",
+   "crc_extra": 47,
+   "length": 32,
+   "wire_order": [
+    "time_usec",
+    "altitude_monotonic",
+    "altitude_amsl",
+    "altitude_local",
+    "altitude_relative",
+    "altitude_terrain",
+    "bottom_clearance"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "altitude_monotonic": "float",
+    "altitude_amsl": "float",
+    "altitude_local": "float",
+    "altitude_relative": "float",
+    "altitude_terrain": "float",
+    "bottom_clearance": "float"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "altitude_monotonic": 0,
+    "altitude_amsl": 0,
+    "altitude_local": 0,
+    "altitude_relative": 0,
+    "altitude_terrain": 0,
+    "bottom_clearance": 0
+   }
+  },
+  "142": {
+   "name": "RESOURCE_REQUEST",
+   "crc_extra": 72,
+   "length": 243,
+   "wire_order": [
+    "request_id",
+    "uri_type",
+    "uri",
+    "transfer_type",
+    "storage"
+   ],
+   "types": {
+    "request_id": "uint8_t",
+    "uri_type": "uint8_t",
+    "uri": "uint8_t",
+    "transfer_type": "uint8_t",
+    "storage": "uint8_t"
+   },
+   "array_lengths": {
+    "request_id": 0,
+    "uri_type": 0,
+    "uri": 120,
+    "transfer_type": 0,
+    "storage": 120
+   }
+  },
+  "143": {
+   "name": "SCALED_PRESSURE3",
+   "crc_extra": 131,
+   "length": 16,
+   "wire_order": [
+    "time_boot_ms",
+    "press_abs",
+    "press_diff",
+    "temperature",
+    "temperature_press_diff"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "press_abs": "float",
+    "press_diff": "float",
+    "temperature": "int16_t",
+    "temperature_press_diff": "int16_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "press_abs": 0,
+    "press_diff": 0,
+    "temperature": 0,
+    "temperature_press_diff": 0
+   }
+  },
+  "144": {
+   "name": "FOLLOW_TARGET",
+   "crc_extra": 127,
+   "length": 93,
+   "wire_order": [
+    "timestamp",
+    "custom_state",
+    "lat",
+    "lon",
+    "alt",
+    "vel",
+    "acc",
+    "attitude_q",
+    "rates",
+    "position_cov",
+    "est_capabilities"
+   ],
+   "types": {
+    "timestamp": "uint64_t",
+    "est_capabilities": "uint8_t",
+    "lat": "int32_t",
+    "lon": "int32_t",
+    "alt": "float",
+    "vel": "float",
+    "acc": "float",
+    "attitude_q": "float",
+    "rates": "float",
+    "position_cov": "float",
+    "custom_state": "uint64_t"
+   },
+   "array_lengths": {
+    "timestamp": 0,
+    "custom_state": 0,
+    "lat": 0,
+    "lon": 0,
+    "alt": 0,
+    "vel": 3,
+    "acc": 3,
+    "attitude_q": 4,
+    "rates": 3,
+    "position_cov": 3,
+    "est_capabilities": 0
+   }
+  },
+  "146": {
+   "name": "CONTROL_SYSTEM_STATE",
+   "crc_extra": 103,
+   "length": 100,
+   "wire_order": [
+    "time_usec",
+    "x_acc",
+    "y_acc",
+    "z_acc",
+    "x_vel",
+    "y_vel",
+    "z_vel",
+    "x_pos",
+    "y_pos",
+    "z_pos",
+    "airspeed",
+    "vel_variance",
+    "pos_variance",
+    "q",
+    "roll_rate",
+    "pitch_rate",
+    "yaw_rate"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "x_acc": "float",
+    "y_acc": "float",
+    "z_acc": "float",
+    "x_vel": "float",
+    "y_vel": "float",
+    "z_vel": "float",
+    "x_pos": "float",
+    "y_pos": "float",
+    "z_pos": "float",
+    "airspeed": "float",
+    "vel_variance": "float",
+    "pos_variance": "float",
+    "q": "float",
+    "roll_rate": "float",
+    "pitch_rate": "float",
+    "yaw_rate": "float"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "x_acc": 0,
+    "y_acc": 0,
+    "z_acc": 0,
+    "x_vel": 0,
+    "y_vel": 0,
+    "z_vel": 0,
+    "x_pos": 0,
+    "y_pos": 0,
+    "z_pos": 0,
+    "airspeed": 0,
+    "vel_variance": 3,
+    "pos_variance": 3,
+    "q": 4,
+    "roll_rate": 0,
+    "pitch_rate": 0,
+    "yaw_rate": 0
+   }
+  },
+  "147": {
+   "name": "BATTERY_STATUS",
+   "crc_extra": 154,
+   "length": 54,
+   "wire_order": [
+    "current_consumed",
+    "energy_consumed",
+    "temperature",
+    "voltages",
+    "current_battery",
+    "id",
+    "battery_function",
+    "type",
+    "battery_remaining",
+    "time_remaining",
+    "charge_state",
+    "voltages_ext",
+    "mode",
+    "fault_bitmask"
+   ],
+   "types": {
+    "id": "uint8_t",
+    "battery_function": "uint8_t",
+    "type": "uint8_t",
+    "temperature": "int16_t",
+    "voltages": "uint16_t",
+    "current_battery": "int16_t",
+    "current_consumed": "int32_t",
+    "energy_consumed": "int32_t",
+    "battery_remaining": "int8_t",
+    "time_remaining": "int32_t",
+    "charge_state": "uint8_t",
+    "voltages_ext": "uint16_t",
+    "mode": "uint8_t",
+    "fault_bitmask": "uint32_t"
+   },
+   "array_lengths": {
+    "current_consumed": 0,
+    "energy_consumed": 0,
+    "temperature": 0,
+    "voltages": 10,
+    "current_battery": 0,
+    "id": 0,
+    "battery_function": 0,
+    "type": 0,
+    "battery_remaining": 0,
+    "time_remaining": 0,
+    "charge_state": 0,
+    "voltages_ext": 4,
+    "mode": 0,
+    "fault_bitmask": 0
+   }
+  },
+  "148": {
+   "name": "AUTOPILOT_VERSION",
+   "crc_extra": 178,
+   "length": 78,
+   "wire_order": [
+    "capabilities",
+    "uid",
+    "flight_sw_version",
+    "middleware_sw_version",
+    "os_sw_version",
+    "board_version",
+    "vendor_id",
+    "product_id",
+    "flight_custom_version",
+    "middleware_custom_version",
+    "os_custom_version",
+    "uid2"
+   ],
+   "types": {
+    "capabilities": "uint64_t",
+    "flight_sw_version": "uint32_t",
+    "middleware_sw_version": "uint32_t",
+    "os_sw_version": "uint32_t",
+    "board_version": "uint32_t",
+    "flight_custom_version": "uint8_t",
+    "middleware_custom_version": "uint8_t",
+    "os_custom_version": "uint8_t",
+    "vendor_id": "uint16_t",
+    "product_id": "uint16_t",
+    "uid": "uint64_t",
+    "uid2": "uint8_t"
+   },
+   "array_lengths": {
+    "capabilities": 0,
+    "uid": 0,
+    "flight_sw_version": 0,
+    "middleware_sw_version": 0,
+    "os_sw_version": 0,
+    "board_version": 0,
+    "vendor_id": 0,
+    "product_id": 0,
+    "flight_custom_version": 8,
+    "middleware_custom_version": 8,
+    "os_custom_version": 8,
+    "uid2": 18
+   }
+  },
+  "149": {
+   "name": "LANDING_TARGET",
+   "crc_extra": 200,
+   "length": 60,
+   "wire_order": [
+    "time_usec",
+    "angle_x",
+    "angle_y",
+    "distance",
+    "size_x",
+    "size_y",
+    "target_num",
+    "frame",
+    "x",
+    "y",
+    "z",
+    "q",
+    "type",
+    "position_valid"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "target_num": "uint8_t",
+    "frame": "uint8_t",
+    "angle_x": "float",
+    "angle_y": "float",
+    "distance": "float",
+    "size_x": "float",
+    "size_y": "float",
+    "x": "float",
+    "y": "float",
+    "z": "float",
+    "q": "float",
+    "type": "uint8_t",
+    "position_valid": "uint8_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "angle_x": 0,
+    "angle_y": 0,
+    "distance": 0,
+    "size_x": 0,
+    "size_y": 0,
+    "target_num": 0,
+    "frame": 0,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "q": 4,
+    "type": 0,
+    "position_valid": 0
+   }
+  },
+  "162": {
+   "name": "FENCE_STATUS",
+   "crc_extra": 189,
+   "length": 9,
+   "wire_order": [
+    "breach_time",
+    "breach_count",
+    "breach_status",
+    "breach_type",
+    "breach_mitigation"
+   ],
+   "types": {
+    "breach_status": "uint8_t",
+    "breach_count": "uint16_t",
+    "breach_type": "uint8_t",
+    "breach_time": "uint32_t",
+    "breach_mitigation": "uint8_t"
+   },
+   "array_lengths": {
+    "breach_time": 0,
+    "breach_count": 0,
+    "breach_status": 0,
+    "breach_type": 0,
+    "breach_mitigation": 0
+   }
+  },
+  "192": {
+   "name": "MAG_CAL_REPORT",
+   "crc_extra": 36,
+   "length": 54,
+   "wire_order": [
+    "fitness",
+    "ofs_x",
+    "ofs_y",
+    "ofs_z",
+    "diag_x",
+    "diag_y",
+    "diag_z",
+    "offdiag_x",
+    "offdiag_y",
+    "offdiag_z",
+    "compass_id",
+    "cal_mask",
+    "cal_status",
+    "autosaved",
+    "orientation_confidence",
+    "old_orientation",
+    "new_orientation",
+    "scale_factor"
+   ],
+   "types": {
+    "compass_id": "uint8_t",
+    "cal_mask": "uint8_t",
+    "cal_status": "uint8_t",
+    "autosaved": "uint8_t",
+    "fitness": "float",
+    "ofs_x": "float",
+    "ofs_y": "float",
+    "ofs_z": "float",
+    "diag_x": "float",
+    "diag_y": "float",
+    "diag_z": "float",
+    "offdiag_x": "float",
+    "offdiag_y": "float",
+    "offdiag_z": "float",
+    "orientation_confidence": "float",
+    "old_orientation": "uint8_t",
+    "new_orientation": "uint8_t",
+    "scale_factor": "float"
+   },
+   "array_lengths": {
+    "fitness": 0,
+    "ofs_x": 0,
+    "ofs_y": 0,
+    "ofs_z": 0,
+    "diag_x": 0,
+    "diag_y": 0,
+    "diag_z": 0,
+    "offdiag_x": 0,
+    "offdiag_y": 0,
+    "offdiag_z": 0,
+    "compass_id": 0,
+    "cal_mask": 0,
+    "cal_status": 0,
+    "autosaved": 0,
+    "orientation_confidence": 0,
+    "old_orientation": 0,
+    "new_orientation": 0,
+    "scale_factor": 0
+   }
+  },
+  "225": {
+   "name": "EFI_STATUS",
+   "crc_extra": 208,
+   "length": 73,
+   "wire_order": [
+    "ecu_index",
+    "rpm",
+    "fuel_consumed",
+    "fuel_flow",
+    "engine_load",
+    "throttle_position",
+    "spark_dwell_time",
+    "barometric_pressure",
+    "intake_manifold_pressure",
+    "intake_manifold_temperature",
+    "cylinder_head_temperature",
+    "ignition_timing",
+    "injection_time",
+    "exhaust_gas_temperature",
+    "throttle_out",
+    "pt_compensation",
+    "health",
+    "ignition_voltage",
+    "fuel_pressure"
+   ],
+   "types": {
+    "health": "uint8_t",
+    "ecu_index": "float",
+    "rpm": "float",
+    "fuel_consumed": "float",
+    "fuel_flow": "float",
+    "engine_load": "float",
+    "throttle_position": "float",
+    "spark_dwell_time": "float",
+    "barometric_pressure": "float",
+    "intake_manifold_pressure": "float",
+    "intake_manifold_temperature": "float",
+    "cylinder_head_temperature": "float",
+    "ignition_timing": "float",
+    "injection_time": "float",
+    "exhaust_gas_temperature": "float",
+    "throttle_out": "float",
+    "pt_compensation": "float",
+    "ignition_voltage": "float",
+    "fuel_pressure": "float"
+   },
+   "array_lengths": {
+    "ecu_index": 0,
+    "rpm": 0,
+    "fuel_consumed": 0,
+    "fuel_flow": 0,
+    "engine_load": 0,
+    "throttle_position": 0,
+    "spark_dwell_time": 0,
+    "barometric_pressure": 0,
+    "intake_manifold_pressure": 0,
+    "intake_manifold_temperature": 0,
+    "cylinder_head_temperature": 0,
+    "ignition_timing": 0,
+    "injection_time": 0,
+    "exhaust_gas_temperature": 0,
+    "throttle_out": 0,
+    "pt_compensation": 0,
+    "health": 0,
+    "ignition_voltage": 0,
+    "fuel_pressure": 0
+   }
+  },
+  "230": {
+   "name": "ESTIMATOR_STATUS",
+   "crc_extra": 163,
+   "length": 42,
+   "wire_order": [
+    "time_usec",
+    "vel_ratio",
+    "pos_horiz_ratio",
+    "pos_vert_ratio",
+    "mag_ratio",
+    "hagl_ratio",
+    "tas_ratio",
+    "pos_horiz_accuracy",
+    "pos_vert_accuracy",
+    "flags"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "flags": "uint16_t",
+    "vel_ratio": "float",
+    "pos_horiz_ratio": "float",
+    "pos_vert_ratio": "float",
+    "mag_ratio": "float",
+    "hagl_ratio": "float",
+    "tas_ratio": "float",
+    "pos_horiz_accuracy": "float",
+    "pos_vert_accuracy": "float"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "vel_ratio": 0,
+    "pos_horiz_ratio": 0,
+    "pos_vert_ratio": 0,
+    "mag_ratio": 0,
+    "hagl_ratio": 0,
+    "tas_ratio": 0,
+    "pos_horiz_accuracy": 0,
+    "pos_vert_accuracy": 0,
+    "flags": 0
+   }
+  },
+  "231": {
+   "name": "WIND_COV",
+   "crc_extra": 105,
+   "length": 40,
+   "wire_order": [
+    "time_usec",
+    "wind_x",
+    "wind_y",
+    "wind_z",
+    "var_horiz",
+    "var_vert",
+    "wind_alt",
+    "horiz_accuracy",
+    "vert_accuracy"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "wind_x": "float",
+    "wind_y": "float",
+    "wind_z": "float",
+    "var_horiz": "float",
+    "var_vert": "float",
+    "wind_alt": "float",
+    "horiz_accuracy": "float",
+    "vert_accuracy": "float"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "wind_x": 0,
+    "wind_y": 0,
+    "wind_z": 0,
+    "var_horiz": 0,
+    "var_vert": 0,
+    "wind_alt": 0,
+    "horiz_accuracy": 0,
+    "vert_accuracy": 0
+   }
+  },
+  "232": {
+   "name": "GPS_INPUT",
+   "crc_extra": 151,
+   "length": 65,
+   "wire_order": [
+    "time_usec",
+    "time_week_ms",
+    "lat",
+    "lon",
+    "alt",
+    "hdop",
+    "vdop",
+    "vn",
+    "ve",
+    "vd",
+    "speed_accuracy",
+    "horiz_accuracy",
+    "vert_accuracy",
+    "ignore_flags",
+    "time_week",
+    "gps_id",
+    "fix_type",
+    "satellites_visible",
+    "yaw"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "gps_id": "uint8_t",
+    "ignore_flags": "uint16_t",
+    "time_week_ms": "uint32_t",
+    "time_week": "uint16_t",
+    "fix_type": "uint8_t",
+    "lat": "int32_t",
+    "lon": "int32_t",
+    "alt": "float",
+    "hdop": "float",
+    "vdop": "float",
+    "vn": "float",
+    "ve": "float",
+    "vd": "float",
+    "speed_accuracy": "float",
+    "horiz_accuracy": "float",
+    "vert_accuracy": "float",
+    "satellites_visible": "uint8_t",
+    "yaw": "uint16_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "time_week_ms": 0,
+    "lat": 0,
+    "lon": 0,
+    "alt": 0,
+    "hdop": 0,
+    "vdop": 0,
+    "vn": 0,
+    "ve": 0,
+    "vd": 0,
+    "speed_accuracy": 0,
+    "horiz_accuracy": 0,
+    "vert_accuracy": 0,
+    "ignore_flags": 0,
+    "time_week": 0,
+    "gps_id": 0,
+    "fix_type": 0,
+    "satellites_visible": 0,
+    "yaw": 0
+   }
+  },
+  "233": {
+   "name": "GPS_RTCM_DATA",
+   "crc_extra": 35,
+   "length": 182,
+   "wire_order": [
+    "flags",
+    "len",
+    "data"
+   ],
+   "types": {
+    "flags": "uint8_t",
+    "len": "uint8_t",
+    "data": "uint8_t"
+   },
+   "array_lengths": {
+    "flags": 0,
+    "len": 0,
+    "data": 180
+   }
+  },
+  "234": {
+   "name": "HIGH_LATENCY",
+   "crc_extra": 150,
+   "length": 40,
+   "wire_order": [
+    "custom_mode",
+    "latitude",
+    "longitude",
+    "roll",
+    "pitch",
+    "heading",
+    "heading_sp",
+    "altitude_amsl",
+    "altitude_sp",
+    "wp_distance",
+    "base_mode",
+    "landed_state",
+    "throttle",
+    "airspeed",
+    "airspeed_sp",
+    "groundspeed",
+    "climb_rate",
+    "gps_nsat",
+    "gps_fix_type",
+    "battery_remaining",
+    "temperature",
+    "temperature_air",
+    "failsafe",
+    "wp_num"
+   ],
+   "types": {
+    "base_mode": "uint8_t",
+    "custom_mode": "uint32_t",
+    "landed_state": "uint8_t",
+    "roll": "int16_t",
+    "pitch": "int16_t",
+    "heading": "uint16_t",
+    "throttle": "int8_t",
+    "heading_sp": "int16_t",
+    "latitude": "int32_t",
+    "longitude": "int32_t",
+    "altitude_amsl": "int16_t",
+    "altitude_sp": "int16_t",
+    "airspeed": "uint8_t",
+    "airspeed_sp": "uint8_t",
+    "groundspeed": "uint8_t",
+    "climb_rate": "int8_t",
+    "gps_nsat": "uint8_t",
+    "gps_fix_type": "uint8_t",
+    "battery_remaining": "uint8_t",
+    "temperature": "int8_t",
+    "temperature_air": "int8_t",
+    "failsafe": "uint8_t",
+    "wp_num": "uint8_t",
+    "wp_distance": "uint16_t"
+   },
+   "array_lengths": {
+    "custom_mode": 0,
+    "latitude": 0,
+    "longitude": 0,
+    "roll": 0,
+    "pitch": 0,
+    "heading": 0,
+    "heading_sp": 0,
+    "altitude_amsl": 0,
+    "altitude_sp": 0,
+    "wp_distance": 0,
+    "base_mode": 0,
+    "landed_state": 0,
+    "throttle": 0,
+    "airspeed": 0,
+    "airspeed_sp": 0,
+    "groundspeed": 0,
+    "climb_rate": 0,
+    "gps_nsat": 0,
+    "gps_fix_type": 0,
+    "battery_remaining": 0,
+    "temperature": 0,
+    "temperature_air": 0,
+    "failsafe": 0,
+    "wp_num": 0
+   }
+  },
+  "235": {
+   "name": "HIGH_LATENCY2",
+   "crc_extra": 179,
+   "length": 42,
+   "wire_order": [
+    "timestamp",
+    "latitude",
+    "longitude",
+    "custom_mode",
+    "altitude",
+    "target_altitude",
+    "target_distance",
+    "wp_num",
+    "failure_flags",
+    "type",
+    "autopilot",
+    "heading",
+    "target_heading",
+    "throttle",
+    "airspeed",
+    "airspeed_sp",
+    "groundspeed",
+    "windspeed",
+    "wind_heading",
+    "eph",
+    "epv",
+    "temperature_air",
+    "climb_rate",
+    "battery",
+    "custom0",
+    "custom1",
+    "custom2"
+   ],
+   "types": {
+    "timestamp": "uint32_t",
+    "type": "uint8_t",
+    "autopilot": "uint8_t",
+    "custom_mode": "uint16_t",
+    "latitude": "int32_t",
+    "longitude": "int32_t",
+    "altitude": "int16_t",
+    "target_altitude": "int16_t",
+    "heading": "uint8_t",
+    "target_heading": "uint8_t",
+    "target_distance": "uint16_t",
+    "throttle": "uint8_t",
+    "airspeed": "uint8_t",
+    "airspeed_sp": "uint8_t",
+    "groundspeed": "uint8_t",
+    "windspeed": "uint8_t",
+    "wind_heading": "uint8_t",
+    "eph": "uint8_t",
+    "epv": "uint8_t",
+    "temperature_air": "int8_t",
+    "climb_rate": "int8_t",
+    "battery": "int8_t",
+    "wp_num": "uint16_t",
+    "failure_flags": "uint16_t",
+    "custom0": "int8_t",
+    "custom1": "int8_t",
+    "custom2": "int8_t"
+   },
+   "array_lengths": {
+    "timestamp": 0,
+    "latitude": 0,
+    "longitude": 0,
+    "custom_mode": 0,
+    "altitude": 0,
+    "target_altitude": 0,
+    "target_distance": 0,
+    "wp_num": 0,
+    "failure_flags": 0,
+    "type": 0,
+    "autopilot": 0,
+    "heading": 0,
+    "target_heading": 0,
+    "throttle": 0,
+    "airspeed": 0,
+    "airspeed_sp": 0,
+    "groundspeed": 0,
+    "windspeed": 0,
+    "wind_heading": 0,
+    "eph": 0,
+    "epv": 0,
+    "temperature_air": 0,
+    "climb_rate": 0,
+    "battery": 0,
+    "custom0": 0,
+    "custom1": 0,
+    "custom2": 0
+   }
+  },
+  "241": {
+   "name": "VIBRATION",
+   "crc_extra": 90,
+   "length": 32,
+   "wire_order": [
+    "time_usec",
+    "vibration_x",
+    "vibration_y",
+    "vibration_z",
+    "clipping_0",
+    "clipping_1",
+    "clipping_2"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "vibration_x": "float",
+    "vibration_y": "float",
+    "vibration_z": "float",
+    "clipping_0": "uint32_t",
+    "clipping_1": "uint32_t",
+    "clipping_2": "uint32_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "vibration_x": 0,
+    "vibration_y": 0,
+    "vibration_z": 0,
+    "clipping_0": 0,
+    "clipping_1": 0,
+    "clipping_2": 0
+   }
+  },
+  "242": {
+   "name": "HOME_POSITION",
+   "crc_extra": 104,
+   "length": 60,
+   "wire_order": [
+    "latitude",
+    "longitude",
+    "altitude",
+    "x",
+    "y",
+    "z",
+    "q",
+    "approach_x",
+    "approach_y",
+    "approach_z",
+    "time_usec"
+   ],
+   "types": {
+    "latitude": "int32_t",
+    "longitude": "int32_t",
+    "altitude": "int32_t",
+    "x": "float",
+    "y": "float",
+    "z": "float",
+    "q": "float",
+    "approach_x": "float",
+    "approach_y": "float",
+    "approach_z": "float",
+    "time_usec": "uint64_t"
+   },
+   "array_lengths": {
+    "latitude": 0,
+    "longitude": 0,
+    "altitude": 0,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "q": 4,
+    "approach_x": 0,
+    "approach_y": 0,
+    "approach_z": 0,
+    "time_usec": 0
+   }
+  },
+  "243": {
+   "name": "SET_HOME_POSITION",
+   "crc_extra": 85,
+   "length": 61,
+   "wire_order": [
+    "latitude",
+    "longitude",
+    "altitude",
+    "x",
+    "y",
+    "z",
+    "q",
+    "approach_x",
+    "approach_y",
+    "approach_z",
+    "target_system",
+    "time_usec"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "latitude": "int32_t",
+    "longitude": "int32_t",
+    "altitude": "int32_t",
+    "x": "float",
+    "y": "float",
+    "z": "float",
+    "q": "float",
+    "approach_x": "float",
+    "approach_y": "float",
+    "approach_z": "float",
+    "time_usec": "uint64_t"
+   },
+   "array_lengths": {
+    "latitude": 0,
+    "longitude": 0,
+    "altitude": 0,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "q": 4,
+    "approach_x": 0,
+    "approach_y": 0,
+    "approach_z": 0,
+    "target_system": 0,
+    "time_usec": 0
+   }
+  },
+  "244": {
+   "name": "MESSAGE_INTERVAL",
+   "crc_extra": 95,
+   "length": 6,
+   "wire_order": [
+    "interval_us",
+    "message_id"
+   ],
+   "types": {
+    "message_id": "uint16_t",
+    "interval_us": "int32_t"
+   },
+   "array_lengths": {
+    "interval_us": 0,
+    "message_id": 0
+   }
+  },
+  "245": {
+   "name": "EXTENDED_SYS_STATE",
+   "crc_extra": 130,
+   "length": 2,
+   "wire_order": [
+    "vtol_state",
+    "landed_state"
+   ],
+   "types": {
+    "vtol_state": "uint8_t",
+    "landed_state": "uint8_t"
+   },
+   "array_lengths": {
+    "vtol_state": 0,
+    "landed_state": 0
+   }
+  },
+  "246": {
+   "name": "ADSB_VEHICLE",
+   "crc_extra": 184,
+   "length": 38,
+   "wire_order": [
+    "ICAO_address",
+    "lat",
+    "lon",
+    "altitude",
+    "heading",
+    "hor_velocity",
+    "ver_velocity",
+    "flags",
+    "squawk",
+    "altitude_type",
+    "callsign",
+    "emitter_type",
+    "tslc"
+   ],
+   "types": {
+    "ICAO_address": "uint32_t",
+    "lat": "int32_t",
+    "lon": "int32_t",
+    "altitude_type": "uint8_t",
+    "altitude": "int32_t",
+    "heading": "uint16_t",
+    "hor_velocity": "uint16_t",
+    "ver_velocity": "int16_t",
+    "callsign": "char",
+    "emitter_type": "uint8_t",
+    "tslc": "uint8_t",
+    "flags": "uint16_t",
+    "squawk": "uint16_t"
+   },
+   "array_lengths": {
+    "ICAO_address": 0,
+    "lat": 0,
+    "lon": 0,
+    "altitude": 0,
+    "heading": 0,
+    "hor_velocity": 0,
+    "ver_velocity": 0,
+    "flags": 0,
+    "squawk": 0,
+    "altitude_type": 0,
+    "callsign": 9,
+    "emitter_type": 0,
+    "tslc": 0
+   }
+  },
+  "247": {
+   "name": "COLLISION",
+   "crc_extra": 81,
+   "length": 19,
+   "wire_order": [
+    "id",
+    "time_to_minimum_delta",
+    "altitude_minimum_delta",
+    "horizontal_minimum_delta",
+    "src",
+    "action",
+    "threat_level"
+   ],
+   "types": {
+    "src": "uint8_t",
+    "id": "uint32_t",
+    "action": "uint8_t",
+    "threat_level": "uint8_t",
+    "time_to_minimum_delta": "float",
+    "altitude_minimum_delta": "float",
+    "horizontal_minimum_delta": "float"
+   },
+   "array_lengths": {
+    "id": 0,
+    "time_to_minimum_delta": 0,
+    "altitude_minimum_delta": 0,
+    "horizontal_minimum_delta": 0,
+    "src": 0,
+    "action": 0,
+    "threat_level": 0
+   }
+  },
+  "248": {
+   "name": "V2_EXTENSION",
+   "crc_extra": 8,
+   "length": 254,
+   "wire_order": [
+    "message_type",
+    "target_network",
+    "target_system",
+    "target_component",
+    "payload"
+   ],
+   "types": {
+    "target_network": "uint8_t",
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "message_type": "uint16_t",
+    "payload": "uint8_t"
+   },
+   "array_lengths": {
+    "message_type": 0,
+    "target_network": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "payload": 249
+   }
+  },
+  "249": {
+   "name": "MEMORY_VECT",
+   "crc_extra": 204,
+   "length": 36,
+   "wire_order": [
+    "address",
+    "ver",
+    "type",
+    "value"
+   ],
+   "types": {
+    "address": "uint16_t",
+    "ver": "uint8_t",
+    "type": "uint8_t",
+    "value": "int8_t"
+   },
+   "array_lengths": {
+    "address": 0,
+    "ver": 0,
+    "type": 0,
+    "value": 32
+   }
+  },
+  "250": {
+   "name": "DEBUG_VECT",
+   "crc_extra": 49,
+   "length": 30,
+   "wire_order": [
+    "time_usec",
+    "x",
+    "y",
+    "z",
+    "name"
+   ],
+   "types": {
+    "name": "char",
+    "time_usec": "uint64_t",
+    "x": "float",
+    "y": "float",
+    "z": "float"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "name": 10
+   }
+  },
+  "251": {
+   "name": "NAMED_VALUE_FLOAT",
+   "crc_extra": 170,
+   "length": 18,
+   "wire_order": [
+    "time_boot_ms",
+    "value",
+    "name"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "name": "char",
+    "value": "float"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "value": 0,
+    "name": 10
+   }
+  },
+  "252": {
+   "name": "NAMED_VALUE_INT",
+   "crc_extra": 44,
+   "length": 18,
+   "wire_order": [
+    "time_boot_ms",
+    "value",
+    "name"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "name": "char",
+    "value": "int32_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "value": 0,
+    "name": 10
+   }
+  },
+  "253": {
+   "name": "STATUSTEXT",
+   "crc_extra": 83,
+   "length": 54,
+   "wire_order": [
+    "severity",
+    "text",
+    "id",
+    "chunk_seq"
+   ],
+   "types": {
+    "severity": "uint8_t",
+    "text": "char",
+    "id": "uint16_t",
+    "chunk_seq": "uint8_t"
+   },
+   "array_lengths": {
+    "severity": 0,
+    "text": 50,
+    "id": 0,
+    "chunk_seq": 0
+   }
+  },
+  "254": {
+   "name": "DEBUG",
+   "crc_extra": 46,
+   "length": 9,
+   "wire_order": [
+    "time_boot_ms",
+    "value",
+    "ind"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "ind": "uint8_t",
+    "value": "float"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "value": 0,
+    "ind": 0
+   }
+  },
+  "256": {
+   "name": "SETUP_SIGNING",
+   "crc_extra": 71,
+   "length": 42,
+   "wire_order": [
+    "initial_timestamp",
+    "target_system",
+    "target_component",
+    "secret_key"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "secret_key": "uint8_t",
+    "initial_timestamp": "uint64_t"
+   },
+   "array_lengths": {
+    "initial_timestamp": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "secret_key": 32
+   }
+  },
+  "257": {
+   "name": "BUTTON_CHANGE",
+   "crc_extra": 131,
+   "length": 9,
+   "wire_order": [
+    "time_boot_ms",
+    "last_change_ms",
+    "state"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "last_change_ms": "uint32_t",
+    "state": "uint8_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "last_change_ms": 0,
+    "state": 0
+   }
+  },
+  "258": {
+   "name": "PLAY_TUNE",
+   "crc_extra": 187,
+   "length": 232,
+   "wire_order": [
+    "target_system",
+    "target_component",
+    "tune",
+    "tune2"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "tune": "char",
+    "tune2": "char"
+   },
+   "array_lengths": {
+    "target_system": 0,
+    "target_component": 0,
+    "tune": 30,
+    "tune2": 200
+   }
+  },
+  "259": {
+   "name": "CAMERA_INFORMATION",
+   "crc_extra": 92,
+   "length": 237,
+   "wire_order": [
+    "time_boot_ms",
+    "firmware_version",
+    "focal_length",
+    "sensor_size_h",
+    "sensor_size_v",
+    "flags",
+    "resolution_h",
+    "resolution_v",
+    "cam_definition_version",
+    "vendor_name",
+    "model_name",
+    "lens_id",
+    "cam_definition_uri",
+    "gimbal_device_id",
+    "camera_device_id"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "vendor_name": "uint8_t",
+    "model_name": "uint8_t",
+    "firmware_version": "uint32_t",
+    "focal_length": "float",
+    "sensor_size_h": "float",
+    "sensor_size_v": "float",
+    "resolution_h": "uint16_t",
+    "resolution_v": "uint16_t",
+    "lens_id": "uint8_t",
+    "flags": "uint32_t",
+    "cam_definition_version": "uint16_t",
+    "cam_definition_uri": "char",
+    "gimbal_device_id": "uint8_t",
+    "camera_device_id": "uint8_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "firmware_version": 0,
+    "focal_length": 0,
+    "sensor_size_h": 0,
+    "sensor_size_v": 0,
+    "flags": 0,
+    "resolution_h": 0,
+    "resolution_v": 0,
+    "cam_definition_version": 0,
+    "vendor_name": 32,
+    "model_name": 32,
+    "lens_id": 0,
+    "cam_definition_uri": 140,
+    "gimbal_device_id": 0,
+    "camera_device_id": 0
+   }
+  },
+  "260": {
+   "name": "CAMERA_SETTINGS",
+   "crc_extra": 146,
+   "length": 14,
+   "wire_order": [
+    "time_boot_ms",
+    "mode_id",
+    "zoomLevel",
+    "focusLevel",
+    "camera_device_id"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "mode_id": "uint8_t",
+    "zoomLevel": "float",
+    "focusLevel": "float",
+    "camera_device_id": "uint8_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "mode_id": 0,
+    "zoomLevel": 0,
+    "focusLevel": 0,
+    "camera_device_id": 0
+   }
+  },
+  "261": {
+   "name": "STORAGE_INFORMATION",
+   "crc_extra": 179,
+   "length": 61,
+   "wire_order": [
+    "time_boot_ms",
+    "total_capacity",
+    "used_capacity",
+    "available_capacity",
+    "read_speed",
+    "write_speed",
+    "storage_id",
+    "storage_count",
+    "status",
+    "type",
+    "name",
+    "storage_usage"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "storage_id": "uint8_t",
+    "storage_count": "uint8_t",
+    "status": "uint8_t",
+    "total_capacity": "float",
+    "used_capacity": "float",
+    "available_capacity": "float",
+    "read_speed": "float",
+    "write_speed": "float",
+    "type": "uint8_t",
+    "name": "char",
+    "storage_usage": "uint8_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "total_capacity": 0,
+    "used_capacity": 0,
+    "available_capacity": 0,
+    "read_speed": 0,
+    "write_speed": 0,
+    "storage_id": 0,
+    "storage_count": 0,
+    "status": 0,
+    "type": 0,
+    "name": 32,
+    "storage_usage": 0
+   }
+  },
+  "262": {
+   "name": "CAMERA_CAPTURE_STATUS",
+   "crc_extra": 12,
+   "length": 23,
+   "wire_order": [
+    "time_boot_ms",
+    "image_interval",
+    "recording_time_ms",
+    "available_capacity",
+    "image_status",
+    "video_status",
+    "image_count",
+    "camera_device_id"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "image_status": "uint8_t",
+    "video_status": "uint8_t",
+    "image_interval": "float",
+    "recording_time_ms": "uint32_t",
+    "available_capacity": "float",
+    "image_count": "int32_t",
+    "camera_device_id": "uint8_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "image_interval": 0,
+    "recording_time_ms": 0,
+    "available_capacity": 0,
+    "image_status": 0,
+    "video_status": 0,
+    "image_count": 0,
+    "camera_device_id": 0
+   }
+  },
+  "263": {
+   "name": "CAMERA_IMAGE_CAPTURED",
+   "crc_extra": 133,
+   "length": 255,
+   "wire_order": [
+    "time_utc",
+    "time_boot_ms",
+    "lat",
+    "lon",
+    "alt",
+    "relative_alt",
+    "q",
+    "image_index",
+    "camera_id",
+    "capture_result",
+    "file_url"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "time_utc": "uint64_t",
+    "camera_id": "uint8_t",
+    "lat": "int32_t",
+    "lon": "int32_t",
+    "alt": "int32_t",
+    "relative_alt": "int32_t",
+    "q": "float",
+    "image_index": "int32_t",
+    "capture_result": "int8_t",
+    "file_url": "char"
+   },
+   "array_lengths": {
+    "time_utc": 0,
+    "time_boot_ms": 0,
+    "lat": 0,
+    "lon": 0,
+    "alt": 0,
+    "relative_alt": 0,
+    "q": 4,
+    "image_index": 0,
+    "camera_id": 0,
+    "capture_result": 0,
+    "file_url": 205
+   }
+  },
+  "264": {
+   "name": "FLIGHT_INFORMATION",
+   "crc_extra": 49,
+   "length": 32,
+   "wire_order": [
+    "arming_time_utc",
+    "takeoff_time_utc",
+    "flight_uuid",
+    "time_boot_ms",
+    "landing_time"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "arming_time_utc": "uint64_t",
+    "takeoff_time_utc": "uint64_t",
+    "flight_uuid": "uint64_t",
+    "landing_time": "uint32_t"
+   },
+   "array_lengths": {
+    "arming_time_utc": 0,
+    "takeoff_time_utc": 0,
+    "flight_uuid": 0,
+    "time_boot_ms": 0,
+    "landing_time": 0
+   }
+  },
+  "265": {
+   "name": "MOUNT_ORIENTATION",
+   "crc_extra": 26,
+   "length": 20,
+   "wire_order": [
+    "time_boot_ms",
+    "roll",
+    "pitch",
+    "yaw",
+    "yaw_absolute"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "roll": "float",
+    "pitch": "float",
+    "yaw": "float",
+    "yaw_absolute": "float"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "roll": 0,
+    "pitch": 0,
+    "yaw": 0,
+    "yaw_absolute": 0
+   }
+  },
+  "266": {
+   "name": "LOGGING_DATA",
+   "crc_extra": 193,
+   "length": 255,
+   "wire_order": [
+    "sequence",
+    "target_system",
+    "target_component",
+    "length",
+    "first_message_offset",
+    "data"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "sequence": "uint16_t",
+    "length": "uint8_t",
+    "first_message_offset": "uint8_t",
+    "data": "uint8_t"
+   },
+   "array_lengths": {
+    "sequence": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "length": 0,
+    "first_message_offset": 0,
+    "data": 249
+   }
+  },
+  "267": {
+   "name": "LOGGING_DATA_ACKED",
+   "crc_extra": 35,
+   "length": 255,
+   "wire_order": [
+    "sequence",
+    "target_system",
+    "target_component",
+    "length",
+    "first_message_offset",
+    "data"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "sequence": "uint16_t",
+    "length": "uint8_t",
+    "first_message_offset": "uint8_t",
+    "data": "uint8_t"
+   },
+   "array_lengths": {
+    "sequence": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "length": 0,
+    "first_message_offset": 0,
+    "data": 249
+   }
+  },
+  "268": {
+   "name": "LOGGING_ACK",
+   "crc_extra": 14,
+   "length": 4,
+   "wire_order": [
+    "sequence",
+    "target_system",
+    "target_component"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "sequence": "uint16_t"
+   },
+   "array_lengths": {
+    "sequence": 0,
+    "target_system": 0,
+    "target_component": 0
+   }
+  },
+  "269": {
+   "name": "VIDEO_STREAM_INFORMATION",
+   "crc_extra": 109,
+   "length": 215,
+   "wire_order": [
+    "framerate",
+    "bitrate",
+    "flags",
+    "resolution_h",
+    "resolution_v",
+    "rotation",
+    "hfov",
+    "stream_id",
+    "count",
+    "type",
+    "name",
+    "uri",
+    "encoding",
+    "camera_device_id"
+   ],
+   "types": {
+    "stream_id": "uint8_t",
+    "count": "uint8_t",
+    "type": "uint8_t",
+    "flags": "uint16_t",
+    "framerate": "float",
+    "resolution_h": "uint16_t",
+    "resolution_v": "uint16_t",
+    "bitrate": "uint32_t",
+    "rotation": "uint16_t",
+    "hfov": "uint16_t",
+    "name": "char",
+    "uri": "char",
+    "encoding": "uint8_t",
+    "camera_device_id": "uint8_t"
+   },
+   "array_lengths": {
+    "framerate": 0,
+    "bitrate": 0,
+    "flags": 0,
+    "resolution_h": 0,
+    "resolution_v": 0,
+    "rotation": 0,
+    "hfov": 0,
+    "stream_id": 0,
+    "count": 0,
+    "type": 0,
+    "name": 32,
+    "uri": 160,
+    "encoding": 0,
+    "camera_device_id": 0
+   }
+  },
+  "270": {
+   "name": "VIDEO_STREAM_STATUS",
+   "crc_extra": 59,
+   "length": 20,
+   "wire_order": [
+    "framerate",
+    "bitrate",
+    "flags",
+    "resolution_h",
+    "resolution_v",
+    "rotation",
+    "hfov",
+    "stream_id",
+    "camera_device_id"
+   ],
+   "types": {
+    "stream_id": "uint8_t",
+    "flags": "uint16_t",
+    "framerate": "float",
+    "resolution_h": "uint16_t",
+    "resolution_v": "uint16_t",
+    "bitrate": "uint32_t",
+    "rotation": "uint16_t",
+    "hfov": "uint16_t",
+    "camera_device_id": "uint8_t"
+   },
+   "array_lengths": {
+    "framerate": 0,
+    "bitrate": 0,
+    "flags": 0,
+    "resolution_h": 0,
+    "resolution_v": 0,
+    "rotation": 0,
+    "hfov": 0,
+    "stream_id": 0,
+    "camera_device_id": 0
+   }
+  },
+  "271": {
+   "name": "CAMERA_FOV_STATUS",
+   "crc_extra": 22,
+   "length": 53,
+   "wire_order": [
+    "time_boot_ms",
+    "lat_camera",
+    "lon_camera",
+    "alt_camera",
+    "lat_image",
+    "lon_image",
+    "alt_image",
+    "q",
+    "hfov",
+    "vfov",
+    "camera_device_id"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "lat_camera": "int32_t",
+    "lon_camera": "int32_t",
+    "alt_camera": "int32_t",
+    "lat_image": "int32_t",
+    "lon_image": "int32_t",
+    "alt_image": "int32_t",
+    "q": "float",
+    "hfov": "float",
+    "vfov": "float",
+    "camera_device_id": "uint8_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "lat_camera": 0,
+    "lon_camera": 0,
+    "alt_camera": 0,
+    "lat_image": 0,
+    "lon_image": 0,
+    "alt_image": 0,
+    "q": 4,
+    "hfov": 0,
+    "vfov": 0,
+    "camera_device_id": 0
+   }
+  },
+  "275": {
+   "name": "CAMERA_TRACKING_IMAGE_STATUS",
+   "crc_extra": 126,
+   "length": 32,
+   "wire_order": [
+    "point_x",
+    "point_y",
+    "radius",
+    "rec_top_x",
+    "rec_top_y",
+    "rec_bottom_x",
+    "rec_bottom_y",
+    "tracking_status",
+    "tracking_mode",
+    "target_data",
+    "camera_device_id"
+   ],
+   "types": {
+    "tracking_status": "uint8_t",
+    "tracking_mode": "uint8_t",
+    "target_data": "uint8_t",
+    "point_x": "float",
+    "point_y": "float",
+    "radius": "float",
+    "rec_top_x": "float",
+    "rec_top_y": "float",
+    "rec_bottom_x": "float",
+    "rec_bottom_y": "float",
+    "camera_device_id": "uint8_t"
+   },
+   "array_lengths": {
+    "point_x": 0,
+    "point_y": 0,
+    "radius": 0,
+    "rec_top_x": 0,
+    "rec_top_y": 0,
+    "rec_bottom_x": 0,
+    "rec_bottom_y": 0,
+    "tracking_status": 0,
+    "tracking_mode": 0,
+    "target_data": 0,
+    "camera_device_id": 0
+   }
+  },
+  "276": {
+   "name": "CAMERA_TRACKING_GEO_STATUS",
+   "crc_extra": 18,
+   "length": 50,
+   "wire_order": [
+    "lat",
+    "lon",
+    "alt",
+    "h_acc",
+    "v_acc",
+    "vel_n",
+    "vel_e",
+    "vel_d",
+    "vel_acc",
+    "dist",
+    "hdg",
+    "hdg_acc",
+    "tracking_status",
+    "camera_device_id"
+   ],
+   "types": {
+    "tracking_status": "uint8_t",
+    "lat": "int32_t",
+    "lon": "int32_t",
+    "alt": "float",
+    "h_acc": "float",
+    "v_acc": "float",
+    "vel_n": "float",
+    "vel_e": "float",
+    "vel_d": "float",
+    "vel_acc": "float",
+    "dist": "float",
+    "hdg": "float",
+    "hdg_acc": "float",
+    "camera_device_id": "uint8_t"
+   },
+   "array_lengths": {
+    "lat": 0,
+    "lon": 0,
+    "alt": 0,
+    "h_acc": 0,
+    "v_acc": 0,
+    "vel_n": 0,
+    "vel_e": 0,
+    "vel_d": 0,
+    "vel_acc": 0,
+    "dist": 0,
+    "hdg": 0,
+    "hdg_acc": 0,
+    "tracking_status": 0,
+    "camera_device_id": 0
+   }
+  },
+  "277": {
+   "name": "CAMERA_THERMAL_RANGE",
+   "crc_extra": 62,
+   "length": 30,
+   "wire_order": [
+    "time_boot_ms",
+    "max",
+    "max_point_x",
+    "max_point_y",
+    "min",
+    "min_point_x",
+    "min_point_y",
+    "stream_id",
+    "camera_device_id"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "stream_id": "uint8_t",
+    "camera_device_id": "uint8_t",
+    "max": "float",
+    "max_point_x": "float",
+    "max_point_y": "float",
+    "min": "float",
+    "min_point_x": "float",
+    "min_point_y": "float"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "max": 0,
+    "max_point_x": 0,
+    "max_point_y": 0,
+    "min": 0,
+    "min_point_x": 0,
+    "min_point_y": 0,
+    "stream_id": 0,
+    "camera_device_id": 0
+   }
+  },
+  "280": {
+   "name": "GIMBAL_MANAGER_INFORMATION",
+   "crc_extra": 70,
+   "length": 33,
+   "wire_order": [
+    "time_boot_ms",
+    "cap_flags",
+    "roll_min",
+    "roll_max",
+    "pitch_min",
+    "pitch_max",
+    "yaw_min",
+    "yaw_max",
+    "gimbal_device_id"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "cap_flags": "uint32_t",
+    "gimbal_device_id": "uint8_t",
+    "roll_min": "float",
+    "roll_max": "float",
+    "pitch_min": "float",
+    "pitch_max": "float",
+    "yaw_min": "float",
+    "yaw_max": "float"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "cap_flags": 0,
+    "roll_min": 0,
+    "roll_max": 0,
+    "pitch_min": 0,
+    "pitch_max": 0,
+    "yaw_min": 0,
+    "yaw_max": 0,
+    "gimbal_device_id": 0
+   }
+  },
+  "281": {
+   "name": "GIMBAL_MANAGER_STATUS",
+   "crc_extra": 48,
+   "length": 13,
+   "wire_order": [
+    "time_boot_ms",
+    "flags",
+    "gimbal_device_id",
+    "primary_control_sysid",
+    "primary_control_compid",
+    "secondary_control_sysid",
+    "secondary_control_compid"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "flags": "uint32_t",
+    "gimbal_device_id": "uint8_t",
+    "primary_control_sysid": "uint8_t",
+    "primary_control_compid": "uint8_t",
+    "secondary_control_sysid": "uint8_t",
+    "secondary_control_compid": "uint8_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "flags": 0,
+    "gimbal_device_id": 0,
+    "primary_control_sysid": 0,
+    "primary_control_compid": 0,
+    "secondary_control_sysid": 0,
+    "secondary_control_compid": 0
+   }
+  },
+  "282": {
+   "name": "GIMBAL_MANAGER_SET_ATTITUDE",
+   "crc_extra": 123,
+   "length": 35,
+   "wire_order": [
+    "flags",
+    "q",
+    "angular_velocity_x",
+    "angular_velocity_y",
+    "angular_velocity_z",
+    "target_system",
+    "target_component",
+    "gimbal_device_id"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "flags": "uint32_t",
+    "gimbal_device_id": "uint8_t",
+    "q": "float",
+    "angular_velocity_x": "float",
+    "angular_velocity_y": "float",
+    "angular_velocity_z": "float"
+   },
+   "array_lengths": {
+    "flags": 0,
+    "q": 4,
+    "angular_velocity_x": 0,
+    "angular_velocity_y": 0,
+    "angular_velocity_z": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "gimbal_device_id": 0
+   }
+  },
+  "283": {
+   "name": "GIMBAL_DEVICE_INFORMATION",
+   "crc_extra": 74,
+   "length": 149,
+   "wire_order": [
+    "uid",
+    "time_boot_ms",
+    "firmware_version",
+    "hardware_version",
+    "roll_min",
+    "roll_max",
+    "pitch_min",
+    "pitch_max",
+    "yaw_min",
+    "yaw_max",
+    "cap_flags",
+    "custom_cap_flags",
+    "vendor_name",
+    "model_name",
+    "custom_name",
+    "gimbal_device_id",
+    "cap_flags2"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "vendor_name": "char",
+    "model_name": "char",
+    "custom_name": "char",
+    "firmware_version": "uint32_t",
+    "hardware_version": "uint32_t",
+    "uid": "uint64_t",
+    "cap_flags": "uint16_t",
+    "custom_cap_flags": "uint16_t",
+    "roll_min": "float",
+    "roll_max": "float",
+    "pitch_min": "float",
+    "pitch_max": "float",
+    "yaw_min": "float",
+    "yaw_max": "float",
+    "gimbal_device_id": "uint8_t",
+    "cap_flags2": "uint32_t"
+   },
+   "array_lengths": {
+    "uid": 0,
+    "time_boot_ms": 0,
+    "firmware_version": 0,
+    "hardware_version": 0,
+    "roll_min": 0,
+    "roll_max": 0,
+    "pitch_min": 0,
+    "pitch_max": 0,
+    "yaw_min": 0,
+    "yaw_max": 0,
+    "cap_flags": 0,
+    "custom_cap_flags": 0,
+    "vendor_name": 32,
+    "model_name": 32,
+    "custom_name": 32,
+    "gimbal_device_id": 0,
+    "cap_flags2": 0
+   }
+  },
+  "284": {
+   "name": "GIMBAL_DEVICE_SET_ATTITUDE",
+   "crc_extra": 99,
+   "length": 32,
+   "wire_order": [
+    "q",
+    "angular_velocity_x",
+    "angular_velocity_y",
+    "angular_velocity_z",
+    "flags",
+    "target_system",
+    "target_component"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "flags": "uint16_t",
+    "q": "float",
+    "angular_velocity_x": "float",
+    "angular_velocity_y": "float",
+    "angular_velocity_z": "float"
+   },
+   "array_lengths": {
+    "q": 4,
+    "angular_velocity_x": 0,
+    "angular_velocity_y": 0,
+    "angular_velocity_z": 0,
+    "flags": 0,
+    "target_system": 0,
+    "target_component": 0
+   }
+  },
+  "285": {
+   "name": "GIMBAL_DEVICE_ATTITUDE_STATUS",
+   "crc_extra": 137,
+   "length": 49,
+   "wire_order": [
+    "time_boot_ms",
+    "q",
+    "angular_velocity_x",
+    "angular_velocity_y",
+    "angular_velocity_z",
+    "failure_flags",
+    "flags",
+    "target_system",
+    "target_component",
+    "delta_yaw",
+    "delta_yaw_velocity",
+    "gimbal_device_id"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "time_boot_ms": "uint32_t",
+    "flags": "uint16_t",
+    "q": "float",
+    "angular_velocity_x": "float",
+    "angular_velocity_y": "float",
+    "angular_velocity_z": "float",
+    "failure_flags": "uint32_t",
+    "delta_yaw": "float",
+    "delta_yaw_velocity": "float",
+    "gimbal_device_id": "uint8_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "q": 4,
+    "angular_velocity_x": 0,
+    "angular_velocity_y": 0,
+    "angular_velocity_z": 0,
+    "failure_flags": 0,
+    "flags": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "delta_yaw": 0,
+    "delta_yaw_velocity": 0,
+    "gimbal_device_id": 0
+   }
+  },
+  "286": {
+   "name": "AUTOPILOT_STATE_FOR_GIMBAL_DEVICE",
+   "crc_extra": 210,
+   "length": 57,
+   "wire_order": [
+    "time_boot_us",
+    "q",
+    "q_estimated_delay_us",
+    "vx",
+    "vy",
+    "vz",
+    "v_estimated_delay_us",
+    "feed_forward_angular_velocity_z",
+    "estimator_status",
+    "target_system",
+    "target_component",
+    "landed_state",
+    "angular_velocity_z"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "time_boot_us": "uint64_t",
+    "q": "float",
+    "q_estimated_delay_us": "uint32_t",
+    "vx": "float",
+    "vy": "float",
+    "vz": "float",
+    "v_estimated_delay_us": "uint32_t",
+    "feed_forward_angular_velocity_z": "float",
+    "estimator_status": "uint16_t",
+    "landed_state": "uint8_t",
+    "angular_velocity_z": "float"
+   },
+   "array_lengths": {
+    "time_boot_us": 0,
+    "q": 4,
+    "q_estimated_delay_us": 0,
+    "vx": 0,
+    "vy": 0,
+    "vz": 0,
+    "v_estimated_delay_us": 0,
+    "feed_forward_angular_velocity_z": 0,
+    "estimator_status": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "landed_state": 0,
+    "angular_velocity_z": 0
+   }
+  },
+  "287": {
+   "name": "GIMBAL_MANAGER_SET_PITCHYAW",
+   "crc_extra": 1,
+   "length": 23,
+   "wire_order": [
+    "flags",
+    "pitch",
+    "yaw",
+    "pitch_rate",
+    "yaw_rate",
+    "target_system",
+    "target_component",
+    "gimbal_device_id"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "flags": "uint32_t",
+    "gimbal_device_id": "uint8_t",
+    "pitch": "float",
+    "yaw": "float",
+    "pitch_rate": "float",
+    "yaw_rate": "float"
+   },
+   "array_lengths": {
+    "flags": 0,
+    "pitch": 0,
+    "yaw": 0,
+    "pitch_rate": 0,
+    "yaw_rate": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "gimbal_device_id": 0
+   }
+  },
+  "288": {
+   "name": "GIMBAL_MANAGER_SET_MANUAL_CONTROL",
+   "crc_extra": 20,
+   "length": 23,
+   "wire_order": [
+    "flags",
+    "pitch",
+    "yaw",
+    "pitch_rate",
+    "yaw_rate",
+    "target_system",
+    "target_component",
+    "gimbal_device_id"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "flags": "uint32_t",
+    "gimbal_device_id": "uint8_t",
+    "pitch": "float",
+    "yaw": "float",
+    "pitch_rate": "float",
+    "yaw_rate": "float"
+   },
+   "array_lengths": {
+    "flags": 0,
+    "pitch": 0,
+    "yaw": 0,
+    "pitch_rate": 0,
+    "yaw_rate": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "gimbal_device_id": 0
+   }
+  },
+  "295": {
+   "name": "AIRSPEED",
+   "crc_extra": 234,
+   "length": 12,
+   "wire_order": [
+    "airspeed",
+    "raw_press",
+    "temperature",
+    "id",
+    "flags"
+   ],
+   "types": {
+    "id": "uint8_t",
+    "airspeed": "float",
+    "temperature": "int16_t",
+    "raw_press": "float",
+    "flags": "uint8_t"
+   },
+   "array_lengths": {
+    "airspeed": 0,
+    "raw_press": 0,
+    "temperature": 0,
+    "id": 0,
+    "flags": 0
+   }
+  },
+  "296": {
+   "name": "GLOBAL_POSITION_SENSOR",
+   "crc_extra": 158,
+   "length": 41,
+   "wire_order": [
+    "time_usec",
+    "processing_time",
+    "lat",
+    "lon",
+    "alt_ellipsoid",
+    "alt",
+    "eph",
+    "epv",
+    "target_system",
+    "target_component",
+    "id",
+    "source",
+    "flags"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "id": "uint8_t",
+    "time_usec": "uint64_t",
+    "processing_time": "uint32_t",
+    "source": "uint8_t",
+    "flags": "uint8_t",
+    "lat": "int32_t",
+    "lon": "int32_t",
+    "alt_ellipsoid": "float",
+    "alt": "float",
+    "eph": "float",
+    "epv": "float"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "processing_time": 0,
+    "lat": 0,
+    "lon": 0,
+    "alt_ellipsoid": 0,
+    "alt": 0,
+    "eph": 0,
+    "epv": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "id": 0,
+    "source": 0,
+    "flags": 0
+   }
+  },
+  "299": {
+   "name": "WIFI_CONFIG_AP",
+   "crc_extra": 19,
+   "length": 96,
+   "wire_order": [
+    "ssid",
+    "password"
+   ],
+   "types": {
+    "ssid": "char",
+    "password": "char"
+   },
+   "array_lengths": {
+    "ssid": 32,
+    "password": 64
+   }
+  },
+  "301": {
+   "name": "AIS_VESSEL",
+   "crc_extra": 243,
+   "length": 58,
+   "wire_order": [
+    "MMSI",
+    "lat",
+    "lon",
+    "COG",
+    "heading",
+    "velocity",
+    "dimension_bow",
+    "dimension_stern",
+    "tslc",
+    "flags",
+    "turn_rate",
+    "navigational_status",
+    "type",
+    "dimension_port",
+    "dimension_starboard",
+    "callsign",
+    "name"
+   ],
+   "types": {
+    "MMSI": "uint32_t",
+    "lat": "int32_t",
+    "lon": "int32_t",
+    "COG": "uint16_t",
+    "heading": "uint16_t",
+    "velocity": "uint16_t",
+    "turn_rate": "int8_t",
+    "navigational_status": "uint8_t",
+    "type": "uint8_t",
+    "dimension_bow": "uint16_t",
+    "dimension_stern": "uint16_t",
+    "dimension_port": "uint8_t",
+    "dimension_starboard": "uint8_t",
+    "callsign": "char",
+    "name": "char",
+    "tslc": "uint16_t",
+    "flags": "uint16_t"
+   },
+   "array_lengths": {
+    "MMSI": 0,
+    "lat": 0,
+    "lon": 0,
+    "COG": 0,
+    "heading": 0,
+    "velocity": 0,
+    "dimension_bow": 0,
+    "dimension_stern": 0,
+    "tslc": 0,
+    "flags": 0,
+    "turn_rate": 0,
+    "navigational_status": 0,
+    "type": 0,
+    "dimension_port": 0,
+    "dimension_starboard": 0,
+    "callsign": 7,
+    "name": 20
+   }
+  },
+  "310": {
+   "name": "UAVCAN_NODE_STATUS",
+   "crc_extra": 28,
+   "length": 17,
+   "wire_order": [
+    "time_usec",
+    "uptime_sec",
+    "vendor_specific_status_code",
+    "health",
+    "mode",
+    "sub_mode"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "uptime_sec": "uint32_t",
+    "health": "uint8_t",
+    "mode": "uint8_t",
+    "sub_mode": "uint8_t",
+    "vendor_specific_status_code": "uint16_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "uptime_sec": 0,
+    "vendor_specific_status_code": 0,
+    "health": 0,
+    "mode": 0,
+    "sub_mode": 0
+   }
+  },
+  "311": {
+   "name": "UAVCAN_NODE_INFO",
+   "crc_extra": 95,
+   "length": 116,
+   "wire_order": [
+    "time_usec",
+    "uptime_sec",
+    "sw_vcs_commit",
+    "name",
+    "hw_version_major",
+    "hw_version_minor",
+    "hw_unique_id",
+    "sw_version_major",
+    "sw_version_minor"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "uptime_sec": "uint32_t",
+    "name": "char",
+    "hw_version_major": "uint8_t",
+    "hw_version_minor": "uint8_t",
+    "hw_unique_id": "uint8_t",
+    "sw_version_major": "uint8_t",
+    "sw_version_minor": "uint8_t",
+    "sw_vcs_commit": "uint32_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "uptime_sec": 0,
+    "sw_vcs_commit": 0,
+    "name": 80,
+    "hw_version_major": 0,
+    "hw_version_minor": 0,
+    "hw_unique_id": 16,
+    "sw_version_major": 0,
+    "sw_version_minor": 0
+   }
+  },
+  "320": {
+   "name": "PARAM_EXT_REQUEST_READ",
+   "crc_extra": 243,
+   "length": 20,
+   "wire_order": [
+    "param_index",
+    "target_system",
+    "target_component",
+    "param_id"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "param_id": "char",
+    "param_index": "int16_t"
+   },
+   "array_lengths": {
+    "param_index": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "param_id": 16
+   }
+  },
+  "321": {
+   "name": "PARAM_EXT_REQUEST_LIST",
+   "crc_extra": 88,
+   "length": 2,
+   "wire_order": [
+    "target_system",
+    "target_component"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t"
+   },
+   "array_lengths": {
+    "target_system": 0,
+    "target_component": 0
+   }
+  },
+  "322": {
+   "name": "PARAM_EXT_VALUE",
+   "crc_extra": 243,
+   "length": 149,
+   "wire_order": [
+    "param_count",
+    "param_index",
+    "param_id",
+    "param_value",
+    "param_type"
+   ],
+   "types": {
+    "param_id": "char",
+    "param_value": "char",
+    "param_type": "uint8_t",
+    "param_count": "uint16_t",
+    "param_index": "uint16_t"
+   },
+   "array_lengths": {
+    "param_count": 0,
+    "param_index": 0,
+    "param_id": 16,
+    "param_value": 128,
+    "param_type": 0
+   }
+  },
+  "323": {
+   "name": "PARAM_EXT_SET",
+   "crc_extra": 78,
+   "length": 147,
+   "wire_order": [
+    "target_system",
+    "target_component",
+    "param_id",
+    "param_value",
+    "param_type"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "param_id": "char",
+    "param_value": "char",
+    "param_type": "uint8_t"
+   },
+   "array_lengths": {
+    "target_system": 0,
+    "target_component": 0,
+    "param_id": 16,
+    "param_value": 128,
+    "param_type": 0
+   }
+  },
+  "324": {
+   "name": "PARAM_EXT_ACK",
+   "crc_extra": 132,
+   "length": 146,
+   "wire_order": [
+    "param_id",
+    "param_value",
+    "param_type",
+    "param_result"
+   ],
+   "types": {
+    "param_id": "char",
+    "param_value": "char",
+    "param_type": "uint8_t",
+    "param_result": "uint8_t"
+   },
+   "array_lengths": {
+    "param_id": 16,
+    "param_value": 128,
+    "param_type": 0,
+    "param_result": 0
+   }
+  },
+  "330": {
+   "name": "OBSTACLE_DISTANCE",
+   "crc_extra": 23,
+   "length": 167,
+   "wire_order": [
+    "time_usec",
+    "distances",
+    "min_distance",
+    "max_distance",
+    "sensor_type",
+    "increment",
+    "increment_f",
+    "angle_offset",
+    "frame"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "sensor_type": "uint8_t",
+    "distances": "uint16_t",
+    "increment": "uint8_t",
+    "min_distance": "uint16_t",
+    "max_distance": "uint16_t",
+    "increment_f": "float",
+    "angle_offset": "float",
+    "frame": "uint8_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "distances": 72,
+    "min_distance": 0,
+    "max_distance": 0,
+    "sensor_type": 0,
+    "increment": 0,
+    "increment_f": 0,
+    "angle_offset": 0,
+    "frame": 0
+   }
+  },
+  "331": {
+   "name": "ODOMETRY",
+   "crc_extra": 91,
+   "length": 233,
+   "wire_order": [
+    "time_usec",
+    "x",
+    "y",
+    "z",
+    "q",
+    "vx",
+    "vy",
+    "vz",
+    "rollspeed",
+    "pitchspeed",
+    "yawspeed",
+    "pose_covariance",
+    "velocity_covariance",
+    "frame_id",
+    "child_frame_id",
+    "reset_counter",
+    "estimator_type",
+    "quality"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "frame_id": "uint8_t",
+    "child_frame_id": "uint8_t",
+    "x": "float",
+    "y": "float",
+    "z": "float",
+    "q": "float",
+    "vx": "float",
+    "vy": "float",
+    "vz": "float",
+    "rollspeed": "float",
+    "pitchspeed": "float",
+    "yawspeed": "float",
+    "pose_covariance": "float",
+    "velocity_covariance": "float",
+    "reset_counter": "uint8_t",
+    "estimator_type": "uint8_t",
+    "quality": "int8_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "q": 4,
+    "vx": 0,
+    "vy": 0,
+    "vz": 0,
+    "rollspeed": 0,
+    "pitchspeed": 0,
+    "yawspeed": 0,
+    "pose_covariance": 21,
+    "velocity_covariance": 21,
+    "frame_id": 0,
+    "child_frame_id": 0,
+    "reset_counter": 0,
+    "estimator_type": 0,
+    "quality": 0
+   }
+  },
+  "332": {
+   "name": "TRAJECTORY_REPRESENTATION_WAYPOINTS",
+   "crc_extra": 236,
+   "length": 239,
+   "wire_order": [
+    "time_usec",
+    "pos_x",
+    "pos_y",
+    "pos_z",
+    "vel_x",
+    "vel_y",
+    "vel_z",
+    "acc_x",
+    "acc_y",
+    "acc_z",
+    "pos_yaw",
+    "vel_yaw",
+    "command",
+    "valid_points"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "valid_points": "uint8_t",
+    "pos_x": "float",
+    "pos_y": "float",
+    "pos_z": "float",
+    "vel_x": "float",
+    "vel_y": "float",
+    "vel_z": "float",
+    "acc_x": "float",
+    "acc_y": "float",
+    "acc_z": "float",
+    "pos_yaw": "float",
+    "vel_yaw": "float",
+    "command": "uint16_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "pos_x": 5,
+    "pos_y": 5,
+    "pos_z": 5,
+    "vel_x": 5,
+    "vel_y": 5,
+    "vel_z": 5,
+    "acc_x": 5,
+    "acc_y": 5,
+    "acc_z": 5,
+    "pos_yaw": 5,
+    "vel_yaw": 5,
+    "command": 5,
+    "valid_points": 0
+   }
+  },
+  "333": {
+   "name": "TRAJECTORY_REPRESENTATION_BEZIER",
+   "crc_extra": 231,
+   "length": 109,
+   "wire_order": [
+    "time_usec",
+    "pos_x",
+    "pos_y",
+    "pos_z",
+    "delta",
+    "pos_yaw",
+    "valid_points"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "valid_points": "uint8_t",
+    "pos_x": "float",
+    "pos_y": "float",
+    "pos_z": "float",
+    "delta": "float",
+    "pos_yaw": "float"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "pos_x": 5,
+    "pos_y": 5,
+    "pos_z": 5,
+    "delta": 5,
+    "pos_yaw": 5,
+    "valid_points": 0
+   }
+  },
+  "335": {
+   "name": "ISBD_LINK_STATUS",
+   "crc_extra": 225,
+   "length": 24,
+   "wire_order": [
+    "timestamp",
+    "last_heartbeat",
+    "failed_sessions",
+    "successful_sessions",
+    "signal_quality",
+    "ring_pending",
+    "tx_session_pending",
+    "rx_session_pending"
+   ],
+   "types": {
+    "timestamp": "uint64_t",
+    "last_heartbeat": "uint64_t",
+    "failed_sessions": "uint16_t",
+    "successful_sessions": "uint16_t",
+    "signal_quality": "uint8_t",
+    "ring_pending": "uint8_t",
+    "tx_session_pending": "uint8_t",
+    "rx_session_pending": "uint8_t"
+   },
+   "array_lengths": {
+    "timestamp": 0,
+    "last_heartbeat": 0,
+    "failed_sessions": 0,
+    "successful_sessions": 0,
+    "signal_quality": 0,
+    "ring_pending": 0,
+    "tx_session_pending": 0,
+    "rx_session_pending": 0
+   }
+  },
+  "339": {
+   "name": "RAW_RPM",
+   "crc_extra": 199,
+   "length": 5,
+   "wire_order": [
+    "frequency",
+    "index"
+   ],
+   "types": {
+    "index": "uint8_t",
+    "frequency": "float"
+   },
+   "array_lengths": {
+    "frequency": 0,
+    "index": 0
+   }
+  },
+  "340": {
+   "name": "UTM_GLOBAL_POSITION",
+   "crc_extra": 99,
+   "length": 70,
+   "wire_order": [
+    "time",
+    "lat",
+    "lon",
+    "alt",
+    "relative_alt",
+    "next_lat",
+    "next_lon",
+    "next_alt",
+    "vx",
+    "vy",
+    "vz",
+    "h_acc",
+    "v_acc",
+    "vel_acc",
+    "update_rate",
+    "uas_id",
+    "flight_state",
+    "flags"
+   ],
+   "types": {
+    "time": "uint64_t",
+    "uas_id": "uint8_t",
+    "lat": "int32_t",
+    "lon": "int32_t",
+    "alt": "int32_t",
+    "relative_alt": "int32_t",
+    "vx": "int16_t",
+    "vy": "int16_t",
+    "vz": "int16_t",
+    "h_acc": "uint16_t",
+    "v_acc": "uint16_t",
+    "vel_acc": "uint16_t",
+    "next_lat": "int32_t",
+    "next_lon": "int32_t",
+    "next_alt": "int32_t",
+    "update_rate": "uint16_t",
+    "flight_state": "uint8_t",
+    "flags": "uint8_t"
+   },
+   "array_lengths": {
+    "time": 0,
+    "lat": 0,
+    "lon": 0,
+    "alt": 0,
+    "relative_alt": 0,
+    "next_lat": 0,
+    "next_lon": 0,
+    "next_alt": 0,
+    "vx": 0,
+    "vy": 0,
+    "vz": 0,
+    "h_acc": 0,
+    "v_acc": 0,
+    "vel_acc": 0,
+    "update_rate": 0,
+    "uas_id": 18,
+    "flight_state": 0,
+    "flags": 0
+   }
+  },
+  "345": {
+   "name": "PARAM_ERROR",
+   "crc_extra": 209,
+   "length": 21,
+   "wire_order": [
+    "param_index",
+    "target_system",
+    "target_component",
+    "param_id",
+    "error"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "param_id": "char",
+    "param_index": "int16_t",
+    "error": "uint8_t"
+   },
+   "array_lengths": {
+    "param_index": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "param_id": 16,
+    "error": 0
+   }
+  },
+  "350": {
+   "name": "DEBUG_FLOAT_ARRAY",
+   "crc_extra": 232,
+   "length": 252,
+   "wire_order": [
+    "time_usec",
+    "array_id",
+    "name",
+    "data"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "name": "char",
+    "array_id": "uint16_t",
+    "data": "float"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "array_id": 0,
+    "name": 10,
+    "data": 58
+   }
+  },
+  "360": {
+   "name": "ORBIT_EXECUTION_STATUS",
+   "crc_extra": 11,
+   "length": 25,
+   "wire_order": [
+    "time_usec",
+    "radius",
+    "x",
+    "y",
+    "z",
+    "frame"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "radius": "float",
+    "frame": "uint8_t",
+    "x": "int32_t",
+    "y": "int32_t",
+    "z": "float"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "radius": 0,
+    "x": 0,
+    "y": 0,
+    "z": 0,
+    "frame": 0
+   }
+  },
+  "370": {
+   "name": "SMART_BATTERY_INFO",
+   "crc_extra": 75,
+   "length": 109,
+   "wire_order": [
+    "capacity_full_specification",
+    "capacity_full",
+    "cycle_count",
+    "weight",
+    "discharge_minimum_voltage",
+    "charging_minimum_voltage",
+    "resting_minimum_voltage",
+    "id",
+    "battery_function",
+    "type",
+    "serial_number",
+    "device_name",
+    "charging_maximum_voltage",
+    "cells_in_series",
+    "discharge_maximum_current",
+    "discharge_maximum_burst_current",
+    "manufacture_date"
+   ],
+   "types": {
+    "id": "uint8_t",
+    "battery_function": "uint8_t",
+    "type": "uint8_t",
+    "capacity_full_specification": "int32_t",
+    "capacity_full": "int32_t",
+    "cycle_count": "uint16_t",
+    "serial_number": "char",
+    "device_name": "char",
+    "weight": "uint16_t",
+    "discharge_minimum_voltage": "uint16_t",
+    "charging_minimum_voltage": "uint16_t",
+    "resting_minimum_voltage": "uint16_t",
+    "charging_maximum_voltage": "uint16_t",
+    "cells_in_series": "uint8_t",
+    "discharge_maximum_current": "uint32_t",
+    "discharge_maximum_burst_current": "uint32_t",
+    "manufacture_date": "char"
+   },
+   "array_lengths": {
+    "capacity_full_specification": 0,
+    "capacity_full": 0,
+    "cycle_count": 0,
+    "weight": 0,
+    "discharge_minimum_voltage": 0,
+    "charging_minimum_voltage": 0,
+    "resting_minimum_voltage": 0,
+    "id": 0,
+    "battery_function": 0,
+    "type": 0,
+    "serial_number": 16,
+    "device_name": 50,
+    "charging_maximum_voltage": 0,
+    "cells_in_series": 0,
+    "discharge_maximum_current": 0,
+    "discharge_maximum_burst_current": 0,
+    "manufacture_date": 11
+   }
+  },
+  "373": {
+   "name": "GENERATOR_STATUS",
+   "crc_extra": 117,
+   "length": 42,
+   "wire_order": [
+    "status",
+    "battery_current",
+    "load_current",
+    "power_generated",
+    "bus_voltage",
+    "bat_current_setpoint",
+    "runtime",
+    "time_until_maintenance",
+    "generator_speed",
+    "rectifier_temperature",
+    "generator_temperature"
+   ],
+   "types": {
+    "status": "uint64_t",
+    "generator_speed": "uint16_t",
+    "battery_current": "float",
+    "load_current": "float",
+    "power_generated": "float",
+    "bus_voltage": "float",
+    "rectifier_temperature": "int16_t",
+    "bat_current_setpoint": "float",
+    "generator_temperature": "int16_t",
+    "runtime": "uint32_t",
+    "time_until_maintenance": "int32_t"
+   },
+   "array_lengths": {
+    "status": 0,
+    "battery_current": 0,
+    "load_current": 0,
+    "power_generated": 0,
+    "bus_voltage": 0,
+    "bat_current_setpoint": 0,
+    "runtime": 0,
+    "time_until_maintenance": 0,
+    "generator_speed": 0,
+    "rectifier_temperature": 0,
+    "generator_temperature": 0
+   }
+  },
+  "375": {
+   "name": "ACTUATOR_OUTPUT_STATUS",
+   "crc_extra": 251,
+   "length": 140,
+   "wire_order": [
+    "time_usec",
+    "active",
+    "actuator"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "active": "uint32_t",
+    "actuator": "float"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "active": 0,
+    "actuator": 32
+   }
+  },
+  "376": {
+   "name": "RELAY_STATUS",
+   "crc_extra": 199,
+   "length": 8,
+   "wire_order": [
+    "time_boot_ms",
+    "on",
+    "present"
+   ],
+   "types": {
+    "time_boot_ms": "uint32_t",
+    "on": "uint16_t",
+    "present": "uint16_t"
+   },
+   "array_lengths": {
+    "time_boot_ms": 0,
+    "on": 0,
+    "present": 0
+   }
+  },
+  "385": {
+   "name": "TUNNEL",
+   "crc_extra": 147,
+   "length": 133,
+   "wire_order": [
+    "payload_type",
+    "target_system",
+    "target_component",
+    "payload_length",
+    "payload"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "payload_type": "uint16_t",
+    "payload_length": "uint8_t",
+    "payload": "uint8_t"
+   },
+   "array_lengths": {
+    "payload_type": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "payload_length": 0,
+    "payload": 128
+   }
+  },
+  "386": {
+   "name": "CAN_FRAME",
+   "crc_extra": 132,
+   "length": 16,
+   "wire_order": [
+    "id",
+    "target_system",
+    "target_component",
+    "bus",
+    "len",
+    "data"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "bus": "uint8_t",
+    "len": "uint8_t",
+    "id": "uint32_t",
+    "data": "uint8_t"
+   },
+   "array_lengths": {
+    "id": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "bus": 0,
+    "len": 0,
+    "data": 8
+   }
+  },
+  "387": {
+   "name": "CANFD_FRAME",
+   "crc_extra": 4,
+   "length": 72,
+   "wire_order": [
+    "id",
+    "target_system",
+    "target_component",
+    "bus",
+    "len",
+    "data"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "bus": "uint8_t",
+    "len": "uint8_t",
+    "id": "uint32_t",
+    "data": "uint8_t"
+   },
+   "array_lengths": {
+    "id": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "bus": 0,
+    "len": 0,
+    "data": 64
+   }
+  },
+  "388": {
+   "name": "CAN_FILTER_MODIFY",
+   "crc_extra": 8,
+   "length": 37,
+   "wire_order": [
+    "ids",
+    "target_system",
+    "target_component",
+    "bus",
+    "operation",
+    "num_ids"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "bus": "uint8_t",
+    "operation": "uint8_t",
+    "num_ids": "uint8_t",
+    "ids": "uint16_t"
+   },
+   "array_lengths": {
+    "ids": 16,
+    "target_system": 0,
+    "target_component": 0,
+    "bus": 0,
+    "operation": 0,
+    "num_ids": 0
+   }
+  },
+  "390": {
+   "name": "ONBOARD_COMPUTER_STATUS",
+   "crc_extra": 156,
+   "length": 240,
+   "wire_order": [
+    "time_usec",
+    "uptime",
+    "ram_usage",
+    "ram_total",
+    "storage_type",
+    "storage_usage",
+    "storage_total",
+    "link_type",
+    "link_tx_rate",
+    "link_rx_rate",
+    "link_tx_max",
+    "link_rx_max",
+    "fan_speed",
+    "type",
+    "cpu_cores",
+    "cpu_combined",
+    "gpu_cores",
+    "gpu_combined",
+    "temperature_board",
+    "temperature_core",
+    "status_flags"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "uptime": "uint32_t",
+    "type": "uint8_t",
+    "cpu_cores": "uint8_t",
+    "cpu_combined": "uint8_t",
+    "gpu_cores": "uint8_t",
+    "gpu_combined": "uint8_t",
+    "temperature_board": "int8_t",
+    "temperature_core": "int8_t",
+    "fan_speed": "int16_t",
+    "ram_usage": "uint32_t",
+    "ram_total": "uint32_t",
+    "storage_type": "uint32_t",
+    "storage_usage": "uint32_t",
+    "storage_total": "uint32_t",
+    "link_type": "uint32_t",
+    "link_tx_rate": "uint32_t",
+    "link_rx_rate": "uint32_t",
+    "link_tx_max": "uint32_t",
+    "link_rx_max": "uint32_t",
+    "status_flags": "uint16_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "uptime": 0,
+    "ram_usage": 0,
+    "ram_total": 0,
+    "storage_type": 4,
+    "storage_usage": 4,
+    "storage_total": 4,
+    "link_type": 6,
+    "link_tx_rate": 6,
+    "link_rx_rate": 6,
+    "link_tx_max": 6,
+    "link_rx_max": 6,
+    "fan_speed": 4,
+    "type": 0,
+    "cpu_cores": 8,
+    "cpu_combined": 10,
+    "gpu_cores": 4,
+    "gpu_combined": 10,
+    "temperature_board": 0,
+    "temperature_core": 8,
+    "status_flags": 0
+   }
+  },
+  "9000": {
+   "name": "WHEEL_DISTANCE",
+   "crc_extra": 113,
+   "length": 137,
+   "wire_order": [
+    "time_usec",
+    "distance",
+    "count"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "count": "uint8_t",
+    "distance": "double"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "distance": 16,
+    "count": 0
+   }
+  },
+  "9005": {
+   "name": "WINCH_STATUS",
+   "crc_extra": 117,
+   "length": 34,
+   "wire_order": [
+    "time_usec",
+    "line_length",
+    "speed",
+    "tension",
+    "voltage",
+    "current",
+    "status",
+    "temperature"
+   ],
+   "types": {
+    "time_usec": "uint64_t",
+    "line_length": "float",
+    "speed": "float",
+    "tension": "float",
+    "voltage": "float",
+    "current": "float",
+    "temperature": "int16_t",
+    "status": "uint32_t"
+   },
+   "array_lengths": {
+    "time_usec": 0,
+    "line_length": 0,
+    "speed": 0,
+    "tension": 0,
+    "voltage": 0,
+    "current": 0,
+    "status": 0,
+    "temperature": 0
+   }
+  },
+  "12900": {
+   "name": "OPEN_DRONE_ID_BASIC_ID",
+   "crc_extra": 114,
+   "length": 44,
+   "wire_order": [
+    "target_system",
+    "target_component",
+    "id_or_mac",
+    "id_type",
+    "ua_type",
+    "uas_id"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "id_or_mac": "uint8_t",
+    "id_type": "uint8_t",
+    "ua_type": "uint8_t",
+    "uas_id": "uint8_t"
+   },
+   "array_lengths": {
+    "target_system": 0,
+    "target_component": 0,
+    "id_or_mac": 20,
+    "id_type": 0,
+    "ua_type": 0,
+    "uas_id": 20
+   }
+  },
+  "12901": {
+   "name": "OPEN_DRONE_ID_LOCATION",
+   "crc_extra": 254,
+   "length": 59,
+   "wire_order": [
+    "latitude",
+    "longitude",
+    "altitude_barometric",
+    "altitude_geodetic",
+    "height",
+    "timestamp",
+    "direction",
+    "speed_horizontal",
+    "speed_vertical",
+    "target_system",
+    "target_component",
+    "id_or_mac",
+    "status",
+    "height_reference",
+    "horizontal_accuracy",
+    "vertical_accuracy",
+    "barometer_accuracy",
+    "speed_accuracy",
+    "timestamp_accuracy"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "id_or_mac": "uint8_t",
+    "status": "uint8_t",
+    "direction": "uint16_t",
+    "speed_horizontal": "uint16_t",
+    "speed_vertical": "int16_t",
+    "latitude": "int32_t",
+    "longitude": "int32_t",
+    "altitude_barometric": "float",
+    "altitude_geodetic": "float",
+    "height_reference": "uint8_t",
+    "height": "float",
+    "horizontal_accuracy": "uint8_t",
+    "vertical_accuracy": "uint8_t",
+    "barometer_accuracy": "uint8_t",
+    "speed_accuracy": "uint8_t",
+    "timestamp": "float",
+    "timestamp_accuracy": "uint8_t"
+   },
+   "array_lengths": {
+    "latitude": 0,
+    "longitude": 0,
+    "altitude_barometric": 0,
+    "altitude_geodetic": 0,
+    "height": 0,
+    "timestamp": 0,
+    "direction": 0,
+    "speed_horizontal": 0,
+    "speed_vertical": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "id_or_mac": 20,
+    "status": 0,
+    "height_reference": 0,
+    "horizontal_accuracy": 0,
+    "vertical_accuracy": 0,
+    "barometer_accuracy": 0,
+    "speed_accuracy": 0,
+    "timestamp_accuracy": 0
+   }
+  },
+  "12902": {
+   "name": "OPEN_DRONE_ID_AUTHENTICATION",
+   "crc_extra": 140,
+   "length": 53,
+   "wire_order": [
+    "timestamp",
+    "target_system",
+    "target_component",
+    "id_or_mac",
+    "authentication_type",
+    "data_page",
+    "last_page_index",
+    "length",
+    "authentication_data"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "id_or_mac": "uint8_t",
+    "authentication_type": "uint8_t",
+    "data_page": "uint8_t",
+    "last_page_index": "uint8_t",
+    "length": "uint8_t",
+    "timestamp": "uint32_t",
+    "authentication_data": "uint8_t"
+   },
+   "array_lengths": {
+    "timestamp": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "id_or_mac": 20,
+    "authentication_type": 0,
+    "data_page": 0,
+    "last_page_index": 0,
+    "length": 0,
+    "authentication_data": 23
+   }
+  },
+  "12903": {
+   "name": "OPEN_DRONE_ID_SELF_ID",
+   "crc_extra": 249,
+   "length": 46,
+   "wire_order": [
+    "target_system",
+    "target_component",
+    "id_or_mac",
+    "description_type",
+    "description"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "id_or_mac": "uint8_t",
+    "description_type": "uint8_t",
+    "description": "char"
+   },
+   "array_lengths": {
+    "target_system": 0,
+    "target_component": 0,
+    "id_or_mac": 20,
+    "description_type": 0,
+    "description": 23
+   }
+  },
+  "12904": {
+   "name": "OPEN_DRONE_ID_SYSTEM",
+   "crc_extra": 77,
+   "length": 54,
+   "wire_order": [
+    "operator_latitude",
+    "operator_longitude",
+    "area_ceiling",
+    "area_floor",
+    "operator_altitude_geo",
+    "timestamp",
+    "area_count",
+    "area_radius",
+    "target_system",
+    "target_component",
+    "id_or_mac",
+    "operator_location_type",
+    "classification_type",
+    "category_eu",
+    "class_eu"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "id_or_mac": "uint8_t",
+    "operator_location_type": "uint8_t",
+    "classification_type": "uint8_t",
+    "operator_latitude": "int32_t",
+    "operator_longitude": "int32_t",
+    "area_count": "uint16_t",
+    "area_radius": "uint16_t",
+    "area_ceiling": "float",
+    "area_floor": "float",
+    "category_eu": "uint8_t",
+    "class_eu": "uint8_t",
+    "operator_altitude_geo": "float",
+    "timestamp": "uint32_t"
+   },
+   "array_lengths": {
+    "operator_latitude": 0,
+    "operator_longitude": 0,
+    "area_ceiling": 0,
+    "area_floor": 0,
+    "operator_altitude_geo": 0,
+    "timestamp": 0,
+    "area_count": 0,
+    "area_radius": 0,
+    "target_system": 0,
+    "target_component": 0,
+    "id_or_mac": 20,
+    "operator_location_type": 0,
+    "classification_type": 0,
+    "category_eu": 0,
+    "class_eu": 0
+   }
+  },
+  "12905": {
+   "name": "OPEN_DRONE_ID_OPERATOR_ID",
+   "crc_extra": 49,
+   "length": 43,
+   "wire_order": [
+    "target_system",
+    "target_component",
+    "id_or_mac",
+    "operator_id_type",
+    "operator_id"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "id_or_mac": "uint8_t",
+    "operator_id_type": "uint8_t",
+    "operator_id": "char"
+   },
+   "array_lengths": {
+    "target_system": 0,
+    "target_component": 0,
+    "id_or_mac": 20,
+    "operator_id_type": 0,
+    "operator_id": 20
+   }
+  },
+  "12915": {
+   "name": "OPEN_DRONE_ID_MESSAGE_PACK",
+   "crc_extra": 94,
+   "length": 249,
+   "wire_order": [
+    "target_system",
+    "target_component",
+    "id_or_mac",
+    "single_message_size",
+    "msg_pack_size",
+    "messages"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "id_or_mac": "uint8_t",
+    "single_message_size": "uint8_t",
+    "msg_pack_size": "uint8_t",
+    "messages": "uint8_t"
+   },
+   "array_lengths": {
+    "target_system": 0,
+    "target_component": 0,
+    "id_or_mac": 20,
+    "single_message_size": 0,
+    "msg_pack_size": 0,
+    "messages": 225
+   }
+  },
+  "12918": {
+   "name": "OPEN_DRONE_ID_ARM_STATUS",
+   "crc_extra": 139,
+   "length": 51,
+   "wire_order": [
+    "status",
+    "error"
+   ],
+   "types": {
+    "status": "uint8_t",
+    "error": "char"
+   },
+   "array_lengths": {
+    "status": 0,
+    "error": 50
+   }
+  },
+  "12919": {
+   "name": "OPEN_DRONE_ID_SYSTEM_UPDATE",
+   "crc_extra": 7,
+   "length": 18,
+   "wire_order": [
+    "operator_latitude",
+    "operator_longitude",
+    "operator_altitude_geo",
+    "timestamp",
+    "target_system",
+    "target_component"
+   ],
+   "types": {
+    "target_system": "uint8_t",
+    "target_component": "uint8_t",
+    "operator_latitude": "int32_t",
+    "operator_longitude": "int32_t",
+    "operator_altitude_geo": "float",
+    "timestamp": "uint32_t"
+   },
+   "array_lengths": {
+    "operator_latitude": 0,
+    "operator_longitude": 0,
+    "operator_altitude_geo": 0,
+    "timestamp": 0,
+    "target_system": 0,
+    "target_component": 0
+   }
+  },
+  "12920": {
+   "name": "HYGROMETER_SENSOR",
+   "crc_extra": 20,
+   "length": 5,
+   "wire_order": [
+    "temperature",
+    "humidity",
+    "id"
+   ],
+   "types": {
+    "id": "uint8_t",
+    "temperature": "int16_t",
+    "humidity": "uint16_t"
+   },
+   "array_lengths": {
+    "temperature": 0,
+    "humidity": 0,
+    "id": 0
+   }
+  }
+ },
+ "payloads": [
+  {
+   "name": "SYS_STATUS",
+   "msgid": 1,
+   "fields": {
+    "onboard_control_sensors_present": 1,
+    "onboard_control_sensors_enabled": 2,
+    "onboard_control_sensors_health": 3,
+    "load": 4,
+    "voltage_battery": 5,
+    "current_battery": -6,
+    "battery_remaining": -7,
+    "drop_rate_comm": 8,
+    "errors_comm": 9,
+    "errors_count1": 10,
+    "errors_count2": 11,
+    "errors_count3": 12,
+    "errors_count4": 13,
+    "onboard_control_sensors_present_extended": 14,
+    "onboard_control_sensors_enabled_extended": 15,
+    "onboard_control_sensors_health_extended": 16
+   },
+   "wire_payload": "01000000020000000300000004000500faff080009000a000b000c000d00f90e0000000f00000010"
+  },
+  {
+   "name": "PARAM_VALUE",
+   "msgid": 22,
+   "fields": {
+    "param_id": "abparam_id",
+    "param_value": 3.0,
+    "param_type": 3,
+    "param_count": 4,
+    "param_index": 5
+   },
+   "wire_payload": "00004040040005006162706172616d5f696400000000000003"
+  },
+  {
+   "name": "GPS_RAW_INT",
+   "msgid": 24,
+   "fields": {
+    "time_usec": 1,
+    "fix_type": 2,
+    "lat": -3,
+    "lon": -4,
+    "alt": -5,
+    "eph": 6,
+    "epv": 7,
+    "vel": 8,
+    "cog": 9,
+    "satellites_visible": 10,
+    "alt_ellipsoid": -11,
+    "h_acc": 12,
+    "v_acc": 13,
+    "vel_acc": 14,
+    "hdg_acc": 15,
+    "yaw": 16
+   },
+   "wire_payload": "0100000000000000fdfffffffcfffffffbffffff0600070008000900020af5ffffff0c0000000d0000000e0000000f00000010"
+  },
+  {
+   "name": "STATUSTEXT",
+   "msgid": 253,
+   "fields": {
+    "severity": 1,
+    "text": "abtext",
+    "id": 3,
+    "chunk_seq": 4
+   },
+   "wire_payload": "016162746578740000000000000000000000000000000000000000000000000000000000000000000000000000000000000000030004"
+  },
+  {
+   "name": "COMMAND_LONG",
+   "msgid": 76,
+   "fields": {
+    "target_system": 1,
+    "target_component": 2,
+    "command": 3,
+    "confirmation": 4,
+    "param1": 7.5,
+    "param2": 9.0,
+    "param3": 10.5,
+    "param4": 12.0,
+    "param5": 13.5,
+    "param6": 15.0,
+    "param7": 16.5
+   },
+   "wire_payload": "0000f0400000104100002841000040410000584100007041000084410300010204"
+  },
+  {
+   "name": "FILE_TRANSFER_PROTOCOL",
+   "msgid": 110,
+   "fields": {
+    "target_network": 1,
+    "target_system": 2,
+    "target_component": 3,
+    "payload": [
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27,
+     28,
+     29,
+     30,
+     31,
+     32,
+     33,
+     34,
+     35,
+     36,
+     37,
+     38,
+     39,
+     40,
+     41,
+     42,
+     43,
+     44,
+     45,
+     46,
+     47,
+     48,
+     49,
+     50,
+     51,
+     52,
+     53,
+     54,
+     55,
+     56,
+     57,
+     58,
+     59,
+     60,
+     61,
+     62,
+     63,
+     64,
+     65,
+     66,
+     67,
+     68,
+     69,
+     70,
+     71,
+     72,
+     73,
+     74,
+     75,
+     76,
+     77,
+     78,
+     79,
+     80,
+     81,
+     82,
+     83,
+     84,
+     85,
+     86,
+     87,
+     88,
+     89,
+     90,
+     91,
+     92,
+     93,
+     94,
+     95,
+     96,
+     97,
+     98,
+     99,
+     100,
+     101,
+     102,
+     103,
+     104,
+     105,
+     106,
+     107,
+     108,
+     109,
+     110,
+     111,
+     112,
+     113,
+     114,
+     115,
+     116,
+     117,
+     118,
+     119,
+     120,
+     121,
+     122,
+     123,
+     124,
+     125,
+     126,
+     127,
+     128,
+     129,
+     130,
+     131,
+     132,
+     133,
+     134,
+     135,
+     136,
+     137,
+     138,
+     139,
+     140,
+     141,
+     142,
+     143,
+     144,
+     145,
+     146,
+     147,
+     148,
+     149,
+     150,
+     151,
+     152,
+     153,
+     154,
+     155,
+     156,
+     157,
+     158,
+     159,
+     160,
+     161,
+     162,
+     163,
+     164,
+     165,
+     166,
+     167,
+     168,
+     169,
+     170,
+     171,
+     172,
+     173,
+     174,
+     175,
+     176,
+     177,
+     178,
+     179,
+     180,
+     181,
+     182,
+     183,
+     184,
+     185,
+     186,
+     187,
+     188,
+     189,
+     190,
+     191,
+     192,
+     193,
+     194,
+     195,
+     196,
+     197,
+     198,
+     199,
+     200,
+     201,
+     202,
+     203,
+     204,
+     205,
+     206,
+     207,
+     208,
+     209,
+     210,
+     211,
+     212,
+     213,
+     214,
+     215,
+     216,
+     217,
+     218,
+     219,
+     220,
+     221,
+     222,
+     223,
+     224,
+     225,
+     226,
+     227,
+     228,
+     229,
+     230,
+     231,
+     232,
+     233,
+     234,
+     235,
+     236,
+     237,
+     238,
+     239,
+     240,
+     241,
+     242,
+     243,
+     244,
+     245,
+     246,
+     247,
+     248,
+     249,
+     250,
+     251,
+     252,
+     253,
+     254
+    ]
+   },
+   "wire_payload": "0102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b4c4d4e4f505152535455565758595a5b5c5d5e5f606162636465666768696a6b6c6d6e6f707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeafb0b1b2b3b4b5b6b7b8b9babbbcbdbebfc0c1c2c3c4c5c6c7c8c9cacbcccdcecfd0d1d2d3d4d5d6d7d8d9dadbdcdddedfe0e1e2e3e4e5e6e7e8e9eaebecedeeeff0f1f2f3f4f5f6f7f8f9fafbfcfdfe"
+  },
+  {
+   "name": "ATTITUDE_QUATERNION",
+   "msgid": 31,
+   "fields": {
+    "time_boot_ms": 1,
+    "q1": 3.0,
+    "q2": 4.5,
+    "q3": 6.0,
+    "q4": 7.5,
+    "rollspeed": 9.0,
+    "pitchspeed": 10.5,
+    "yawspeed": 12.0,
+    "repr_offset_q": [
+     13.5,
+     13.75,
+     14.0,
+     14.25
+    ]
+   },
+   "wire_payload": "0100000000004040000090400000c0400000f0400000104100002841000040410000584100005c410000604100006441"
+  },
+  {
+   "name": "SETUP_SIGNING",
+   "msgid": 256,
+   "fields": {
+    "target_system": 1,
+    "target_component": 2,
+    "secret_key": [
+     3,
+     4,
+     5,
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27,
+     28,
+     29,
+     30,
+     31,
+     32,
+     33,
+     34
+    ],
+    "initial_timestamp": 4
+   },
+   "wire_payload": "04000000000000000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122"
+  },
+  {
+   "name": "HEARTBEAT",
+   "msgid": 0,
+   "fields": {
+    "type": 1,
+    "autopilot": 2,
+    "base_mode": 3,
+    "custom_mode": 4,
+    "system_status": 5,
+    "mavlink_version": 6
+   },
+   "wire_payload": "040000000102030506"
+  },
+  {
+   "name": "SERIAL_CONTROL",
+   "msgid": 126,
+   "fields": {
+    "device": 1,
+    "flags": 2,
+    "timeout": 3,
+    "baudrate": 4,
+    "count": 5,
+    "data": [
+     6,
+     7,
+     8,
+     9,
+     10,
+     11,
+     12,
+     13,
+     14,
+     15,
+     16,
+     17,
+     18,
+     19,
+     20,
+     21,
+     22,
+     23,
+     24,
+     25,
+     26,
+     27,
+     28,
+     29,
+     30,
+     31,
+     32,
+     33,
+     34,
+     35,
+     36,
+     37,
+     38,
+     39,
+     40,
+     41,
+     42,
+     43,
+     44,
+     45,
+     46,
+     47,
+     48,
+     49,
+     50,
+     51,
+     52,
+     53,
+     54,
+     55,
+     56,
+     57,
+     58,
+     59,
+     60,
+     61,
+     62,
+     63,
+     64,
+     65,
+     66,
+     67,
+     68,
+     69,
+     70,
+     71,
+     72,
+     73,
+     74,
+     75
+    ]
+   },
+   "wire_payload": "040000000300010205060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f404142434445464748494a4b"
+  }
+ ]
+}
