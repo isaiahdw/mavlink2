@@ -14,7 +14,7 @@ defmodule MAVLink2.Dialect.XML do
 
   | Function | |
   | --- | --- |
-  | `crc_extra/1`, `payload_length/1` | the `MAVLink2.Dialect` callbacks |
+  | `crc_extra/1`, `payload_length/1`, `target_offsets/1` | the `MAVLink2.Dialect` callbacks; `target_offsets/1` is `{nil, nil}` for an unknown id |
   | `msgids/0`, `message/1` | every message id; the struct module for an id, or `nil` |
   | `encode/1` | a message struct to `{msgid, payload}` (untruncated; `MAVLink2.Frame` truncates); `ArgumentError` for an integer outside its field's type |
   | `decode/2` | `{msgid, payload}` to `{:ok, struct}`, or `{:error, {:unknown_msgid, id}}` |
@@ -23,7 +23,7 @@ defmodule MAVLink2.Dialect.XML do
   And a module per message, named from the message (`COMMAND_LONG` is
   `MyDialect.CommandLong`): a struct with the XML's field names as written, each
   starting at its zero value (`MAVLink2.Codec`), and `msgid/0`,
-  `crc_extra/0`, `layout/0`. A `uint8_t_mavlink_version` field starts at
+  `crc_extra/0`, `layout/0`, `target_offsets/0`. A `uint8_t_mavlink_version` field starts at
   the XML's `<version>`. Enum and entry names are lowercase atoms
   (`:mav_cmd`, `:mav_cmd_component_arm_disarm`).
   """
@@ -64,6 +64,14 @@ defmodule MAVLink2.Dialect.XML do
         case @mavlink2_messages do
           %{^msgid => mod} -> mod.payload_length()
           _ -> nil
+        end
+      end
+
+      @impl MAVLink2.Dialect
+      def target_offsets(msgid) do
+        case @mavlink2_messages do
+          %{^msgid => mod} -> mod.target_offsets()
+          _ -> {nil, nil}
         end
       end
 
@@ -115,8 +123,19 @@ defmodule MAVLink2.Dialect.XML do
         def crc_extra, do: unquote(m.crc_extra)
         def payload_length, do: unquote(m.length)
         def layout, do: unquote(Macro.escape(layout))
+        def target_offsets, do: unquote(Macro.escape(target_offsets(m.wire)))
       end
     end
+  end
+
+  defp target_offsets(wire) do
+    {offsets, _} =
+      Enum.reduce(wire, {%{}, 0}, fn f, {acc, at} ->
+        acc = if f.type == :uint8 and f.array == nil, do: Map.put(acc, f.name, at), else: acc
+        {acc, at + MAVLink2.XML.size(f.type) * (f.array || 1)}
+      end)
+
+    {offsets["target_system"], offsets["target_component"]}
   end
 
   defp module_name(name), do: name |> String.downcase() |> Macro.camelize()
