@@ -45,7 +45,7 @@ defmodule MAVLink2.LinkTest do
 
     assert_receive {Link, ^link, %Frame{seq: 10}}
     assert_receive {Link, ^link, %Frame{seq: 13}}
-    assert %{rx: 2, dropped: 2, errors: 2} = Link.stats(link)
+    assert %{rx: 2, dropped: 2, errors: 1} = Link.stats(link)
   end
 
   test "a transport that does not open leaves the link out" do

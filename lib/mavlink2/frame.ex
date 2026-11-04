@@ -70,33 +70,59 @@ defmodule MAVLink2.Frame do
   @doc """
   Encode a frame to wire bytes.
 
-  An id the dialect does not have is `{:error, {:unknown_msgid, id}}`: a
-  guessed `crc_extra` makes a frame the peer drops without a word.
+  Errors:
+
+  | | |
+  | --- | --- |
+  | `{:unknown_msgid, id}` | the dialect does not have `id`: a guessed `crc_extra` makes a frame the peer drops without a word |
+  | `{:out_of_range, field}` | `seq`, `sysid`, `compid` or a flags byte outside 0..255, or `msgid` outside 24 bits |
+  | `:payload_too_long` | the payload, after truncation, is longer than the message |
   """
   @spec encode(t(), module()) :: {:ok, binary()} | {:error, term()}
   def encode(%__MODULE__{} = f, dialect) do
-    case dialect.crc_extra(f.msgid) do
-      nil ->
-        {:error, {:unknown_msgid, f.msgid}}
+    with :ok <- check_header(f),
+         {:ok, crc_extra} <- fetch_crc_extra(dialect, f.msgid),
+         payload = truncate(f.payload),
+         :ok <- check_length(payload, dialect.payload_length(f.msgid)) do
+      len = byte_size(payload)
 
-      crc_extra ->
-        payload = truncate(f.payload)
-        len = byte_size(payload)
+      header = <<
+        len,
+        f.incompat_flags,
+        f.compat_flags,
+        f.seq,
+        f.sysid,
+        f.compid,
+        f.msgid::little-size(24)
+      >>
 
-        header = <<
-          len,
-          f.incompat_flags,
-          f.compat_flags,
-          f.seq,
-          f.sysid,
-          f.compid,
-          f.msgid::little-size(24)
-        >>
-
-        crc = CRC.checksum(header <> payload, crc_extra)
-        {:ok, <<@stx_v2, header::binary, payload::binary, crc::little-16>>}
+      crc = CRC.checksum(header <> payload, crc_extra)
+      {:ok, <<@stx_v2, header::binary, payload::binary, crc::little-16>>}
     end
   end
+
+  @bytes [:seq, :sysid, :compid, :incompat_flags, :compat_flags]
+
+  defp check_header(f) do
+    bad =
+      Enum.find(@bytes, &(not (is_integer(Map.fetch!(f, &1)) and Map.fetch!(f, &1) in 0..255)))
+
+    cond do
+      bad -> {:error, {:out_of_range, bad}}
+      not (is_integer(f.msgid) and f.msgid in 0..0xFFFFFF) -> {:error, {:out_of_range, :msgid}}
+      true -> :ok
+    end
+  end
+
+  defp fetch_crc_extra(dialect, msgid) do
+    case dialect.crc_extra(msgid) do
+      nil -> {:error, {:unknown_msgid, msgid}}
+      crc_extra -> {:ok, crc_extra}
+    end
+  end
+
+  defp check_length(payload, max) when byte_size(payload) <= max, do: :ok
+  defp check_length(_payload, _max), do: {:error, :payload_too_long}
 
   @doc """
   Decode the first complete frame in `bin`.
@@ -105,55 +131,76 @@ defmodule MAVLink2.Frame do
     * `{:incomplete, bin}`: more bytes needed; keep `bin`
     * `{:error, reason, rest}`: resynchronise from `rest`
 
-  A bad checksum resumes after the rejected STX, since the length byte
-  itself may be the corruption.
+  Errors:
+
+  | | Resumes |
+  | --- | --- |
+  | `:no_stx` | at the next STX, so a run of junk is one error |
+  | `:mavlink_v1_unsupported` | after the v1 STX |
+  | `{:unknown_msgid, id}` | after the STX, as soon as the header has arrived: without the message's `crc_extra` the frame cannot be checked, so its length byte cannot be trusted |
+  | `:bad_checksum` | after the STX, since the length byte itself may be the corruption |
+  | `{:unsupported_incompat_flags, flags}` | after the frame: a flag other than signing may change the layout |
   """
   @spec decode(binary(), module()) ::
           {:ok, t(), binary()} | {:incomplete, binary()} | {:error, term(), binary()}
   def decode(<<>>, _dialect), do: {:incomplete, <<>>}
   def decode(<<@stx_v2, rest::binary>> = bin, dialect), do: decode_v2(bin, rest, dialect)
   def decode(<<@stx_v1, rest::binary>>, _dialect), do: {:error, :mavlink_v1_unsupported, rest}
-  def decode(<<_junk, rest::binary>>, _dialect), do: {:error, :no_stx, rest}
 
-  defp decode_v2(bin, <<len, incompat, _::binary>> = rest, dialect) do
+  def decode(bin, _dialect) do
+    case :binary.match(bin, [<<@stx_v2>>, <<@stx_v1>>]) do
+      {at, 1} -> {:error, :no_stx, binary_part(bin, at, byte_size(bin) - at)}
+      :nomatch -> {:error, :no_stx, <<>>}
+    end
+  end
+
+  defp decode_v2(
+         bin,
+         <<_len, _flags::16, _seq, _sysid, _compid, msgid::little-24, _::binary>> = rest,
+         dialect
+       ) do
+    case dialect.crc_extra(msgid) do
+      nil -> {:error, {:unknown_msgid, msgid}, rest}
+      crc_extra -> decode_v2(bin, rest, crc_extra, dialect)
+    end
+  end
+
+  defp decode_v2(bin, _rest, _dialect), do: {:incomplete, bin}
+
+  defp decode_v2(bin, <<len, incompat, _::binary>> = rest, crc_extra, dialect) do
     sig_len = if (incompat &&& @iflag_signed) != 0, do: @signature_bytes, else: 0
-    need = @header_after_stx + len + 2 + sig_len
 
     case rest do
       <<header::binary-size(@header_after_stx), payload::binary-size(^len), crc::little-16,
         sig_block::binary-size(^sig_len), tail::binary>> ->
         <<_len, incompat, compat, seq, sysid, compid, msgid::little-size(24)>> = header
 
-        case dialect.crc_extra(msgid) do
-          nil ->
-            {:error, {:unknown_msgid, msgid}, tail}
+        cond do
+          CRC.checksum(header <> payload, crc_extra) != crc ->
+            {:error, :bad_checksum, rest}
 
-          crc_extra ->
-            if CRC.checksum(header <> payload, crc_extra) == crc do
-              frame = %__MODULE__{
-                msgid: msgid,
-                payload: zero_extend(payload, dialect.payload_length(msgid)),
-                seq: seq,
-                sysid: sysid,
-                compid: compid,
-                incompat_flags: incompat,
-                compat_flags: compat,
-                signature: signature(sig_block, bin, len)
-              }
+          (incompat &&& bnot(@iflag_signed)) != 0 ->
+            {:error, {:unsupported_incompat_flags, incompat}, tail}
 
-              {:ok, frame, tail}
-            else
-              <<_stx, after_stx::binary>> = bin
-              {:error, :bad_checksum, after_stx}
-            end
+          true ->
+            frame = %__MODULE__{
+              msgid: msgid,
+              payload: zero_extend(payload, dialect.payload_length(msgid)),
+              seq: seq,
+              sysid: sysid,
+              compid: compid,
+              incompat_flags: incompat,
+              compat_flags: compat,
+              signature: signature(sig_block, bin, len)
+            }
+
+            {:ok, frame, tail}
         end
 
-      _ when byte_size(rest) < need ->
+      _ ->
         {:incomplete, bin}
     end
   end
-
-  defp decode_v2(bin, _rest, _dialect), do: {:incomplete, bin}
 
   defp signature(<<>>, _bin, _len), do: nil
 
