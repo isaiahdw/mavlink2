@@ -184,7 +184,11 @@ MAVLink2.Link.start_link(dialect: D, device: "/dev/ttyUSB0", signing: signing)
 With `:signing`, every frame sent is signed and a frame received is delivered
 only if it verifies. Rejected frames are counted as `:unsigned`,
 `:bad_signature` or `:replay`. `accept_unsigned: [msgid]` lets the listed
-message ids through unsigned.
+message ids through unsigned, and `accept_unsigned: :all` every one, for a
+link that is secure by itself (USB, a board-level UART). A subscriber that
+calls `Link.subscribe(link, self(), rejected: true)` also gets each refused
+frame, as `{MAVLink2.Link, link, {:rejected, reason, frame}}`, to show as
+untrusted.
 
 A frame from a stream not seen before is refused when its timestamp is more
 than a minute behind the clock, and this end's own frames reflected back are
@@ -207,15 +211,21 @@ The services below do this for any target.
 ### Routing
 
 ```elixir
-MAVLink2.Router.start_link(links: [:telemetry, :companion, :gimbal])
+MAVLink2.Router.start_link(links: [:telemetry, :companion, :gimbal], sysid: 1)
 ```
 
 The router learns which link each `{sysid, compid}` is on from what it
-receives, sends broadcasts to every other link, sends a targeted frame only
-to the links where its target has been seen, and never back where it came
-from. It forwards with `MAVLink2.Link.forward/2`, which writes a frame's
-original bytes. Links with `unknown: :keep` let it pass on messages outside
-its dialect.
+receives, sends broadcasts to every other link, sends a frame for another
+system to the links where that system has been seen, and never back where it
+came from. Within its own system (`:sysid`), a frame for a component goes
+only where that component has been seen. It forwards with
+`MAVLink2.Link.forward/2`, which writes a frame's original bytes, so
+signatures survive.
+
+- Links with `unknown: :keep` let it pass on messages outside its dialect.
+- Frames a link's signing refuses are forwarded too, but teach it no routes.
+- `SETUP_SIGNING` is never forwarded.
+- A `SYSTEM_TIME` showing a reboot clears that system's routes.
 
 ### Commands, parameters and missions
 
@@ -241,9 +251,9 @@ is `{sysid, compid}`.
 
 | Module | Options |
 | --- | --- |
-| `MAVLink2.Command` | `:timeout`, `:retries`, `:progress_timeout`, `:on_progress` for `MAV_RESULT_IN_PROGRESS` acks |
-| `MAVLink2.Param` | `:timeout`, `:retries`, `:encoding` (`:cast` for ArduPilot, `:bytewise` for PX4) |
-| `MAVLink2.Mission` | `:timeout`, `:retries`, `:mission_type` (mission, fence or rally) |
+| `MAVLink2.Command` | `:timeout`, `:retries`, `:progress_timeout`, `:on_progress` for `MAV_RESULT_IN_PROGRESS` acks; `cancel/3` sends `COMMAND_CANCEL` |
+| `MAVLink2.Param` | `:timeout`, `:retries`, `:encoding` (`:cast` for ArduPilot, `:bytewise` for PX4); `list/3` to compid 0 lists every component |
+| `MAVLink2.Mission` | `:timeout`, `:item_timeout`, `:retries`, `:mission_type` (mission, fence or rally) |
 
 ### Without a link
 
@@ -258,6 +268,32 @@ is `{sysid, compid}`.
 
 `drain/2` returns every complete frame in a buffer, the errors it skipped
 over, and the bytes left for the next read.
+
+## Specification
+
+The library follows the [MAVLink developer guide](https://mavlink.io/en/):
+
+| Part | Guide |
+| --- | --- |
+| Frames, checksum, `crc_extra`, payload truncation | [Serialization](https://mavlink.io/en/guide/serialization.html) |
+| Signing | [Message signing](https://mavlink.io/en/guide/message_signing.html) |
+| `MAVLink2.Router` | [Routing](https://mavlink.io/en/guide/routing.html) |
+| `MAVLink2.Command`, `Param`, `Mission` | [Command](https://mavlink.io/en/services/command.html), [parameter](https://mavlink.io/en/services/parameter.html) and [mission](https://mavlink.io/en/services/mission.html) protocols |
+
+Where it goes beyond the guide:
+
+- **`SYSID32` and `TARGET32`** (incompat flags `0x02`, `0x04`) follow the C
+  library (`c_library_v2`), which has them before the guide does.
+- **Signing** is stricter: a timestamp equal to the stream's last is a replay,
+  as in the C library; the window for new streams counts from the clock even
+  before this end has sent; and this end's own frames reflected back are
+  refused.
+- **Recovery after noise** resumes after the start byte of a frame that fails
+  its checksum or has an unknown id; the guide leaves recovery to the
+  implementation.
+- **A system broadcast within the router's own system** (target component 0)
+  goes to the links where that system has been seen.
+- **MAVLink v1** is not implemented.
 
 ## Modules
 
