@@ -13,9 +13,8 @@ defmodule MAVLink2.Transport.UART do
   def open(opts) do
     device = Keyword.fetch!(opts, :device)
 
-    with {:ok, pid} <- uart().start_link([]),
-         :ok <-
-           uart().open(pid, device,
+    with {:ok, pid} <- uart().start_link([]) do
+      case uart().open(pid, device,
              speed: Keyword.get(opts, :speed, 115_200),
              data_bits: 8,
              stop_bits: 1,
@@ -23,7 +22,13 @@ defmodule MAVLink2.Transport.UART do
              flow_control: Keyword.get(opts, :flow_control, :none),
              active: true
            ) do
-      {:ok, pid}
+        :ok ->
+          {:ok, pid}
+
+        {:error, reason} ->
+          uart().stop(pid)
+          {:error, reason}
+      end
     end
   end
 
