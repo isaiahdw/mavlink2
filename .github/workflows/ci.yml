@@ -54,6 +54,14 @@ jobs:
           key: plt-${{ matrix.elixir }}-${{ matrix.otp }}-${{ hashFiles('mix.lock') }}
           restore-keys: plt-${{ matrix.elixir }}-${{ matrix.otp }}-
 
+      # Building the PLT recompiles OTP's xmerl_ucs with the options it was
+      # built with, which prints its missing-spec compiler warnings; this
+      # project has no Erlang sources, so the Erlang warning matcher only
+      # turns those into annotations. Dialyzer's own findings are annotated
+      # by --format github.
+      - if: matrix.lint
+        run: echo "::remove-matcher owner=erlc-warning::"
+
       # The test environment also compiles test/support, so this checks a
       # dialect generated from common.xml as well as the library.
       - if: matrix.lint
