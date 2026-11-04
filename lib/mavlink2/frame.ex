@@ -26,7 +26,7 @@ defmodule MAVLink2.Frame do
   `incompat_flags` bit 0 (`MAVLINK_IFLAG_SIGNED`) adds a 13-byte signature
   after the checksum. A signed frame decodes with `signature` set to
   `{link_id, timestamp, signature, signed_bytes}`; checking it is
-  `MAVLink2.Signing.verify/2`. `MAVLink2.Signing.encode/4` sends one.
+  `MAVLink2.Signing.verify/3`. `MAVLink2.Signing.encode/4` sends one.
   """
 
   import Bitwise

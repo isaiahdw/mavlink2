@@ -12,13 +12,20 @@ defmodule MAVLink2.Signing do
   Receiving, a frame is accepted only if its signature matches and its
   timestamp is later than the last one accepted from the same stream
   (link id, system, component). A stream not seen before is accepted if its
-  timestamp is no more than one minute behind this end's timestamp. The
-  signature is checked before any stream state changes, so a forged frame
-  moves nothing.
+  timestamp is no more than one minute behind this end's timestamp, which
+  is at least the clock. The signature is checked before any stream state
+  changes, so a forged frame moves nothing.
 
   Sending, each frame takes a timestamp later than the previous one and no
   earlier than the clock, so a clock that steps back cannot repeat one.
   This end's timestamp also follows the latest accepted from a peer.
+
+  Each frame this end signs also records its own stream, so its frames
+  reflected back to it are refused as replays.
+
+  The replay window is only as good as the clock: a board that boots with
+  no real time accepts stale frames until its timestamp catches up. Such a
+  board can persist `timestamp` and pass it back to `new/2`.
   """
 
   import Bitwise
@@ -42,16 +49,21 @@ defmodule MAVLink2.Signing do
   @max_timestamp (1 <<< 48) - 1
 
   @doc """
-  Signing state for `key`. Options: `:link_id` (default 0),
-  `:accept_unsigned`, message ids delivered even when unsigned (default
-  none).
+  Signing state for `key`. Options:
+
+  | | |
+  | --- | --- |
+  | `:link_id` | default 0 |
+  | `:accept_unsigned` | message ids delivered even when unsigned; default none |
+  | `:timestamp` | the earliest timestamp, for a board that persists it; default 0 |
   """
   @spec new(<<_::256>>, keyword()) :: t()
   def new(<<_::binary-size(32)>> = key, opts \\ []) do
     %__MODULE__{
       key: key,
       link_id: Keyword.get(opts, :link_id, 0),
-      accept_unsigned: Keyword.get(opts, :accept_unsigned, [])
+      accept_unsigned: Keyword.get(opts, :accept_unsigned, []),
+      timestamp: Keyword.get(opts, :timestamp, 0)
     }
   end
 
@@ -66,10 +78,15 @@ defmodule MAVLink2.Signing do
   signed bit, with the next timestamp at or after `now` (a `timestamp/1`).
   """
   @spec sign(t(), binary(), non_neg_integer()) :: {binary(), t()}
-  def sign(%__MODULE__{} = s, wire, now) do
+  def sign(
+        %__MODULE__{} = s,
+        <<_stx, _len, _iflags, _cflags, _seq, sysid, compid, _::binary>> = wire,
+        now
+      ) do
     ts = min(max(now, s.timestamp + 1), @max_timestamp)
     tail = <<s.link_id, ts::little-48>>
-    {wire <> tail <> digest(s.key, wire <> tail), %{s | timestamp: ts}}
+    streams = Map.put(s.streams, {s.link_id, sysid, compid}, ts)
+    {wire <> tail <> digest(s.key, wire <> tail), %{s | timestamp: ts, streams: streams}}
   end
 
   @doc """
@@ -88,17 +105,23 @@ defmodule MAVLink2.Signing do
   end
 
   @doc """
-  Checks a decoded frame. `{:ok, state}` for a signed frame that verifies
-  and is not a replay, or an unsigned one of an `accept_unsigned` id;
-  otherwise `{:error, :unsigned | :bad_signature | :replay}`.
+  Checks a decoded frame at `now`, this end's clock as a `timestamp/1`.
+  `{:ok, state}` for a signed frame that verifies and is not a replay, or
+  an unsigned one of an `accept_unsigned` id; otherwise
+  `{:error, :unsigned | :bad_signature | :replay}`.
   """
-  @spec verify(t(), MAVLink2.Frame.t()) ::
+  @spec verify(t(), MAVLink2.Frame.t(), non_neg_integer()) ::
           {:ok, t()} | {:error, :unsigned | :bad_signature | :replay}
-  def verify(%__MODULE__{} = s, %MAVLink2.Frame{signature: nil} = frame) do
+  def verify(%__MODULE__{} = s, %MAVLink2.Frame{signature: nil} = frame, _now) do
     if frame.msgid in s.accept_unsigned, do: {:ok, s}, else: {:error, :unsigned}
   end
 
-  def verify(%__MODULE__{} = s, %MAVLink2.Frame{signature: {link_id, ts, sig, signed}} = frame) do
+  def verify(
+        %__MODULE__{} = s,
+        %MAVLink2.Frame{signature: {link_id, ts, sig, signed}} = frame,
+        now
+      ) do
+    s = %{s | timestamp: max(s.timestamp, now)}
     stream = {link_id, frame.sysid, frame.compid}
 
     cond do

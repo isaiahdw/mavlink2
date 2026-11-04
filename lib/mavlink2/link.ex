@@ -188,7 +188,9 @@ defmodule MAVLink2.Link do
   defp deliver(%Frame{} = frame, %{signing: nil} = state), do: fan_out(frame, state)
 
   defp deliver(%Frame{} = frame, state) do
-    case MAVLink2.Signing.verify(state.signing, frame) do
+    now = MAVLink2.Signing.timestamp(state.clock.())
+
+    case MAVLink2.Signing.verify(state.signing, frame, now) do
       {:ok, signing} -> fan_out(frame, %{state | signing: signing})
       {:error, reason} -> bump(state, reason)
     end

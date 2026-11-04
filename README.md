@@ -114,6 +114,11 @@ only if it verifies. Rejected frames are counted as `:unsigned`,
 `:bad_signature` or `:replay`. `accept_unsigned: [msgid]` lets the listed
 message ids through unsigned.
 
+A frame from a stream not seen before is refused when its timestamp is more
+than a minute behind the clock, and this end's own frames reflected back are
+refused as replays. A board that boots without real time can save
+`signing.timestamp` and start from it with `Signing.new(key, timestamp: saved)`.
+
 ### Without a link
 
 `MAVLink2.Frame` encodes and decodes frames directly:

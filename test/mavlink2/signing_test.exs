@@ -36,24 +36,24 @@ defmodule MAVLink2.SigningTest do
     assert t1 == @t0 + 1
 
     s = Signing.new(@key)
-    assert {:ok, s} = Signing.verify(s, hb)
-    assert {:ok, s} = Signing.verify(s, cl)
+    assert {:ok, s} = Signing.verify(s, hb, 0)
+    assert {:ok, s} = Signing.verify(s, cl, 0)
     assert s.timestamp == t1
-    assert Signing.verify(s, hb) == {:error, :replay}
-    assert Signing.verify(s, cl) == {:error, :replay}
+    assert Signing.verify(s, hb, 0) == {:error, :replay}
+    assert Signing.verify(s, cl, 0) == {:error, :replay}
   end
 
   test "a wrong key or a changed signature fails, and moves nothing" do
     {:ok, frame, <<>>} = Frame.decode(@heartbeat, @d)
     other = Signing.new(:binary.copy(<<7>>, 32))
-    assert Signing.verify(other, frame) == {:error, :bad_signature}
+    assert Signing.verify(other, frame, 0) == {:error, :bad_signature}
 
     n = byte_size(@heartbeat) - 1
     <<head::binary-size(^n), last>> = @heartbeat
     {:ok, forged, <<>>} = Frame.decode(<<head::binary, Bitwise.bxor(last, 1)>>, @d)
     s = Signing.new(@key)
-    assert Signing.verify(s, forged) == {:error, :bad_signature}
-    assert {:ok, _} = Signing.verify(s, frame)
+    assert Signing.verify(s, forged, 0) == {:error, :bad_signature}
+    assert {:ok, _} = Signing.verify(s, frame, 0)
   end
 
   test "a signed frame's checksum still covers it" do
@@ -67,15 +67,36 @@ defmodule MAVLink2.SigningTest do
     {:ok, wire} = Frame.encode(heartbeat(), @d)
     {:ok, frame, <<>>} = Frame.decode(wire, @d)
     assert frame.signature == nil
-    assert Signing.verify(Signing.new(@key), frame) == {:error, :unsigned}
-    assert {:ok, _} = Signing.verify(Signing.new(@key, accept_unsigned: [0]), frame)
+    assert Signing.verify(Signing.new(@key), frame, 0) == {:error, :unsigned}
+    assert {:ok, _} = Signing.verify(Signing.new(@key, accept_unsigned: [0]), frame, 0)
   end
 
   test "a new stream more than a minute behind is refused" do
     {:ok, frame, <<>>} = Frame.decode(@heartbeat, @d)
     ahead = %{Signing.new(@key) | timestamp: @t0 + 6_000_001}
-    assert Signing.verify(ahead, frame) == {:error, :replay}
-    assert {:ok, _} = Signing.verify(%{ahead | timestamp: @t0 + 6_000_000}, frame)
+    assert Signing.verify(ahead, frame, 0) == {:error, :replay}
+    assert {:ok, _} = Signing.verify(%{ahead | timestamp: @t0 + 6_000_000}, frame, 0)
+  end
+
+  test "a new stream more than a minute behind the clock is refused" do
+    {:ok, frame, <<>>} = Frame.decode(@heartbeat, @d)
+    assert Signing.verify(Signing.new(@key), frame, @t0 + 6_000_001) == {:error, :replay}
+    assert {:ok, s} = Signing.verify(Signing.new(@key), frame, @t0 + 6_000_000)
+    assert s.timestamp == @t0 + 6_000_000
+  end
+
+  test "a frame this end signed, reflected back, is a replay" do
+    s = Signing.new(@key, link_id: 5)
+    {:ok, wire, s} = Signing.encode(s, heartbeat(), @d, @t0)
+    {:ok, frame, <<>>} = Frame.decode(wire, @d)
+    assert Signing.verify(s, frame, @t0) == {:error, :replay}
+    assert {:ok, _} = Signing.verify(Signing.new(@key), frame, @t0)
+  end
+
+  test "a persisted timestamp is where a new state starts" do
+    {:ok, frame, <<>>} = Frame.decode(@heartbeat, @d)
+    s = Signing.new(@key, timestamp: @t0 + 6_000_001)
+    assert Signing.verify(s, frame, 0) == {:error, :replay}
   end
 
   test "timestamps never repeat when the clock steps back" do

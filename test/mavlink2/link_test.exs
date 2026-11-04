@@ -59,17 +59,37 @@ defmodule MAVLink2.LinkTest do
   describe "signed" do
     @key :binary.copy(<<1>>, 32)
 
-    test "frames go out signed and come back verified" do
-      signing = MAVLink2.Signing.new(@key, link_id: 3)
-      link = link(echo: true, signing: signing)
+    test "frames go out signed; reflected back, they are refused" do
+      link = link(echo: true, signing: MAVLink2.Signing.new(@key, link_id: 3))
       :ok = Link.subscribe(link)
 
       assert :ok = Link.send_message(link, 300, <<1, 2, 3, 4>>)
       assert :ok = Link.send_message(link, 300, <<5, 6, 7, 8>>)
-      assert_receive {Link, ^link, %Frame{signature: {3, t1, _, _}}}
-      assert_receive {Link, ^link, %Frame{signature: {3, t2, _, _}}}
+      refute_receive {Link, ^link, _}, 50
+      assert %{tx: 2, rx: 0, replay: 2} = Link.stats(link)
+
+      written = Loopback.written(:sys.get_state(link).handle)
+      assert {[a, b], [], <<>>} = Frame.drain(written, TestDialect)
+      assert {3, t1, _, _} = a.signature
+      assert {3, t2, _, _} = b.signature
       assert t2 > t1
-      assert %{rx: 2, unsigned: 0, bad_signature: 0, replay: 0} = Link.stats(link)
+
+      peer = MAVLink2.Signing.new(@key)
+      assert {:ok, peer} = MAVLink2.Signing.verify(peer, a, t1)
+      assert {:ok, _} = MAVLink2.Signing.verify(peer, b, t1)
+    end
+
+    test "a frame signed long ago is refused by a link that has not sent" do
+      link = link(signing: MAVLink2.Signing.new(@key))
+      :ok = Link.subscribe(link)
+      frame = %Frame{msgid: 300, payload: <<1, 1, 1, 1>>, sysid: 7}
+
+      {:ok, stale, _} =
+        MAVLink2.Signing.encode(MAVLink2.Signing.new(@key), frame, TestDialect, 1_000)
+
+      send(link, {:mavlink_data, stale})
+      refute_receive {Link, ^link, _}, 50
+      assert %{rx: 0, replay: 1} = Link.stats(link)
     end
 
     test "unsigned, wrongly signed and replayed frames are dropped and counted" do
