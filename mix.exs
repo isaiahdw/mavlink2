@@ -8,7 +8,12 @@ defmodule MAVLink2.MixProject do
       elixir: "~> 1.17",
       start_permanent: Mix.env() == :prod,
       elixirc_paths: elixirc_paths(Mix.env()),
-      deps: deps()
+      deps: deps(),
+      dialyzer: [
+        plt_add_apps: [:crypto, :xmerl, :ex_unit],
+        plt_local_path: "priv/plts",
+        flags: [:error_handling, :extra_return, :missing_return]
+      ]
     ]
   end
 
@@ -20,7 +25,8 @@ defmodule MAVLink2.MixProject do
   defp deps do
     [
       # MAVLink2.Transport.UART only; a project that uses it depends on it.
-      {:circuits_uart, "~> 1.5", optional: true}
+      {:circuits_uart, "~> 1.5", optional: true},
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
   end
 end
