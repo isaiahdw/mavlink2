@@ -104,6 +104,82 @@ defmodule MAVLink2.ParamTest do
     assert Enum.map(list, & &1.value) == Enum.map(0..9, &(&1 * 1.0))
   end
 
+  test "PARAM_ERROR ends the wait" do
+    {gcs, v} = Vehicle.pair()
+    test = self()
+
+    Vehicle.script(v, nil, fn %Common.ParamRequestRead{param_id: name}, _, s ->
+      send(test, :asked)
+
+      {%Common.ParamError{
+         target_system: 255,
+         target_component: 190,
+         param_id: name,
+         param_index: -1,
+         error: 1
+       }, s}
+    end)
+
+    assert Param.read(gcs, {1, 1}, "NOPE", @fast) ==
+             {:error, {:param_error, :mav_param_error_does_not_exist}}
+
+    assert_received :asked
+    refute_received :asked
+  end
+
+  test "set reads the value back from a target that does not answer PARAM_SET" do
+    {gcs, v} = Vehicle.pair()
+
+    Vehicle.script(v, 0.0, fn
+      %Common.ParamSet{param_value: value}, _, _ ->
+        {[], value}
+
+      %Common.ParamRequestRead{param_id: "A"}, _, value ->
+        {%Common.ParamValue{
+           param_id: "A",
+           param_value: value,
+           param_type: @real32,
+           param_count: 1
+         }, value}
+    end)
+
+    assert {:ok, %{name: "A", value: 2.5}} =
+             Param.set(gcs, {1, 1}, "A", 2.5, @real32, @fast ++ [retries: 1])
+  end
+
+  test "a list for every component keeps each component's parameters apart" do
+    {gcs, v} = Vehicle.pair()
+
+    value = fn compid, index ->
+      {%Common.ParamValue{
+         param_id: "C#{compid}_#{index}",
+         param_value: index * 1.0,
+         param_type: @real32,
+         param_count: 2,
+         param_index: index
+       }, compid: compid}
+    end
+
+    Vehicle.script(v, nil, fn
+      # Component 100 leaves its index 1 out of the stream.
+      %Common.ParamRequestList{target_component: 0}, _, s ->
+        {[value.(1, 0), value.(100, 0), value.(1, 1)], s}
+
+      %Common.ParamRequestRead{param_index: i, target_component: c}, _, s ->
+        {value.(c, i), s}
+    end)
+
+    assert {:ok, list} = Param.list(gcs, {1, 0}, @fast)
+
+    assert Enum.map(list, &{&1.component, &1.name}) ==
+             [{1, "C1_0"}, {1, "C1_1"}, {100, "C100_0"}, {100, "C100_1"}]
+  end
+
+  test "names are 7-bit ASCII" do
+    {gcs, _v} = Vehicle.pair()
+    assert Param.read(gcs, {1, 1}, "CAFÉ") == {:error, :name_not_ascii}
+  end
+
   test "a name longer than 16 bytes is refused" do
     {gcs, _v} = Vehicle.pair()
     assert Param.read(gcs, {1, 1}, String.duplicate("X", 17)) == {:error, :name_too_long}

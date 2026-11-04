@@ -40,6 +40,7 @@ defmodule MAVLink2.Param do
   @request_list 21
   @value 22
   @set 23
+  @error 345
 
   @type encoding :: :cast | :bytewise
 
@@ -48,25 +49,39 @@ defmodule MAVLink2.Param do
           value: number() | :nan | :infinity | :neg_infinity,
           type: atom() | integer(),
           index: non_neg_integer(),
-          count: non_neg_integer()
+          count: non_neg_integer(),
+          component: 0..255
         }
 
-  @doc "Reads one parameter, by name or by index."
+  @doc """
+  Reads one parameter, by name or by index. A target that answers with
+  `PARAM_ERROR` (a dialect with it, such as current `common.xml`) ends the
+  wait with `{:error, {:param_error, error}}`, `error` a `MAV_PARAM_ERROR`
+  atom such as `:mav_param_error_does_not_exist`.
+  """
   @spec read(GenServer.server(), MAVLink2.target(), String.t() | non_neg_integer(), keyword()) ::
           {:ok, param()} | {:error, term()}
   def read(link, target, name_or_index, opts \\ []) do
     Service.run(link, target, fn ctx ->
       {id, index} = key!(name_or_index)
-      send_fun = fn _ -> request_read(ctx, id, index) end
-      matches = fn p -> if is_binary(name_or_index), do: p.name == id, else: p.index == index end
-      Service.request(retries(opts), send_fun, fn -> await_value(ctx, opts, matches) end)
+      read_one(ctx, opts, id, index)
     end)
+  end
+
+  defp read_one(ctx, opts, id, index) do
+    matches = if id == "", do: &(&1.index == index), else: &(&1.name == id)
+    ask(ctx, opts, fn _ -> request_read(ctx, id, index) end, matches, {id, index})
   end
 
   @doc """
   Sets a parameter and returns the value the target reports back, which
   is what it now holds: compare it with `value` to see whether the target
-  took it. `type` is a `MAV_PARAM_TYPE` atom or value.
+  took it. `type` is a `MAV_PARAM_TYPE` atom or value. `PARAM_ERROR` ends
+  the wait as for `read/4`.
+
+  The protocol has the target answer with `PARAM_VALUE`. For one that does
+  not, as the MAVLink guide notes of ArduPilot, the value is read back by
+  name once the retries run out.
   """
   @spec set(
           GenServer.server(),
@@ -93,16 +108,22 @@ defmodule MAVLink2.Param do
         )
       end
 
-      Service.request(retries(opts), send_fun, fn ->
-        await_value(ctx, opts, &(&1.name == id))
-      end)
+      case ask(ctx, opts, send_fun, &(&1.name == id), {id, -1}) do
+        {:error, :timeout} -> read_one(ctx, opts, id, -1)
+        result -> result
+      end
     end)
   end
 
   @doc """
-  Every parameter, in index order. After the stream goes quiet, each
-  missing index is asked for on its own. `{:error, {:missing, indices}}`
-  when some never arrive.
+  Every parameter, in component and index order. With target compid 0
+  (`MAV_COMP_ID_ALL`), every component of the system that answers is
+  included, each parameter with its `component`.
+
+  After the stream goes quiet, each missing index is asked for on its own.
+  `{:error, {:missing, [{component, index}]}}` when some never arrive. A
+  `PARAM_VALUE` whose index is not below its count is not part of the list
+  (PX4 sends its parameter-set hash at index 32767).
   """
   @spec list(GenServer.server(), MAVLink2.target(), keyword()) ::
           {:ok, [param()]} | {:error, term()}
@@ -111,9 +132,11 @@ defmodule MAVLink2.Param do
       send_fun = fn _ -> Service.send_to(ctx, @request_list, :param_request_list, []) end
 
       with {:ok, first} <-
-             Service.request(retries(opts), send_fun, fn -> await_value(ctx, opts, &listed?/1) end) do
-        got = collect(ctx, opts, %{first.index => first})
-        fill(ctx, opts, got, first.count)
+             Service.request(retries(opts), send_fun, fn ->
+               await_value(ctx, opts, &listed?/1, nil)
+             end) do
+        got = collect(ctx, opts, %{{first.component, first.index} => first})
+        fill(ctx, opts, got)
       end
     end)
   end
@@ -121,30 +144,33 @@ defmodule MAVLink2.Param do
   defp listed?(p), do: p.index < p.count
 
   defp collect(ctx, opts, got) do
-    case await_value(ctx, opts, &listed?/1) do
-      {:ok, p} -> collect(ctx, opts, Map.put(got, p.index, p))
+    case await_value(ctx, opts, &listed?/1, nil) do
+      {:ok, p} -> collect(ctx, opts, Map.put(got, {p.component, p.index}, p))
       :timeout -> got
     end
   end
 
-  defp fill(ctx, opts, got, count) do
+  defp fill(ctx, opts, got) do
+    counts = for {{component, _}, p} <- got, into: %{}, do: {component, p.count}
+    wanted = for {component, count} <- counts, index <- 0..(count - 1)//1, do: {component, index}
+
     got =
-      Enum.reduce(0..(count - 1)//1, got, fn index, got ->
-        if Map.has_key?(got, index) do
+      Enum.reduce(wanted, got, fn {component, index} = key, got ->
+        if Map.has_key?(got, key) do
           got
         else
-          send_fun = fn _ -> request_read(ctx, "", index) end
-          await = fn -> await_value(ctx, opts, &(&1.index == index)) end
+          {sysid, _} = ctx.target
+          ctx = %{ctx | target: {sysid, component}}
 
-          case Service.request(retries(opts), send_fun, await) do
-            {:ok, p} -> Map.put(got, index, p)
-            {:error, :timeout} -> got
+          case read_one(ctx, opts, "", index) do
+            {:ok, p} -> Map.put(got, key, p)
+            {:error, _} -> got
           end
         end
       end)
 
-    case Enum.reject(0..(count - 1)//1, &Map.has_key?(got, &1)) do
-      [] -> {:ok, got |> Map.values() |> Enum.sort_by(& &1.index)}
+    case Enum.reject(wanted, &Map.has_key?(got, &1)) do
+      [] -> {:ok, got |> Map.values() |> Enum.sort_by(&{&1.component, &1.index})}
       missing -> {:error, {:missing, missing}}
     end
   end
@@ -153,33 +179,65 @@ defmodule MAVLink2.Param do
     Service.send_to(ctx, @request_read, :param_request_read, param_id: id, param_index: index)
   end
 
-  defp await_value(ctx, opts, matches) do
+  # Sends until a PARAM_VALUE `matches`, or the target refuses `key`
+  # ({id, index}) with PARAM_ERROR.
+  defp ask(ctx, opts, send_fun, matches, key) do
+    case Service.request(retries(opts), send_fun, fn -> await_value(ctx, opts, matches, key) end) do
+      {:ok, {:param_error, _} = error} -> {:error, error}
+      result -> result
+    end
+  end
+
+  defp await_value(ctx, opts, matches, key) do
     mod = Service.message!(ctx, @value, :param_value)
 
-    Service.await(ctx, Keyword.get(opts, :timeout, 1000), fn frame, message ->
-      with @value <- frame.msgid,
-           raw = Service.raw(mod, frame.payload, :param_value),
-           p = param(ctx, message, raw, encoding(opts)),
-           true <- matches.(p) do
-        {:ok, p}
-      else
-        _ -> :skip
-      end
+    Service.await(ctx, Keyword.get(opts, :timeout, 1000), fn
+      %{msgid: @value} = frame, message ->
+        p =
+          param(
+            ctx,
+            frame,
+            message,
+            Service.raw(mod, frame.payload, :param_value),
+            encoding(opts)
+          )
+
+        if matches.(p), do: {:ok, p}, else: :skip
+
+      %{msgid: @error} = frame, message ->
+        if key != nil and refuses?(key, message) and Service.for_me?(ctx, frame, message),
+          do: {:ok, {:param_error, Service.entry(ctx, :mav_param_error, message.error)}},
+          else: :skip
+
+      _frame, _message ->
+        :skip
     end)
   end
 
-  defp param(ctx, message, raw, encoding) do
+  defp refuses?({"", index}, message), do: message.param_index == index
+  defp refuses?({id, _}, message), do: message.param_id == id
+
+  defp param(ctx, frame, message, raw, encoding) do
     %{
       name: message.param_id,
       value: from_wire(message.param_value, raw, message.param_type, encoding),
       type: Service.entry(ctx, :mav_param_type, message.param_type),
       index: message.param_index,
-      count: message.param_count
+      count: message.param_count,
+      component: frame.compid
     }
   end
 
-  defp key!(name) when is_binary(name) and byte_size(name) <= 16, do: {name, -1}
-  defp key!(name) when is_binary(name), do: throw({:error, :name_too_long})
+  # Names are up to 16 bytes of 7-bit ASCII.
+  defp key!(name) when is_binary(name) and byte_size(name) > 16,
+    do: throw({:error, :name_too_long})
+
+  defp key!(name) when is_binary(name) do
+    if for(<<c <- name>>, reduce: true, do: (ok -> ok and c < 128)),
+      do: {name, -1},
+      else: throw({:error, :name_not_ascii})
+  end
+
   defp key!(index) when is_integer(index) and index in 0..32_767, do: {"", index}
 
   defp retries(opts), do: Keyword.get(opts, :retries, 3)

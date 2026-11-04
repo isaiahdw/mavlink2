@@ -27,7 +27,8 @@ defmodule MAVLink2.Vehicle do
   @doc """
   Runs the vehicle's side: for each message the vehicle receives,
   `fun.(message, frame, state)` returns `{replies, state}`, each reply a
-  message struct sent back from the vehicle. Returns once subscribed.
+  message struct sent back from the vehicle, or `{struct, opts}` with
+  `Link.send_message/4` options (`compid:` to answer as another component). Returns once subscribed.
   """
   def script(vehicle, state, fun) do
     test = self()
@@ -51,8 +52,9 @@ defmodule MAVLink2.Vehicle do
         {replies, state} = fun.(message, frame, state)
 
         for reply <- List.wrap(replies) do
+          {reply, opts} = with(%_{} <- reply, do: {reply, []})
           {msgid, payload} = dialect.encode(reply)
-          :ok = Link.send_message(vehicle, msgid, payload)
+          :ok = Link.send_message(vehicle, msgid, payload, opts)
         end
 
         loop(vehicle, dialect, state, fun)
