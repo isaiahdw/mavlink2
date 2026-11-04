@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - elixir: "1.17"
+          - elixir: "1.18"
             otp: "27"
           - elixir: "1.20"
             otp: "29"
@@ -21,7 +21,7 @@ jobs:
     env:
       MIX_ENV: test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: erlef/setup-beam@v1
         with:
@@ -29,7 +29,7 @@ jobs:
           otp-version: ${{ matrix.otp }}
 
       - name: Cache deps and build
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             deps
@@ -48,7 +48,7 @@ jobs:
 
       - if: matrix.lint
         name: Cache Dialyzer PLTs
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: priv/plts
           key: plt-${{ matrix.elixir }}-${{ matrix.otp }}-${{ hashFiles('mix.lock') }}

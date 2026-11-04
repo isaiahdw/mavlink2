@@ -38,7 +38,7 @@ def deps do
 end
 ```
 
-Requires Elixir 1.17 or later.
+Requires Elixir 1.18 or later.
 
 ## Usage
 
