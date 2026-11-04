@@ -113,6 +113,29 @@ defmodule MAVLink2.CommandTest do
     assert_received {:got, %{command: 192, frame: 5, x: 473_977_420, y: 85_455_940, z: 50.0}}
   end
 
+  test "a long-running command can be cancelled from another process" do
+    alias MAVLink2.CancelDialect, as: C
+    {gcs, vehicle} = Vehicle.pair(dialect: C)
+
+    Vehicle.script(vehicle, nil, fn
+      %C.CommandLong{command: cmd}, _, s ->
+        {struct!(C.CommandAck, command: cmd, result: @in_progress, progress: 0), s}
+
+      %C.CommandCancel{command: cmd, target_system: 1, target_component: 1}, _, s ->
+        {struct!(C.CommandAck, command: cmd, result: 6), s}
+    end)
+
+    task = Task.async(fn -> Command.long(gcs, {1, 1}, @arm, [], @fast) end)
+    Process.sleep(20)
+    assert Command.cancel(gcs, {1, 1}, @arm) == :ok
+    assert {:ok, :mav_result_cancelled, _} = Task.await(task)
+  end
+
+  test "cancel needs COMMAND_CANCEL in the dialect" do
+    {gcs, _vehicle} = Vehicle.pair()
+    assert Command.cancel(gcs, {1, 1}, @arm) == {:error, {:unsupported_message, :command_cancel}}
+  end
+
   test "an unknown command entry is refused before anything is sent" do
     {gcs, _vehicle} = Vehicle.pair()
 

@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<mavlink>
+  <include>common.xml</include>
+  <enums>
+    <enum name="MAV_RESULT">
+      <entry value="6" name="MAV_RESULT_CANCELLED">Command has been cancelled (as a result of receiving a COMMAND_CANCEL message).</entry>
+    </enum>
+  </enums>
+  <messages>
+    <message id="80" name="COMMAND_CANCEL">
+      <description>Cancel a long running command.</description>
+      <field type="uint8_t" name="target_system">System executing long running command.</field>
+      <field type="uint8_t" name="target_component">Component executing long running command.</field>
+      <field type="uint16_t" name="command" enum="MAV_CMD">Command ID (of command to cancel).</field>
+    </message>
+  </messages>
+</mavlink>

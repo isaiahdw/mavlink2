@@ -14,7 +14,8 @@ defmodule MAVLink2.Command do
   more times; a `COMMAND_LONG` sent again has its `confirmation` counted up.
   An ack of `MAV_RESULT_IN_PROGRESS` stops the resending: each one goes to
   `:on_progress`, and the wait for the final ack restarts at
-  `:progress_timeout`.
+  `:progress_timeout`. `cancel/3` asks the target to stop a long-running
+  command.
 
   Options:
 
@@ -35,6 +36,7 @@ defmodule MAVLink2.Command do
   @command_int 75
   @command_long 76
   @command_ack 77
+  @command_cancel 80
 
   @doc "Sends `COMMAND_LONG` with up to seven `params` (the rest 0.0)."
   @spec long(GenServer.server(), MAVLink2.target(), atom() | integer(), [number()], keyword()) ::
@@ -75,6 +77,24 @@ defmodule MAVLink2.Command do
 
       send_fun = fn _attempt -> Service.send_to(ctx, @command_int, :command_int, fields) end
       exchange(ctx, command, send_fun, opts)
+    end)
+  end
+
+  @doc """
+  Sends `COMMAND_CANCEL` for a long-running `command` the target is
+  executing. It is not acked: the `long/5` or `int/5` call waiting on the
+  command returns with the target's final ack, `:mav_result_cancelled` if
+  it cancelled. A target that cannot cancel carries on, and one with
+  nothing running ignores it. The dialect must have `COMMAND_CANCEL`
+  (current `common.xml` does).
+  """
+  @spec cancel(GenServer.server(), MAVLink2.target(), atom() | integer()) ::
+          :ok | {:error, term()}
+  def cancel(link, target, command) do
+    Service.run(link, target, fn ctx ->
+      Service.send_to(ctx, @command_cancel, :command_cancel,
+        command: Service.value!(ctx, :mav_cmd, command)
+      )
     end)
   end
 
