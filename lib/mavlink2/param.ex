@@ -52,7 +52,7 @@ defmodule MAVLink2.Param do
         }
 
   @doc "Reads one parameter, by name or by index."
-  @spec read(GenServer.server(), Service.target(), String.t() | non_neg_integer(), keyword()) ::
+  @spec read(GenServer.server(), MAVLink2.target(), String.t() | non_neg_integer(), keyword()) ::
           {:ok, param()} | {:error, term()}
   def read(link, target, name_or_index, opts \\ []) do
     Service.run(link, target, fn ctx ->
@@ -70,7 +70,7 @@ defmodule MAVLink2.Param do
   """
   @spec set(
           GenServer.server(),
-          Service.target(),
+          MAVLink2.target(),
           String.t(),
           number(),
           atom() | integer(),
@@ -104,7 +104,7 @@ defmodule MAVLink2.Param do
   missing index is asked for on its own. `{:error, {:missing, indices}}`
   when some never arrive.
   """
-  @spec list(GenServer.server(), Service.target(), keyword()) ::
+  @spec list(GenServer.server(), MAVLink2.target(), keyword()) ::
           {:ok, [param()]} | {:error, term()}
   def list(link, target, opts \\ []) do
     Service.run(link, target, fn ctx ->

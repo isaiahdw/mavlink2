@@ -37,7 +37,7 @@ defmodule MAVLink2.Command do
   @command_ack 77
 
   @doc "Sends `COMMAND_LONG` with up to seven `params` (the rest 0.0)."
-  @spec long(GenServer.server(), Service.target(), atom() | integer(), [number()], keyword()) ::
+  @spec long(GenServer.server(), MAVLink2.target(), atom() | integer(), [number()], keyword()) ::
           {:ok, atom() | integer(), struct()} | {:error, term()}
   def long(link, target, command, params \\ [], opts \\ []) when length(params) <= 7 do
     params = params ++ List.duplicate(0.0, 7 - length(params))
@@ -65,7 +65,7 @@ defmodule MAVLink2.Command do
   `:x`, `:y` (integers, degrees × 10^7 for a global frame), `:z`,
   `:current`, `:autocontinue`; each defaults to 0.
   """
-  @spec int(GenServer.server(), Service.target(), atom() | integer(), keyword(), keyword()) ::
+  @spec int(GenServer.server(), MAVLink2.target(), atom() | integer(), keyword(), keyword()) ::
           {:ok, atom() | integer(), struct()} | {:error, term()}
   def int(link, target, command, fields \\ [], opts \\ []) do
     Service.run(link, target, fn ctx ->

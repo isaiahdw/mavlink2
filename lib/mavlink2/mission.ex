@@ -67,7 +67,7 @@ defmodule MAVLink2.Mission do
   @type item :: keyword() | map()
 
   @doc "Uploads `items`, replacing the target's list of that mission type."
-  @spec upload(GenServer.server(), Service.target(), [item()], keyword()) ::
+  @spec upload(GenServer.server(), MAVLink2.target(), [item()], keyword()) ::
           :ok | {:error, term()}
   def upload(link, target, items, opts \\ []) do
     Service.run(link, target, fn ctx ->
@@ -126,7 +126,7 @@ defmodule MAVLink2.Mission do
   end
 
   @doc "Downloads the target's list of that mission type."
-  @spec download(GenServer.server(), Service.target(), keyword()) ::
+  @spec download(GenServer.server(), MAVLink2.target(), keyword()) ::
           {:ok, [map()]} | {:error, term()}
   def download(link, target, opts \\ []) do
     Service.run(link, target, fn ctx ->
@@ -173,7 +173,7 @@ defmodule MAVLink2.Mission do
   end
 
   @doc "Clears the target's list of that mission type."
-  @spec clear(GenServer.server(), Service.target(), keyword()) :: :ok | {:error, term()}
+  @spec clear(GenServer.server(), MAVLink2.target(), keyword()) :: :ok | {:error, term()}
   def clear(link, target, opts \\ []) do
     Service.run(link, target, fn ctx ->
       type = mission_type(ctx, opts)

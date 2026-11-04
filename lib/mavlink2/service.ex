@@ -16,7 +16,7 @@ defmodule MAVLink2.Service do
           target: target()
         }
 
-  @type target :: {sysid :: non_neg_integer(), compid :: 0..255}
+  @type target :: MAVLink2.target()
 
   @doc """
   Runs `fun` with a context for `link` and `target` in a process subscribed

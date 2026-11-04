@@ -75,7 +75,7 @@ A protocol over a byte stream needs all of these, and MAVLink has them:
 ```elixir
 def deps do
   [
-    {:mavlink2, github: "isaiahdw/mavlink2"},
+    {:mavlink2, "~> 0.1"},
     # only for MAVLink2.Transport.UART
     {:circuits_uart, "~> 1.5"}
   ]
