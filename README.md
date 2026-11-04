@@ -1,21 +1,28 @@
 # mavlink2
 
 [MAVLink v2](https://mavlink.io/en/guide/serialization.html) for Elixir: a
-frame codec, message signing, dialects generated from MAVLink XML, and a link
-process over a serial port or any other byte transport.
+frame codec, message signing, dialects generated from MAVLink XML, a link
+process over a serial port or any other byte transport, a router, and the
+command, parameter and mission protocols.
 
 - Frames: payload truncation and zero-extension, resynchronisation after a
-  bad frame, partial frames buffered until complete.
+  bad frame, partial frames buffered until complete, 32-bit system ids and
+  header targets (`SYSID32`, `TARGET32`).
 - Dialects: `use MAVLink2.Dialect.XML` turns a MAVLink XML file and its
   includes into a struct per message, `encode/1`, `decode/2` and enum lookups.
 - Signing: sign and verify, per-stream replay protection, timestamps that
   never repeat when the clock steps back.
 - Link: a GenServer that owns a transport, numbers outgoing frames, delivers
-  decoded frames to subscribers and counts errors, sequence gaps and rejected
-  signatures.
+  decoded frames to subscribers and counts errors, sequence gaps per sender
+  and rejected signatures.
+- Router: forwards frames between links by MAVLink's routing rules,
+  unchanged, signatures intact.
+- Services: commands with acks and retries, parameters read, set and
+  listed, missions uploaded, downloaded and cleared.
 - Checked against pymavlink: `crc_extra`, payload length, wire order and field
   types for every message in `common.xml`, packed payloads, and signed frames
-  byte for byte.
+  byte for byte; and against the C library: frames with extended headers,
+  signed and unsigned.
 
 MAVLink v1 frames are refused.
 
@@ -92,7 +99,8 @@ Link options:
 | `:dialect` | the dialect module (required) |
 | `:transport` | a `MAVLink2.Transport`; default `MAVLink2.Transport.UART`. Remaining options go to its `open/1` |
 | `:device`, `:speed`, `:flow_control` | `MAVLink2.Transport.UART` options; `:speed` defaults to 115200 |
-| `:sysid`, `:compid` | this end's ids; default 1, 1 |
+| `:sysid`, `:compid` | this end's ids; default 1, 1. `:sysid` may be up to 32 bits |
+| `:unknown` | `:keep` delivers frames whose id the dialect lacks, unchecked, with `known: false`; default `:skip` |
 | `:sendable` | message ids the peer accepts; others return `{:error, {:not_sendable, id}}` |
 | `:signing` | a `MAVLink2.Signing`; see below |
 | `:name` | registered name |
@@ -119,6 +127,60 @@ than a minute behind the clock, and this end's own frames reflected back are
 refused as replays. A board that boots without real time can save
 `signing.timestamp` and start from it with `Signing.new(key, timestamp: saved)`.
 
+### A target over 255
+
+A system id over 255 goes in the header: `Frame.encode/2` sets `SYSID32` for
+a `sysid` over 255 and `TARGET32` for a `target_sysid`. A message to such a
+system has 255 in its payload `target_system`:
+
+```elixir
+{msgid, payload} = D.encode(%D.CommandLong{target_system: 255, target_component: 1, command: 400})
+MAVLink2.Link.send_message(link, msgid, payload, target_sysid: 100_000)
+```
+
+The services below do this for any target.
+
+### Routing
+
+```elixir
+MAVLink2.Router.start_link(links: [:telemetry, :companion, :gimbal])
+```
+
+The router learns which link each `{sysid, compid}` is on from what it
+receives, sends broadcasts to every other link, sends a targeted frame only
+to the links where its target has been seen, and never back where it came
+from. It forwards with `MAVLink2.Link.forward/2`, which writes a frame's
+original bytes. Links with `unknown: :keep` let it pass on messages outside
+its dialect.
+
+### Commands, parameters and missions
+
+Each call runs in its own task subscribed to the link, sends again when the
+target is quiet, and needs a dialect with `common.xml`'s messages. `target`
+is `{sysid, compid}`.
+
+```elixir
+{:ok, :mav_result_accepted, _ack} =
+  MAVLink2.Command.long(link, {1, 1}, :mav_cmd_component_arm_disarm, [1.0])
+
+{:ok, %{value: 1}} = MAVLink2.Param.read(link, {1, 1}, "SYSID_THISMAV")
+{:ok, _} = MAVLink2.Param.set(link, {1, 1}, "RTL_ALT", 3000, :mav_param_type_int32)
+{:ok, params} = MAVLink2.Param.list(link, {1, 1})
+
+:ok =
+  MAVLink2.Mission.upload(link, {1, 1}, [
+    [command: :mav_cmd_nav_takeoff, frame: :mav_frame_global_relative_alt_int, z: 20.0]
+  ])
+
+{:ok, items} = MAVLink2.Mission.download(link, {1, 1})
+```
+
+| Module | Options |
+| --- | --- |
+| `MAVLink2.Command` | `:timeout`, `:retries`, `:progress_timeout`, `:on_progress` for `MAV_RESULT_IN_PROGRESS` acks |
+| `MAVLink2.Param` | `:timeout`, `:retries`, `:encoding` (`:cast` for ArduPilot, `:bytewise` for PX4) |
+| `MAVLink2.Mission` | `:timeout`, `:retries`, `:mission_type` (mission, fence or rally) |
+
 ### Without a link
 
 `MAVLink2.Frame` encodes and decodes frames directly:
@@ -138,16 +200,20 @@ over, and the bytes left for the next read.
 | Module | |
 | --- | --- |
 | `MAVLink2.Frame` | v2 encode and decode for a dialect; `drain/2` over a byte stream |
-| `MAVLink2.Dialect` | the behaviour a dialect implements: `crc_extra/1`, `payload_length/1` |
+| `MAVLink2.Dialect` | the behaviour a dialect implements: `crc_extra/1`, `payload_length/1`, optionally `target_offsets/1` |
 | `MAVLink2.Dialect.XML` | generates a dialect from MAVLink XML at compile time |
 | `MAVLink2.XML` | reads MAVLink XML with its includes: wire order, lengths, `crc_extra` |
 | `MAVLink2.Codec` | payloads from a wire layout; NaN and the infinities as atoms |
 | `MAVLink2.Signing` | sign, verify, per-stream replay protection |
 | `MAVLink2.CRC` | CRC-16/MCRF4XX with `crc_extra` |
 | `MAVLink2.Link` | a link process over one transport |
+| `MAVLink2.Router` | forwards frames between links |
+| `MAVLink2.Command` | `COMMAND_LONG` and `COMMAND_INT`, with acks |
+| `MAVLink2.Param` | the parameter protocol |
+| `MAVLink2.Mission` | the mission protocol |
 | `MAVLink2.Transport` | the transport behaviour: `open/1`, `write/2`, `close/1` |
 | `MAVLink2.Transport.UART` | a serial port through `Circuits.UART` |
-| `MAVLink2.Transport.Loopback` | in memory, for tests; `echo: true` sends writes back |
+| `MAVLink2.Transport.Loopback` | in memory, for tests; `echo: true` sends writes back, `peer:` joins two links |
 
 A custom transport implements `MAVLink2.Transport` and sends received bytes to
 the link as `{:mavlink_data, binary}`.
@@ -159,4 +225,5 @@ mix test
 ```
 
 The fixtures are pymavlink 2.4.50's XML definitions and its output on them;
-see `test/fixtures/README.md`.
+see `test/fixtures/README.md`. The extended-header frames in
+`test/mavlink2/extended_header_test.exs` are the C library's.
