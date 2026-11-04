@@ -231,12 +231,12 @@ is `{sysid, compid}`.
 {:ok, _} = MAVLink2.Param.set(link, {1, 1}, "RTL_ALT", 3000, :mav_param_type_int32)
 {:ok, params} = MAVLink2.Param.list(link, {1, 1})
 
-:ok =
+{:ok, opaque_id} =
   MAVLink2.Mission.upload(link, {1, 1}, [
-    [command: :mav_cmd_nav_takeoff, frame: :mav_frame_global_relative_alt_int, z: 20.0]
+    [command: :mav_cmd_nav_takeoff, frame: :mav_frame_global_relative_alt, z: 20.0]
   ])
 
-{:ok, items} = MAVLink2.Mission.download(link, {1, 1})
+{:ok, items, opaque_id} = MAVLink2.Mission.download(link, {1, 1})
 ```
 
 | Module | Options |

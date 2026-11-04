@@ -11,10 +11,10 @@ defmodule MAVLink2.MissionTest do
   @fence 1
 
   @items [
-    [command: :mav_cmd_nav_takeoff, frame: :mav_frame_global_relative_alt_int, z: 20.0],
+    [command: :mav_cmd_nav_takeoff, frame: :mav_frame_global_relative_alt, z: 20.0],
     [
       command: :mav_cmd_nav_waypoint,
-      frame: :mav_frame_global_relative_alt_int,
+      frame: :mav_frame_global_relative_alt,
       x: 473_977_420,
       y: 85_455_940,
       z: 30.0,
@@ -79,30 +79,30 @@ defmodule MAVLink2.MissionTest do
   test "upload sends each item the vehicle asks for" do
     {gcs, v} = Vehicle.pair()
     vehicle(v, self())
-    assert Mission.upload(gcs, {1, 1}, @items, @fast) == :ok
+    assert Mission.upload(gcs, {1, 1}, @items, @fast) == {:ok, nil}
     assert_received {:stored, [takeoff, waypoint]}
-    assert %{seq: 0, command: 22, frame: 6, z: 20.0} = takeoff
+    assert %{seq: 0, command: 22, frame: 3, z: 20.0} = takeoff
     assert %{seq: 1, command: 16, x: 473_977_420, y: 85_455_940, autocontinue: 1} = waypoint
   end
 
   test "upload answers the older MISSION_REQUEST too" do
     {gcs, v} = Vehicle.pair()
     vehicle(v, self(), [], legacy: true)
-    assert Mission.upload(gcs, {1, 1}, @items, @fast) == :ok
+    assert Mission.upload(gcs, {1, 1}, @items, @fast) == {:ok, nil}
     assert_received {:stored, [_, _]}
   end
 
   test "upload sends the count again when the vehicle stays quiet" do
     {gcs, v} = Vehicle.pair()
     vehicle(v, self(), [], drop_first_count: true)
-    assert Mission.upload(gcs, {1, 1}, @items, @fast) == :ok
+    assert Mission.upload(gcs, {1, 1}, @items, @fast) == {:ok, nil}
     assert_received {:stored, [_, _]}
   end
 
   test "an empty upload is acked at once" do
     {gcs, v} = Vehicle.pair()
     vehicle(v, self())
-    assert Mission.upload(gcs, {1, 1}, [], @fast) == :ok
+    assert Mission.upload(gcs, {1, 1}, [], @fast) == {:ok, nil}
   end
 
   test "a refusal is the vehicle's mission result" do
@@ -113,29 +113,81 @@ defmodule MAVLink2.MissionTest do
              {:error, {:mission_result, :mav_mission_no_space}}
   end
 
-  test "a silent vehicle is a timeout" do
-    {gcs, _v} = Vehicle.pair()
+  test "a silent vehicle is a timeout, and the operation is cancelled" do
+    {gcs, v} = Vehicle.pair()
+    test = self()
+
+    Vehicle.script(v, nil, fn
+      %Common.MissionAck{type: type}, _, s -> send(test, {:acked, type}) && {[], s}
+      _, _, s -> {[], s}
+    end)
+
     assert Mission.upload(gcs, {1, 1}, @items, @fast) == {:error, :timeout}
+    assert_receive {:acked, 15}
     assert Mission.download(gcs, {1, 1}, @fast) == {:error, :timeout}
+    assert_receive {:acked, 15}
+  end
+
+  test "download takes the deprecated MISSION_ITEM, scaling its positions" do
+    {gcs, v} = Vehicle.pair()
+
+    Vehicle.script(v, nil, fn
+      %Common.MissionRequestList{}, _, s ->
+        {%Common.MissionCount{target_system: 255, target_component: 190, count: 2}, s}
+
+      %Common.MissionRequestInt{seq: 0}, _, s ->
+        {%Common.MissionItem{
+           target_system: 255,
+           target_component: 190,
+           seq: 0,
+           frame: 3,
+           command: 16,
+           x: 47.397742,
+           y: 8.545594,
+           z: 30.0
+         }, s}
+
+      %Common.MissionRequestInt{seq: 1}, _, s ->
+        {%Common.MissionItem{
+           target_system: 255,
+           target_component: 190,
+           seq: 1,
+           frame: 1,
+           command: 16,
+           x: 5.0,
+           y: -2.5
+         }, s}
+
+      %Common.MissionAck{}, _, s ->
+        {[], s}
+    end)
+
+    assert {:ok, [global, local], nil} = Mission.download(gcs, {1, 1}, @fast)
+    # A float32 holds about 7 significant digits: degrees to within a few
+    # 10^-7.
+    assert global.frame == :mav_frame_global_relative_alt
+    assert_in_delta global.x, 473_977_420, 20
+    assert_in_delta global.y, 85_455_940, 20
+    assert %{frame: :mav_frame_local_ned, x: 50_000, y: -25_000} = local
   end
 
   test "download returns what upload stored, and acks it" do
     {gcs, v} = Vehicle.pair()
     vehicle(v, self())
-    :ok = Mission.upload(gcs, {1, 1}, @items, @fast)
+    {:ok, nil} = Mission.upload(gcs, {1, 1}, @items, @fast)
     assert_received {:stored, stored}
 
     {gcs2, v2} = Vehicle.pair()
     vehicle(v2, self(), stored)
-    assert {:ok, [takeoff, waypoint]} = Mission.download(gcs2, {1, 1}, @fast)
+    assert {:ok, [takeoff, waypoint], nil} = Mission.download(gcs2, {1, 1}, @fast)
 
-    assert %{command: :mav_cmd_nav_takeoff, frame: :mav_frame_global_relative_alt_int, z: 20.0} =
+    assert %{command: :mav_cmd_nav_takeoff, frame: :mav_frame_global_relative_alt, z: 20.0} =
              takeoff
 
     assert %{command: :mav_cmd_nav_waypoint, x: 473_977_420, autocontinue: 1} = waypoint
     assert_receive {:acked, @accepted}
 
-    assert Mission.upload(gcs2, {1, 1}, [takeoff, waypoint], @fast) == :ok
+    assert Mission.upload(gcs2, {1, 1}, [takeoff, waypoint], @fast) == {:ok, nil}
   end
 
   test "clear waits for the ack of its own mission type" do
