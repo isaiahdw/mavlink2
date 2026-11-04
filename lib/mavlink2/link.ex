@@ -20,9 +20,9 @@ defmodule MAVLink2.Link do
   | `:dialect` | a `MAVLink2.Dialect` (required) |
   | `:transport` | a `MAVLink2.Transport` (default `MAVLink2.Transport.UART`); the rest of the options go to its `open/1` |
   | `:sendable` | the message ids the peer accepts; others are refused with `{:error, {:not_sendable, id}}`. Default: any id the dialect has |
-  | `:sysid`, `:compid` | this end's ids (default 1, 1); `sysid` may be up to 32 bits |
+  | `:sysid`, `:compid` | this end's ids (default 1, 1): `sysid` from 1 to 32 bits, `compid` 1 to 255. 0 is the broadcast id and never a sender's, so the link refuses it, here and in `send_message/4` |
   | `:unknown` | `:skip` (default) or `:keep`: deliver frames whose id the dialect lacks, unchecked, with `known: false` (see `MAVLink2.Frame.decode/3`). Each is counted in `:unknown` as well as `:rx` |
-  | `:signing` | a `MAVLink2.Signing`: every frame sent is signed, and a frame received is delivered only if it verifies (counted as `:unsigned`, `:bad_signature` or `:replay` otherwise). Without it, frames are sent unsigned and every frame received is delivered, signed or not |
+  | `:signing` | a `MAVLink2.Signing`: every frame sent is signed, and a frame received is delivered only if it verifies (counted as `:unsigned`, `:bad_signature` or `:replay` otherwise, and delivered tagged to subscribers that ask; see `subscribe/3`). Without it, frames are sent unsigned and every frame received is delivered, signed or not |
   | `:clock` | Unix time in microseconds for signing timestamps (default `System.os_time(:microsecond)`) |
   | `:name` | registered name |
 
@@ -74,9 +74,19 @@ defmodule MAVLink2.Link do
     end
   end
 
-  @doc "Delivers every decoded frame to `pid`. Subscribing again changes nothing."
-  @spec subscribe(GenServer.server(), pid()) :: :ok
-  def subscribe(link, pid \\ self()), do: GenServer.call(link, {:subscribe, pid})
+  @doc """
+  Delivers every decoded frame to `pid` as `{MAVLink2.Link, link, frame}`.
+  Subscribing again replaces the options.
+
+  With `rejected: true`, a frame the link's `:signing` refuses also goes to
+  `pid`, as `{MAVLink2.Link, link, {:rejected, reason, frame}}` with
+  `reason` one of `:unsigned`, `:bad_signature`, `:replay`, so that it
+  cannot be mistaken for a verified one. Its timestamp moves nothing. A
+  router forwards these; an application can show them as untrusted.
+  """
+  @spec subscribe(GenServer.server(), pid(), keyword()) :: :ok
+  def subscribe(link, pid \\ self(), opts \\ []),
+    do: GenServer.call(link, {:subscribe, pid, Keyword.get(opts, :rejected, false)})
 
   @spec unsubscribe(GenServer.server(), pid()) :: :ok
   def unsubscribe(link, pid \\ self()), do: GenServer.call(link, {:unsubscribe, pid})
@@ -116,6 +126,23 @@ defmodule MAVLink2.Link do
   def init(opts) do
     transport = Keyword.get(opts, :transport, MAVLink2.Transport.UART)
 
+    with :ok <- check_source(Keyword.get(opts, :sysid, 1), Keyword.get(opts, :compid, 1)) do
+      open(transport, opts)
+    else
+      {:error, reason} -> {:stop, reason}
+    end
+  end
+
+  # 0 is the broadcast id: never a sender's.
+  defp check_source(sysid, _compid) when not (is_integer(sysid) and sysid in 1..0xFFFFFFFF),
+    do: {:error, {:out_of_range, :sysid}}
+
+  defp check_source(_sysid, compid) when not (is_integer(compid) and compid in 1..255),
+    do: {:error, {:out_of_range, :compid}}
+
+  defp check_source(_sysid, _compid), do: :ok
+
+  defp open(transport, opts) do
     # The link always owns its transport's bytes.
     case transport.open(Keyword.put(opts, :owner, self())) do
       {:ok, handle} ->
@@ -140,9 +167,14 @@ defmodule MAVLink2.Link do
   end
 
   @impl true
-  def handle_call({:subscribe, pid}, _from, state) do
-    subscribers = Map.put_new_lazy(state.subscribers, pid, fn -> Process.monitor(pid) end)
-    {:reply, :ok, %{state | subscribers: subscribers}}
+  def handle_call({:subscribe, pid, rejected?}, _from, state) do
+    ref =
+      case state.subscribers do
+        %{^pid => {ref, _}} -> ref
+        _ -> Process.monitor(pid)
+      end
+
+    {:reply, :ok, %{state | subscribers: Map.put(state.subscribers, pid, {ref, rejected?})}}
   end
 
   def handle_call({:unsubscribe, pid}, _from, state) do
@@ -150,7 +182,7 @@ defmodule MAVLink2.Link do
       {nil, _} ->
         {:reply, :ok, state}
 
-      {ref, subscribers} ->
+      {{ref, _}, subscribers} ->
         Process.demonitor(ref, [:flush])
         {:reply, :ok, %{state | subscribers: subscribers}}
     end
@@ -169,25 +201,40 @@ defmodule MAVLink2.Link do
   end
 
   def handle_call({:send, msgid, payload, opts}, _from, state) do
-    if state.sendable != nil and msgid not in state.sendable and
-         not Keyword.get(opts, :force, false) do
-      {:reply, {:error, {:not_sendable, msgid}}, state}
-    else
-      frame = %Frame{
-        msgid: msgid,
-        payload: payload,
-        seq: state.tx_seq,
-        sysid: Keyword.get(opts, :sysid, state.sysid),
-        compid: Keyword.get(opts, :compid, state.compid),
-        target_sysid: Keyword.get(opts, :target_sysid)
-      }
+    source =
+      check_source(
+        Keyword.get(opts, :sysid, state.sysid),
+        Keyword.get(opts, :compid, state.compid)
+      )
 
-      with {:ok, bytes, state} <- encode(frame, state),
-           :ok <- state.transport.write(state.handle, bytes) do
-        {:reply, :ok, state |> Map.update!(:tx_seq, &rem(&1 + 1, 256)) |> bump(:tx)}
-      else
-        {:error, reason} -> {:reply, {:error, reason}, state}
-      end
+    cond do
+      source != :ok ->
+        {:reply, source, state}
+
+      state.sendable != nil and msgid not in state.sendable and
+          not Keyword.get(opts, :force, false) ->
+        {:reply, {:error, {:not_sendable, msgid}}, state}
+
+      true ->
+        send_frame(msgid, payload, opts, state)
+    end
+  end
+
+  defp send_frame(msgid, payload, opts, state) do
+    frame = %Frame{
+      msgid: msgid,
+      payload: payload,
+      seq: state.tx_seq,
+      sysid: Keyword.get(opts, :sysid, state.sysid),
+      compid: Keyword.get(opts, :compid, state.compid),
+      target_sysid: Keyword.get(opts, :target_sysid)
+    }
+
+    with {:ok, bytes, state} <- encode(frame, state),
+         :ok <- state.transport.write(state.handle, bytes) do
+      {:reply, :ok, state |> Map.update!(:tx_seq, &rem(&1 + 1, 256)) |> bump(:tx)}
+    else
+      {:error, reason} -> {:reply, {:error, reason}, state}
     end
   end
 
@@ -236,14 +283,20 @@ defmodule MAVLink2.Link do
     now = MAVLink2.Signing.timestamp(state.clock.())
 
     case MAVLink2.Signing.verify(state.signing, frame, now) do
-      {:ok, signing} -> fan_out(frame, %{state | signing: signing})
-      {:error, reason} -> bump(state, reason)
+      {:ok, signing} ->
+        fan_out(frame, %{state | signing: signing})
+
+      {:error, reason} ->
+        for {pid, {_ref, true}} <- state.subscribers,
+            do: send(pid, {__MODULE__, state.name, {:rejected, reason, frame}})
+
+        bump(state, reason)
     end
   end
 
   defp fan_out(frame, state) do
     state = track_peer_seq(state, frame)
-    for {pid, _ref} <- state.subscribers, do: send(pid, {__MODULE__, state.name, frame})
+    for {pid, _} <- state.subscribers, do: send(pid, {__MODULE__, state.name, frame})
     state = bump(state, :rx)
     if frame.known, do: state, else: bump(state, :unknown)
   end

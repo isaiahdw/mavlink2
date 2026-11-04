@@ -38,7 +38,7 @@ defmodule MAVLink2.Signing do
           link_id: 0..255,
           timestamp: non_neg_integer(),
           streams: %{{0..255, 0..0xFFFFFFFF, 0..255} => non_neg_integer()},
-          accept_unsigned: [non_neg_integer()]
+          accept_unsigned: [non_neg_integer()] | :all
         }
 
   @iflag_signed 0x01
@@ -55,7 +55,7 @@ defmodule MAVLink2.Signing do
   | | |
   | --- | --- |
   | `:link_id` | default 0 |
-  | `:accept_unsigned` | message ids delivered even when unsigned; default none |
+  | `:accept_unsigned` | message ids delivered even when unsigned, or `:all` (for a link that is secure by itself, such as USB); default none |
   | `:timestamp` | the earliest timestamp, for a board that persists it; default 0 |
   """
   @spec new(<<_::256>>, keyword()) :: t()
@@ -112,7 +112,9 @@ defmodule MAVLink2.Signing do
   @spec verify(t(), MAVLink2.Frame.t(), non_neg_integer()) ::
           {:ok, t()} | {:error, :unsigned | :bad_signature | :replay}
   def verify(%__MODULE__{} = s, %MAVLink2.Frame{signature: nil} = frame, _now) do
-    if frame.msgid in s.accept_unsigned, do: {:ok, s}, else: {:error, :unsigned}
+    if s.accept_unsigned == :all or frame.msgid in s.accept_unsigned,
+      do: {:ok, s},
+      else: {:error, :unsigned}
   end
 
   def verify(

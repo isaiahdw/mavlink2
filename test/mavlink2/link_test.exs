@@ -103,6 +103,19 @@ defmodule MAVLink2.LinkTest do
     assert Link.forward(out, %Frame{msgid: 300, payload: <<1>>}) == {:error, :no_raw_bytes}
   end
 
+  test "0 is refused as this end's sysid or compid" do
+    Process.flag(:trap_exit, true)
+
+    assert {:error, {:out_of_range, :sysid}} =
+             Link.start_link(dialect: TestDialect, transport: Loopback, sysid: 0)
+
+    assert {:error, {:out_of_range, :compid}} =
+             Link.start_link(dialect: TestDialect, transport: Loopback, compid: 0)
+
+    link = link([])
+    assert Link.send_message(link, 300, <<1>>, compid: 0) == {:error, {:out_of_range, :compid}}
+  end
+
   test "a transport that does not open leaves the link out" do
     defmodule Closed do
       def open(_), do: {:error, :enoent}
@@ -132,6 +145,27 @@ defmodule MAVLink2.LinkTest do
       peer = MAVLink2.Signing.new(@key)
       assert {:ok, peer} = MAVLink2.Signing.verify(peer, a, t1)
       assert {:ok, _} = MAVLink2.Signing.verify(peer, b, t1)
+    end
+
+    test "subscribers that ask get refused frames, tagged with the reason" do
+      link = link(signing: MAVLink2.Signing.new(@key))
+      :ok = Link.subscribe(link, self(), rejected: true)
+      {:ok, unsigned} = Frame.encode(%Frame{msgid: 300, payload: <<1, 1, 1, 1>>}, TestDialect)
+      send(link, {:mavlink_data, unsigned})
+      assert_receive {Link, ^link, {:rejected, :unsigned, %Frame{msgid: 300}}}
+      assert %{rx: 0, unsigned: 1} = Link.stats(link)
+
+      :ok = Link.subscribe(link)
+      send(link, {:mavlink_data, unsigned})
+      refute_receive {Link, ^link, _}, 50
+    end
+
+    test "accept_unsigned: :all lets every unsigned frame through" do
+      link = link(signing: MAVLink2.Signing.new(@key, accept_unsigned: :all))
+      :ok = Link.subscribe(link)
+      {:ok, unsigned} = Frame.encode(%Frame{msgid: 300, payload: <<1, 1, 1, 1>>}, TestDialect)
+      send(link, {:mavlink_data, unsigned})
+      assert_receive {Link, ^link, %Frame{signature: nil}}
     end
 
     test "a frame signed long ago is refused by a link that has not sent" do
