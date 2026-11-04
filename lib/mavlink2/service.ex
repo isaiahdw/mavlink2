@@ -50,19 +50,41 @@ defmodule MAVLink2.Service do
 
   @doc """
   Sends `fields` as message `msgid` to the target. A target system over 255
-  goes in the header, with 255 in the payload.
+  goes in the header, with 255 in the payload. `raw` is `[{field, bytes}]`
+  written over fields' encoded bytes.
   """
-  def send_to(%__MODULE__{target: {sysid, compid}} = ctx, msgid, name, fields) do
+  def send_to(%__MODULE__{target: {sysid, compid}} = ctx, msgid, name, fields, raw \\ []) do
     mod = message!(ctx, msgid, name)
     narrow = if sysid > 255, do: 255, else: sysid
     message = struct!(mod, [target_system: narrow, target_component: compid] ++ fields)
     {^msgid, payload} = ctx.dialect.encode(message)
+    payload = Enum.reduce(raw, payload, fn {field, bytes}, p -> put_raw(mod, p, field, bytes) end)
     opts = if sysid > 255, do: [target_sysid: sysid], else: []
 
     case Link.send_message(ctx.link, msgid, payload, opts) do
       :ok -> :ok
       {:error, reason} -> throw({:error, reason})
     end
+  end
+
+  @doc "The encoded bytes of `field` in `payload`, a message of `mod`."
+  def raw(mod, payload, field) do
+    {at, size} = place(mod, field)
+    binary_part(payload, at, size)
+  end
+
+  defp put_raw(mod, payload, field, bytes) do
+    {at, size} = place(mod, field)
+    ^size = byte_size(bytes)
+    <<head::binary-size(^at), _::binary-size(^size), tail::binary>> = payload
+    head <> bytes <> tail
+  end
+
+  defp place(mod, field) do
+    Enum.reduce_while(mod.layout(), 0, fn {name, type, n}, at ->
+      size = MAVLink2.XML.size(type) * (n || 1)
+      if name == field, do: {:halt, {at, size}}, else: {:cont, at + size}
+    end)
   end
 
   @doc """
