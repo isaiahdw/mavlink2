@@ -163,6 +163,6 @@ defmodule MAVLink2.RouterTest do
   test "the router stops with a link", %{links: l, router: r} do
     ref = Process.monitor(r)
     GenServer.stop(l.b)
-    assert_receive {:DOWN, ^ref, :process, ^r, {:link_down, _}}
+    assert_receive {:DOWN, ^ref, :process, ^r, {:link_down, _}}, 1000
   end
 end
