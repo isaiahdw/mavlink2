@@ -227,3 +227,8 @@ mix test
 The fixtures are pymavlink 2.4.50's XML definitions and its output on them;
 see `test/fixtures/README.md`. The extended-header frames in
 `test/mavlink2/extended_header_test.exs` are the C library's.
+
+## License
+
+MIT; see `LICENSE`. The files in `test/fixtures` keep their own licenses, listed
+in `test/fixtures/README.md`.
