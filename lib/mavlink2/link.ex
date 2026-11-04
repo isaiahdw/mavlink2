@@ -20,7 +20,8 @@ defmodule MAVLink2.Link do
   | `:dialect` | a `MAVLink2.Dialect` (required) |
   | `:transport` | a `MAVLink2.Transport` (default `MAVLink2.Transport.UART`); the rest of the options go to its `open/1` |
   | `:sendable` | the message ids the peer accepts; others are refused with `{:error, {:not_sendable, id}}`. Default: any id the dialect has |
-  | `:sysid`, `:compid` | this end's ids (default 1, 1) |
+  | `:sysid`, `:compid` | this end's ids (default 1, 1); `sysid` may be up to 32 bits |
+  | `:unknown` | `:skip` (default) or `:keep`: deliver frames whose id the dialect lacks, unchecked, with `known: false` (see `MAVLink2.Frame.decode/3`). Each is counted in `:unknown` as well as `:rx` |
   | `:signing` | a `MAVLink2.Signing`: every frame sent is signed, and a frame received is delivered only if it verifies (counted as `:unsigned`, `:bad_signature` or `:replay` otherwise). Without it, frames are sent unsigned and every frame received is delivered, signed or not |
   | `:clock` | Unix time in microseconds for signing timestamps (default `System.os_time(:microsecond)`) |
   | `:name` | registered name |
@@ -45,6 +46,7 @@ defmodule MAVLink2.Link do
       :sendable,
       :signing,
       :clock,
+      unknown: :skip,
       sysid: 1,
       compid: 1,
       buffer: <<>>,
@@ -78,13 +80,30 @@ defmodule MAVLink2.Link do
 
   @doc """
   Sends message `msgid` with `payload`. `sysid:` and `compid:` override the
-  link's; `force: true` sends an id outside `:sendable`, for probing.
+  link's; `target_sysid:` puts a target system in the header, for a target
+  over 255 (with 255 in the payload's `target_system`); `force: true` sends
+  an id outside `:sendable`, for probing.
   """
   @spec send_message(GenServer.server(), non_neg_integer(), binary(), keyword()) ::
           :ok | {:error, term()}
   def send_message(link, msgid, payload, opts \\ [])
       when is_integer(msgid) and is_binary(payload),
       do: GenServer.call(link, {:send, msgid, payload, opts})
+
+  @doc """
+  Writes a decoded frame's `raw` bytes unchanged: its sequence number,
+  source and signature are the original sender's. For routing; `:sendable`
+  does not apply. A link with `:signing` does not sign what it forwards.
+  """
+  @spec forward(GenServer.server(), Frame.t()) :: :ok | {:error, term()}
+  def forward(link, %Frame{raw: raw}) when is_binary(raw),
+    do: GenServer.call(link, {:forward, raw})
+
+  def forward(_link, %Frame{raw: nil}), do: {:error, :no_raw_bytes}
+
+  @doc "This end's `:sysid`, `:compid` and `:dialect`."
+  @spec info(GenServer.server()) :: %{sysid: non_neg_integer(), compid: 0..255, dialect: module()}
+  def info(link), do: GenServer.call(link, :info)
 
   @doc "Counts: `:rx`, `:tx`, `:errors`, `:dropped`, `:unknown`, `:unsigned`, `:bad_signature`, `:replay`."
   def stats(link), do: GenServer.call(link, :stats)
@@ -105,6 +124,7 @@ defmodule MAVLink2.Link do
            sendable: Keyword.get(opts, :sendable),
            signing: Keyword.get(opts, :signing),
            clock: Keyword.get(opts, :clock, fn -> System.os_time(:microsecond) end),
+           unknown: Keyword.get(opts, :unknown, :skip),
            sysid: Keyword.get(opts, :sysid, 1),
            compid: Keyword.get(opts, :compid, 1)
          }}
@@ -134,6 +154,16 @@ defmodule MAVLink2.Link do
 
   def handle_call(:stats, _from, state), do: {:reply, state.stats, state}
 
+  def handle_call(:info, _from, state),
+    do: {:reply, %{sysid: state.sysid, compid: state.compid, dialect: state.dialect}, state}
+
+  def handle_call({:forward, raw}, _from, state) do
+    case state.transport.write(state.handle, raw) do
+      :ok -> {:reply, :ok, bump(state, :tx)}
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
   def handle_call({:send, msgid, payload, opts}, _from, state) do
     if state.sendable != nil and msgid not in state.sendable and
          not Keyword.get(opts, :force, false) do
@@ -144,7 +174,8 @@ defmodule MAVLink2.Link do
         payload: payload,
         seq: state.tx_seq,
         sysid: Keyword.get(opts, :sysid, state.sysid),
-        compid: Keyword.get(opts, :compid, state.compid)
+        compid: Keyword.get(opts, :compid, state.compid),
+        target_sysid: Keyword.get(opts, :target_sysid)
       }
 
       with {:ok, bytes, state} <- encode(frame, state),
@@ -158,7 +189,9 @@ defmodule MAVLink2.Link do
 
   @impl true
   def handle_info({:mavlink_data, bytes}, state) do
-    {frames, errors, rest} = Frame.drain(state.buffer <> bytes, state.dialect)
+    {frames, errors, rest} =
+      Frame.drain(state.buffer <> bytes, state.dialect, unknown: state.unknown)
+
     state = state |> Map.put(:buffer, rest) |> count_errors(errors)
     {:noreply, Enum.reduce(frames, state, &deliver/2)}
   end
@@ -207,7 +240,8 @@ defmodule MAVLink2.Link do
   defp fan_out(frame, state) do
     state = track_peer_seq(state, frame)
     for {pid, _ref} <- state.subscribers, do: send(pid, {__MODULE__, state.name, frame})
-    bump(state, :rx)
+    state = bump(state, :rx)
+    if frame.known, do: state, else: bump(state, :unknown)
   end
 
   defp track_peer_seq(state, %Frame{sysid: sysid, compid: compid, seq: seq}) do

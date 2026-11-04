@@ -37,11 +37,12 @@ defmodule MAVLink2.Signing do
           key: <<_::256>>,
           link_id: 0..255,
           timestamp: non_neg_integer(),
-          streams: %{{0..255, 0..255, 0..255} => non_neg_integer()},
+          streams: %{{0..255, 0..0xFFFFFFFF, 0..255} => non_neg_integer()},
           accept_unsigned: [non_neg_integer()]
         }
 
   @iflag_signed 0x01
+  @iflag_sysid32 0x02
   # 2015-01-01T00:00:00Z in Unix microseconds.
   @epoch_us 1_420_070_400_000_000
   # One minute in timestamp units (10 µs).
@@ -78,11 +79,8 @@ defmodule MAVLink2.Signing do
   signed bit, with the next timestamp at or after `now` (a `timestamp/1`).
   """
   @spec sign(t(), binary(), non_neg_integer()) :: {binary(), t()}
-  def sign(
-        %__MODULE__{} = s,
-        <<_stx, _len, _iflags, _cflags, _seq, sysid, compid, _::binary>> = wire,
-        now
-      ) do
+  def sign(%__MODULE__{} = s, wire, now) do
+    {sysid, compid} = source(wire)
     ts = min(max(now, s.timestamp + 1), @max_timestamp)
     tail = <<s.link_id, ts::little-48>>
     streams = Map.put(s.streams, {s.link_id, sysid, compid}, ts)
@@ -142,6 +140,15 @@ defmodule MAVLink2.Signing do
       _ -> ts + @new_stream_window < s.timestamp
     end
   end
+
+  defp source(<<_stx, _len, iflags, _cflags, _seq, sysid0, rest::binary>>)
+       when (iflags &&& @iflag_sysid32) != 0 do
+    <<sysid_hi::little-24, compid, _::binary>> = rest
+    {sysid0 + (sysid_hi <<< 8), compid}
+  end
+
+  defp source(<<_stx, _len, _iflags, _cflags, _seq, sysid, compid, _::binary>>),
+    do: {sysid, compid}
 
   defp digest(key, data), do: :crypto.hash(:sha256, [key, data]) |> binary_part(0, 6)
 end

@@ -93,6 +93,26 @@ defmodule MAVLink2.SigningTest do
     assert {:ok, _} = Signing.verify(Signing.new(@key), frame, @t0)
   end
 
+  test "a signature covers the extended header" do
+    frame = %Frame{msgid: 300, payload: <<1, 2, 3, 4>>, sysid: 70_000, target_sysid: 100_000}
+    {:ok, wire, s} = Signing.encode(Signing.new(@key), frame, @d, @t0)
+    assert {:ok, decoded, <<>>} = Frame.decode(wire, @d)
+    assert {:ok, _} = Signing.verify(Signing.new(@key), decoded, @t0)
+    assert Signing.verify(s, decoded, @t0) == {:error, :replay}
+
+    # The target's high byte, changed with the checksum fixed up, fails the
+    # signature.
+    <<head::binary-size(16), hi, rest::binary>> = wire
+    tampered = <<head::binary, Bitwise.bxor(hi, 1), rest::binary>>
+    n = byte_size(tampered) - 13 - 2
+    <<covered::binary-size(^n), _crc::16, sig::binary>> = tampered
+    <<_stx, crc_input::binary>> = covered
+    crc = MAVLink2.CRC.checksum(crc_input, @d.crc_extra(300))
+    {:ok, forged, <<>>} = Frame.decode(<<covered::binary, crc::little-16, sig::binary>>, @d)
+    assert forged.target_sysid != 100_000
+    assert Signing.verify(Signing.new(@key), forged, @t0) == {:error, :bad_signature}
+  end
+
   test "a persisted timestamp is where a new state starts" do
     {:ok, frame, <<>>} = Frame.decode(@heartbeat, @d)
     s = Signing.new(@key, timestamp: @t0 + 6_000_001)

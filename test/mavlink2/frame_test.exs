@@ -16,13 +16,13 @@ defmodule MAVLink2.FrameTest do
   test "frames as pymavlink encodes them" do
     heartbeat = %Frame{msgid: 0, payload: <<0::32, 6, 8, 0, 4, 3>>, sysid: 255, compid: 0}
     assert Frame.encode(heartbeat, @d) == {:ok, @heartbeat}
-    assert Frame.decode(@heartbeat, @d) == {:ok, heartbeat, <<>>}
+    assert Frame.decode(@heartbeat, @d) == {:ok, %{heartbeat | raw: @heartbeat}, <<>>}
 
     # COMMAND_LONG 400 with param1 = 1.0; its trailing zero byte is truncated.
     payload = <<1.0::float-32-little, 0::size(6 * 32), 400::16-little, 1, 1, 0>>
     command = %Frame{msgid: 76, payload: payload, sysid: 255, compid: 0}
     assert Frame.encode(command, @d) == {:ok, @command_long}
-    assert Frame.decode(@command_long, @d) == {:ok, command, <<>>}
+    assert Frame.decode(@command_long, @d) == {:ok, %{command | raw: @command_long}, <<>>}
   end
 
   test "every message round-trips" do
@@ -30,7 +30,7 @@ defmodule MAVLink2.FrameTest do
       payload = :binary.copy(<<0xAB>>, TestDialect.payload_length(msgid))
       frame = %Frame{msgid: msgid, payload: payload, seq: 7, sysid: 1, compid: 2}
       assert {:ok, wire} = Frame.encode(frame, @d)
-      assert {:ok, ^frame, <<>>} = Frame.decode(wire, @d)
+      assert Frame.decode(wire, @d) == {:ok, %{frame | raw: wire}, <<>>}
     end
   end
 
@@ -88,17 +88,77 @@ defmodule MAVLink2.FrameTest do
              Frame.decode(<<0xFD, 0xFF, 0, 0, 0, 0, 0, 0xEE, 0xEE, 0xEE>>, @d)
   end
 
-  test "a frame with an incompat flag other than signing is refused whole" do
-    {:ok, wire} =
-      Frame.encode(%Frame{msgid: 300, payload: <<1, 2, 3, 4>>, incompat_flags: 0x02}, @d)
+  test "an unknown incompat flag is refused as soon as it arrives" do
+    assert Frame.decode(<<0xFD, 4, 0x08>>, @d) ==
+             {:error, {:unsupported_incompat_flags, 0x08}, <<4, 0x08>>}
 
-    assert Frame.decode(wire <> "x", @d) ==
-             {:error, {:unsupported_incompat_flags, 0x02}, "x"}
+    assert Frame.encode(%Frame{msgid: 300, payload: <<1>>, incompat_flags: 0x08}, @d) ==
+             {:error, {:unsupported_incompat_flags, 0x08}}
+  end
+
+  # Built by hand from the C library's layout: the 3 high sysid bytes after
+  # the first, the 4-byte target after msgid, all covered by the checksum.
+  defp wide(sysid, target, payload, msgid \\ 300) do
+    flags = if(sysid > 255, do: 0x02, else: 0) ||| if(target, do: 0x04, else: 0)
+    sys = if sysid > 255, do: <<sysid::little-32>>, else: <<sysid>>
+    tgt = if target, do: <<target::little-32>>, else: <<>>
+    header = <<byte_size(payload), flags, 0, 0>> <> sys <> <<2, msgid::little-24>> <> tgt
+    crc = MAVLink2.CRC.checksum(header <> payload, TestDialect.crc_extra(msgid))
+    <<0xFD>> <> header <> payload <> <<crc::little-16>>
+  end
+
+  test "a 32-bit sysid and a header target, each and both" do
+    for {sysid, target} <- [{70_000, nil}, {9, 100_000}, {70_000, 100_000}, {9, 0}] do
+      wire = wide(sysid, target, <<1, 2, 3, 4>>)
+
+      frame = %Frame{
+        msgid: 300,
+        payload: <<1, 2, 3, 4>>,
+        sysid: sysid,
+        compid: 2,
+        target_sysid: target
+      }
+
+      assert Frame.encode(frame, @d) == {:ok, wire}
+      assert {:ok, decoded, "x"} = Frame.decode(wire <> "x", @d)
+      assert %{sysid: ^sysid, compid: 2, target_sysid: ^target, raw: ^wire} = decoded
+    end
+  end
+
+  test "a SYSID32 frame with a small sysid keeps its 4-byte sysid" do
+    frame = %Frame{msgid: 300, payload: <<1>>, sysid: 5, incompat_flags: 0x02}
+    {:ok, wire} = Frame.encode(frame, @d)
+    assert byte_size(wire) == 1 + 9 + 3 + 1 + 2
+    assert {:ok, %{sysid: 5, incompat_flags: 0x02}, <<>>} = Frame.decode(wire, @d)
+  end
+
+  test "an extended header waits until all of it has arrived" do
+    wire = wide(70_000, 100_000, <<1, 2, 3, 4>>)
+
+    for n <- 1..(byte_size(wire) - 1) do
+      part = binary_part(wire, 0, n)
+      assert Frame.decode(part, @d) == {:incomplete, part}
+    end
+  end
+
+  test "with unknown: :keep, an unknown id is returned unchecked, whole" do
+    {:ok, a} = Frame.encode(%Frame{msgid: 300, payload: <<9, 9, 9, 9>>}, @d)
+    unknown = <<0xFD, 3, 0, 0, 7, 70, 80, 0x39, 0x30, 0, 1, 2, 3, 0xAA, 0xBB>>
+
+    assert {[%Frame{known: false} = u, %Frame{known: true}], [], <<>>} =
+             Frame.drain(unknown <> a, @d, unknown: :keep)
+
+    assert %{msgid: 0x3039, sysid: 70, compid: 80, payload: <<1, 2, 3>>, raw: ^unknown} = u
   end
 
   test "fields that do not fit are refused, not wrapped" do
     frame = %Frame{msgid: 300, payload: <<1>>}
-    assert Frame.encode(%{frame | sysid: 256}, @d) == {:error, {:out_of_range, :sysid}}
+    assert Frame.encode(%{frame | sysid: 1 <<< 32}, @d) == {:error, {:out_of_range, :sysid}}
+    assert Frame.encode(%{frame | compid: 256}, @d) == {:error, {:out_of_range, :compid}}
+
+    assert Frame.encode(%{frame | target_sysid: -1}, @d) ==
+             {:error, {:out_of_range, :target_sysid}}
+
     assert Frame.encode(%{frame | seq: -1}, @d) == {:error, {:out_of_range, :seq}}
     assert Frame.encode(%{frame | msgid: 1 <<< 24}, @d) == {:error, {:out_of_range, :msgid}}
     assert Frame.encode(%{frame | payload: <<1, 2, 3, 4, 5>>}, @d) == {:error, :payload_too_long}

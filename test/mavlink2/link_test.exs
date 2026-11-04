@@ -78,6 +78,31 @@ defmodule MAVLink2.LinkTest do
     refute_receive {Link, ^link, _}, 50
   end
 
+  test "a 32-bit sysid and a header target go out and come back" do
+    link = link(echo: true, sysid: 70_000)
+    :ok = Link.subscribe(link)
+    :ok = Link.send_message(link, 300, <<1, 2, 3, 4>>, target_sysid: 100_000)
+    assert_receive {Link, ^link, %Frame{sysid: 70_000, target_sysid: 100_000}}
+  end
+
+  test "unknown ids are delivered with unknown: :keep, and forwarded unchanged" do
+    link = link(unknown: :keep)
+    :ok = Link.subscribe(link)
+    unknown = <<0xFD, 3, 0, 0, 7, 70, 80, 0x39, 0x30, 0, 1, 2, 3, 0xAA, 0xBB>>
+    send(link, {:mavlink_data, unknown})
+    assert_receive {Link, ^link, %Frame{known: false, msgid: 0x3039} = frame}
+    assert %{rx: 1, unknown: 1, errors: 0} = Link.stats(link)
+
+    out =
+      start_supervised!(
+        Supervisor.child_spec({Link, dialect: TestDialect, transport: Loopback}, id: :out)
+      )
+
+    assert :ok = Link.forward(out, frame)
+    assert Loopback.written(:sys.get_state(out).handle) == unknown
+    assert Link.forward(out, %Frame{msgid: 300, payload: <<1>>}) == {:error, :no_raw_bytes}
+  end
+
   test "a transport that does not open leaves the link out" do
     defmodule Closed do
       def open(_), do: {:error, :enoent}
