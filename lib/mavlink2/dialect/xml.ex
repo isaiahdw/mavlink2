@@ -16,7 +16,7 @@ defmodule MAVLink2.Dialect.XML do
   | --- | --- |
   | `crc_extra/1`, `payload_length/1` | the `MAVLink2.Dialect` callbacks |
   | `msgids/0`, `message/1` | every message id; the struct module for an id, or `nil` |
-  | `encode/1` | a message struct to `{msgid, payload}` (untruncated; `MAVLink2.Frame` truncates) |
+  | `encode/1` | a message struct to `{msgid, payload}` (untruncated; `MAVLink2.Frame` truncates); `ArgumentError` for an integer outside its field's type |
   | `decode/2` | `{msgid, payload}` to `{:ok, struct}`, or `{:error, {:unknown_msgid, id}}` |
   | `enum/1`, `enum_value/2`, `enum_entry/2` | an enum as `%{entry => value}`, an entry's value, a value's entry |
 

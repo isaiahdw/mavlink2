@@ -11,6 +11,7 @@ defmodule MAVLink2.Codec do
   | other arrays | list of `n` values, zero-filled when shorter |
 
   `decode/2` zero-extends a short payload first, as a v2 receiver must.
+  `encode/2` raises `ArgumentError` for an integer outside its type's range.
   """
 
   import Bitwise
@@ -20,7 +21,9 @@ defmodule MAVLink2.Codec do
   @doc "The payload for `values`, a map or struct holding every field in `layout`."
   @spec encode(layout(), map()) :: binary()
   def encode(layout, values) do
-    for {name, type, n} <- layout, into: <<>>, do: field(type, n, Map.fetch!(values, name))
+    for {name, type, n} <- layout, into: <<>> do
+      field(type, n, Map.fetch!(values, name), name)
+    end
   end
 
   @doc "The field values in `payload`, as a keyword list in wire order."
@@ -47,22 +50,35 @@ defmodule MAVLink2.Codec do
   def zero(type, nil) when type in [:float, :double], do: 0.0
   def zero(_type, nil), do: 0
 
-  defp field(:char, n, s) when is_integer(n) and is_binary(s),
+  defp field(:char, n, s, _name) when is_integer(n) and is_binary(s),
     do: s |> binary_part(0, min(byte_size(s), n)) |> pad(n)
 
-  defp field(type, n, list) when is_integer(n) and is_list(list) do
+  defp field(type, n, list, name) when is_integer(n) and is_list(list) do
     list = Enum.take(list, n)
     values = list ++ List.duplicate(zero(type, nil), n - length(list))
-    for v <- values, into: <<>>, do: field(type, nil, v)
+    for v <- values, into: <<>>, do: field(type, nil, v, name)
   end
 
-  defp field(:float, nil, v), do: float(32, v)
-  defp field(:double, nil, v), do: float(64, v)
+  defp field(:float, nil, v, _name), do: float(32, v)
+  defp field(:double, nil, v, _name), do: float(64, v)
 
-  defp field(type, nil, v) when type in [:int8, :int16, :int32, :int64],
-    do: <<v::signed-little-size(bits(type))>>
+  defp field(type, nil, v, name) do
+    {min, max} = range(type)
 
-  defp field(type, nil, v), do: <<v::unsigned-little-size(bits(type))>>
+    unless is_integer(v) and v >= min and v <= max do
+      raise ArgumentError,
+            "field #{inspect(name)} is #{inspect(v)}, outside #{type} (#{min}..#{max})"
+    end
+
+    <<v::little-size(bits(type))>>
+  end
+
+  @signed [:int8, :int16, :int32, :int64]
+
+  defp range(type) when type in @signed,
+    do: {-(1 <<< (bits(type) - 1)), (1 <<< (bits(type) - 1)) - 1}
+
+  defp range(type), do: {0, (1 <<< bits(type)) - 1}
 
   defp float(32, :nan), do: <<0x7FC00000::little-32>>
   defp float(32, :infinity), do: <<0x7F800000::little-32>>
@@ -84,7 +100,7 @@ defmodule MAVLink2.Codec do
   defp take(:float, nil, <<raw::little-32, rest::binary>>), do: {unfloat(32, raw), rest}
   defp take(:double, nil, <<raw::little-64, rest::binary>>), do: {unfloat(64, raw), rest}
 
-  defp take(type, nil, bin) when type in [:int8, :int16, :int32, :int64] do
+  defp take(type, nil, bin) when type in @signed do
     size = bits(type)
     <<v::signed-little-size(^size), rest::binary>> = bin
     {v, rest}

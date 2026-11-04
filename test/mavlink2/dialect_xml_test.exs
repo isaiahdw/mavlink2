@@ -90,6 +90,23 @@ defmodule MAVLink2.Dialect.XMLTest do
     assert zeros == List.duplicate(0, 30)
   end
 
+  test "an integer outside its field's type is refused, not wrapped" do
+    assert_raise ArgumentError, ~r/field :type is 300, outside uint8/, fn ->
+      Common.encode(%Common.Heartbeat{type: 300})
+    end
+
+    assert_raise ArgumentError, ~r/field :custom_mode is -1/, fn ->
+      Common.encode(%Common.Heartbeat{custom_mode: -1})
+    end
+
+    assert_raise ArgumentError, ~r/field :secret_key is 256/, fn ->
+      Common.encode(%Common.SetupSigning{secret_key: [1, 256]})
+    end
+
+    {msgid, payload} = Common.encode(%Common.ScaledPressure{temperature: -32_768})
+    assert {:ok, %{temperature: -32_768}} = Common.decode(msgid, payload)
+  end
+
   test "enums by name and value; unknown ids" do
     assert Common.enum_value(:mav_cmd, :mav_cmd_component_arm_disarm) == 400
     assert Common.enum_entry(:mav_cmd, 400) == :mav_cmd_component_arm_disarm
