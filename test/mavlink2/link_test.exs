@@ -48,6 +48,36 @@ defmodule MAVLink2.LinkTest do
     assert %{rx: 2, dropped: 2, errors: 1} = Link.stats(link)
   end
 
+  test "sequence gaps are counted per sender" do
+    link = link([])
+
+    bytes =
+      for seq <- 0..4, compid <- [1, 2], into: <<>> do
+        {:ok, wire} =
+          Frame.encode(%Frame{msgid: 300, payload: <<1>>, seq: seq, compid: compid}, TestDialect)
+
+        wire
+      end
+
+    {:ok, gap} = Frame.encode(%Frame{msgid: 300, payload: <<1>>, seq: 8, compid: 2}, TestDialect)
+    send(link, {:mavlink_data, bytes <> gap})
+    assert %{rx: 11, dropped: 3} = Link.stats(link)
+  end
+
+  test "subscribing twice delivers once; unsubscribing stops delivery" do
+    link = link(echo: true)
+    :ok = Link.subscribe(link)
+    :ok = Link.subscribe(link)
+    :ok = Link.send_message(link, 300, <<1>>)
+    assert_receive {Link, ^link, %Frame{}}
+    refute_receive {Link, ^link, _}, 50
+
+    :ok = Link.unsubscribe(link)
+    assert {:monitors, []} = Process.info(link, :monitors)
+    :ok = Link.send_message(link, 300, <<1>>)
+    refute_receive {Link, ^link, _}, 50
+  end
+
   test "a transport that does not open leaves the link out" do
     defmodule Closed do
       def open(_), do: {:error, :enoent}

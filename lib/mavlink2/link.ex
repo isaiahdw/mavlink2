@@ -10,8 +10,8 @@ defmodule MAVLink2.Link do
   - A partial frame stays buffered until the rest arrives.
   - Decode errors are counted in `stats/1`, not raised: a noisy line
     degrades.
-  - Outgoing frames are numbered per link; a gap in the peer's numbers is
-    counted as `:dropped`.
+  - Outgoing frames are numbered per link; a gap in a sender's numbers
+    (per system and component id) is counted as `:dropped`.
 
   Options:
 
@@ -49,8 +49,8 @@ defmodule MAVLink2.Link do
       compid: 1,
       buffer: <<>>,
       tx_seq: 0,
-      peer_seq: nil,
-      subscribers: MapSet.new(),
+      peer_seq: %{},
+      subscribers: %{},
       stats: %{
         rx: 0,
         tx: 0,
@@ -71,7 +71,7 @@ defmodule MAVLink2.Link do
     end
   end
 
-  @doc "Delivers every decoded frame to `pid`."
+  @doc "Delivers every decoded frame to `pid`. Subscribing again changes nothing."
   def subscribe(link, pid \\ self()), do: GenServer.call(link, {:subscribe, pid})
 
   def unsubscribe(link, pid \\ self()), do: GenServer.call(link, {:unsubscribe, pid})
@@ -117,12 +117,20 @@ defmodule MAVLink2.Link do
 
   @impl true
   def handle_call({:subscribe, pid}, _from, state) do
-    Process.monitor(pid)
-    {:reply, :ok, %{state | subscribers: MapSet.put(state.subscribers, pid)}}
+    subscribers = Map.put_new_lazy(state.subscribers, pid, fn -> Process.monitor(pid) end)
+    {:reply, :ok, %{state | subscribers: subscribers}}
   end
 
-  def handle_call({:unsubscribe, pid}, _from, state),
-    do: {:reply, :ok, %{state | subscribers: MapSet.delete(state.subscribers, pid)}}
+  def handle_call({:unsubscribe, pid}, _from, state) do
+    case Map.pop(state.subscribers, pid) do
+      {nil, _} ->
+        {:reply, :ok, state}
+
+      {ref, subscribers} ->
+        Process.demonitor(ref, [:flush])
+        {:reply, :ok, %{state | subscribers: subscribers}}
+    end
+  end
 
   def handle_call(:stats, _from, state), do: {:reply, state.stats, state}
 
@@ -165,7 +173,7 @@ defmodule MAVLink2.Link do
   end
 
   def handle_info({:DOWN, _ref, :process, pid, _reason}, state),
-    do: {:noreply, %{state | subscribers: MapSet.delete(state.subscribers, pid)}}
+    do: {:noreply, %{state | subscribers: Map.delete(state.subscribers, pid)}}
 
   def handle_info(_other, state), do: {:noreply, state}
 
@@ -197,16 +205,21 @@ defmodule MAVLink2.Link do
   end
 
   defp fan_out(frame, state) do
-    state = track_peer_seq(state, frame.seq)
-    for pid <- state.subscribers, do: send(pid, {__MODULE__, state.name, frame})
+    state = track_peer_seq(state, frame)
+    for {pid, _ref} <- state.subscribers, do: send(pid, {__MODULE__, state.name, frame})
     bump(state, :rx)
   end
 
-  defp track_peer_seq(%{peer_seq: nil} = state, seq), do: %{state | peer_seq: seq}
+  defp track_peer_seq(state, %Frame{sysid: sysid, compid: compid, seq: seq}) do
+    sender = {sysid, compid}
 
-  defp track_peer_seq(state, seq) do
-    lost = rem(seq - rem(state.peer_seq + 1, 256) + 256, 256)
-    state = %{state | peer_seq: seq}
+    lost =
+      case state.peer_seq do
+        %{^sender => last} -> Integer.mod(seq - last - 1, 256)
+        _ -> 0
+      end
+
+    state = %{state | peer_seq: Map.put(state.peer_seq, sender, seq)}
     if lost > 0, do: bump(state, :dropped, lost), else: state
   end
 
