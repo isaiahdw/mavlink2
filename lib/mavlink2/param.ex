@@ -41,6 +41,8 @@ defmodule MAVLink2.Param do
   @value 22
   @set 23
 
+  @type encoding :: :cast | :bytewise
+
   @type param :: %{
           name: String.t(),
           value: number() | :nan | :infinity | :neg_infinity,
@@ -204,6 +206,8 @@ defmodule MAVLink2.Param do
   A wire float (and its raw 4 bytes) as the parameter's value, for a
   `MAV_PARAM_TYPE` value and an encoding.
   """
+  @spec from_wire(float() | :nan | :infinity | :neg_infinity, binary(), integer(), encoding()) ::
+          number() | :nan | :infinity | :neg_infinity
   def from_wire(float, raw, type, encoding)
 
   def from_wire(float, _raw, type, :cast) when is_float(float) and is_map_key(@integers, type),
@@ -224,6 +228,7 @@ defmodule MAVLink2.Param do
   A value as the wire float and, for a bytewise integer, the raw bytes to
   put in its place.
   """
+  @spec to_wire(number(), integer(), encoding()) :: {float(), [{:param_value, binary()}]}
   def to_wire(value, type, :bytewise) when is_map_key(@integers, type) and is_integer(value) do
     {bits, sign} = @integers[type]
     pad = 32 - bits

@@ -51,7 +51,11 @@ defmodule MAVLink2.Dialect.XML do
       @mavlink2_messages Map.new(unquote(by_id))
       @mavlink2_enums unquote(Macro.escape(enums))
 
+      @typedoc "A message struct of this dialect."
+      @type message :: struct()
+
       @impl MAVLink2.Dialect
+      @spec crc_extra(non_neg_integer()) :: 0..255 | nil
       def crc_extra(msgid) do
         case @mavlink2_messages do
           %{^msgid => mod} -> mod.crc_extra()
@@ -60,6 +64,7 @@ defmodule MAVLink2.Dialect.XML do
       end
 
       @impl MAVLink2.Dialect
+      @spec payload_length(non_neg_integer()) :: pos_integer() | nil
       def payload_length(msgid) do
         case @mavlink2_messages do
           %{^msgid => mod} -> mod.payload_length()
@@ -68,6 +73,8 @@ defmodule MAVLink2.Dialect.XML do
       end
 
       @impl MAVLink2.Dialect
+      @spec target_offsets(non_neg_integer()) ::
+              {non_neg_integer() | nil, non_neg_integer() | nil}
       def target_offsets(msgid) do
         case @mavlink2_messages do
           %{^msgid => mod} -> mod.target_offsets()
@@ -75,12 +82,17 @@ defmodule MAVLink2.Dialect.XML do
         end
       end
 
+      @spec msgids() :: [non_neg_integer()]
       def msgids, do: @mavlink2_messages |> Map.keys() |> Enum.sort()
+      @spec message(non_neg_integer()) :: module() | nil
       def message(msgid), do: Map.get(@mavlink2_messages, msgid)
 
+      @spec encode(message()) :: {non_neg_integer(), binary()}
       def encode(%mod{} = message),
         do: {mod.msgid(), MAVLink2.Codec.encode(mod.layout(), message)}
 
+      @spec decode(non_neg_integer(), binary()) ::
+              {:ok, message()} | {:error, {:unknown_msgid, non_neg_integer()}}
       def decode(msgid, payload) do
         case @mavlink2_messages do
           %{^msgid => mod} -> {:ok, struct!(mod, MAVLink2.Codec.decode(mod.layout(), payload))}
@@ -88,10 +100,13 @@ defmodule MAVLink2.Dialect.XML do
         end
       end
 
+      @spec enum(atom()) :: %{atom() => integer()} | nil
       def enum(name), do: Map.get(@mavlink2_enums, name)
 
+      @spec enum_value(atom(), atom()) :: integer() | nil
       def enum_value(name, entry), do: @mavlink2_enums |> Map.get(name, %{}) |> Map.get(entry)
 
+      @spec enum_entry(atom(), integer()) :: atom() | nil
       def enum_entry(name, value) do
         @mavlink2_enums
         |> Map.get(name, %{})
@@ -114,18 +129,50 @@ defmodule MAVLink2.Dialect.XML do
         {String.to_atom(f.name), value}
       end
 
+    types = for f <- m.fields, do: {String.to_atom(f.name), field_type(f)}
+
     quote do
       defmodule unquote(module) do
         @moduledoc unquote("MAVLink message #{m.name} (#{m.id}).")
         defstruct unquote(Macro.escape(defaults))
 
+        @type t :: %__MODULE__{unquote_splicing(types)}
+
+        @spec msgid() :: non_neg_integer()
         def msgid, do: unquote(m.id)
+        @spec crc_extra() :: 0..255
         def crc_extra, do: unquote(m.crc_extra)
+        @spec payload_length() :: pos_integer()
         def payload_length, do: unquote(m.length)
+        @spec layout() :: MAVLink2.Codec.layout()
         def layout, do: unquote(Macro.escape(layout))
+        @spec target_offsets() :: {non_neg_integer() | nil, non_neg_integer() | nil}
         def target_offsets, do: unquote(Macro.escape(target_offsets(m.wire)))
       end
     end
+  end
+
+  defp field_type(%{type: :char, array: n}) when is_integer(n), do: quote(do: String.t())
+
+  defp field_type(%{type: t, array: n}) when is_integer(n),
+    do: quote(do: [unquote(scalar_type(t))])
+
+  defp field_type(%{type: t}), do: scalar_type(t)
+
+  defp scalar_type(t) when t in [:float, :double],
+    do: quote(do: float() | :nan | :infinity | :neg_infinity)
+
+  defp scalar_type(:uint64), do: quote(do: non_neg_integer())
+  defp scalar_type(:int64), do: quote(do: integer())
+
+  defp scalar_type(t) when t in [:int8, :int16, :int32] do
+    half = Bitwise.bsl(1, MAVLink2.XML.size(t) * 8 - 1)
+    quote(do: unquote(-half)..unquote(half - 1))
+  end
+
+  defp scalar_type(t) do
+    max = Bitwise.bsl(1, MAVLink2.XML.size(t) * 8) - 1
+    quote(do: 0..unquote(max))
   end
 
   defp target_offsets(wire) do

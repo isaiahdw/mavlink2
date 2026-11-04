@@ -68,6 +68,7 @@ defmodule MAVLink2.Signing do
     }
   end
 
+  @spec iflag_signed() :: 0x01
   def iflag_signed, do: @iflag_signed
 
   @doc "A timestamp for `unix_us`, Unix time in microseconds."

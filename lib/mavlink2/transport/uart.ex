@@ -10,6 +10,7 @@ defmodule MAVLink2.Transport.UART do
   @behaviour MAVLink2.Transport
 
   @impl true
+  @spec open(keyword()) :: {:ok, pid()} | {:error, term()}
   def open(opts) do
     device = Keyword.fetch!(opts, :device)
 
@@ -33,9 +34,11 @@ defmodule MAVLink2.Transport.UART do
   end
 
   @impl true
+  @spec write(pid(), iodata()) :: :ok | {:error, term()}
   def write(pid, data), do: uart().write(pid, IO.iodata_to_binary(data))
 
   @impl true
+  @spec close(pid()) :: :ok
   def close(pid), do: uart().close(pid)
 
   # Resolved at run time: Circuits.UART is an optional dependency.

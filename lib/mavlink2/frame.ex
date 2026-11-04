@@ -56,6 +56,7 @@ defmodule MAVLink2.Frame do
   @iflag_signed 0x01
   @iflag_sysid32 0x02
   @iflag_target32 0x04
+  # The known flags are the low bits, so a byte over this has an unknown one.
   @iflags_known 0x07
   @signature_bytes 13
   @u32 0xFFFFFFFF
@@ -89,8 +90,11 @@ defmodule MAVLink2.Frame do
           known: boolean()
         }
 
+  @spec stx_v2() :: 0xFD
   def stx_v2, do: @stx_v2
+  @spec stx_v1() :: 0xFE
   def stx_v1, do: @stx_v1
+  @spec iflag_signed() :: 0x01
   def iflag_signed, do: @iflag_signed
 
   @doc """
@@ -156,7 +160,7 @@ defmodule MAVLink2.Frame do
       f.target_sysid != nil and not (is_integer(f.target_sysid) and f.target_sysid in 0..@u32) ->
         {:error, {:out_of_range, :target_sysid}}
 
-      (f.incompat_flags &&& bnot(@iflags_known)) != 0 ->
+      f.incompat_flags > @iflags_known ->
         {:error, {:unsupported_incompat_flags, f.incompat_flags}}
 
       true ->
@@ -218,7 +222,7 @@ defmodule MAVLink2.Frame do
   end
 
   defp decode_v2(_bin, <<_len, incompat, _::binary>> = rest, _dialect, _unknown)
-       when (incompat &&& bnot(@iflags_known)) != 0,
+       when incompat > @iflags_known,
        do: {:error, {:unsupported_incompat_flags, incompat}, rest}
 
   defp decode_v2(bin, rest, dialect, unknown) do

@@ -35,6 +35,7 @@ defmodule MAVLink2.Router do
 
   alias MAVLink2.{Frame, Link}
 
+  @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(opts) do
     case Keyword.get(opts, :name) do
       nil -> GenServer.start_link(__MODULE__, opts)

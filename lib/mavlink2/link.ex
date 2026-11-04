@@ -66,6 +66,7 @@ defmodule MAVLink2.Link do
     ]
   end
 
+  @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(opts) do
     case Keyword.get(opts, :name) do
       nil -> GenServer.start_link(__MODULE__, opts)
@@ -74,8 +75,10 @@ defmodule MAVLink2.Link do
   end
 
   @doc "Delivers every decoded frame to `pid`. Subscribing again changes nothing."
+  @spec subscribe(GenServer.server(), pid()) :: :ok
   def subscribe(link, pid \\ self()), do: GenServer.call(link, {:subscribe, pid})
 
+  @spec unsubscribe(GenServer.server(), pid()) :: :ok
   def unsubscribe(link, pid \\ self()), do: GenServer.call(link, {:unsubscribe, pid})
 
   @doc """
@@ -106,6 +109,7 @@ defmodule MAVLink2.Link do
   def info(link), do: GenServer.call(link, :info)
 
   @doc "Counts: `:rx`, `:tx`, `:errors`, `:dropped`, `:unknown`, `:unsigned`, `:bad_signature`, `:replay`."
+  @spec stats(GenServer.server()) :: %{atom() => non_neg_integer()}
   def stats(link), do: GenServer.call(link, :stats)
 
   @impl true

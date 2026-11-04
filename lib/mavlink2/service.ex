@@ -9,6 +9,13 @@ defmodule MAVLink2.Service do
 
   defstruct [:link, :dialect, :me, :target]
 
+  @type t :: %__MODULE__{
+          link: GenServer.server(),
+          dialect: module(),
+          me: target(),
+          target: target()
+        }
+
   @type target :: {sysid :: non_neg_integer(), compid :: 0..255}
 
   @doc """
@@ -16,6 +23,8 @@ defmodule MAVLink2.Service do
   to the link, and returns its result. A thrown `{:error, reason}` is
   returned.
   """
+  @spec run(GenServer.server(), target(), (t() -> result)) :: result | {:error, term()}
+        when result: term()
   def run(link, {sysid, compid} = target, fun)
       when is_integer(sysid) and sysid > 0 and is_integer(compid) and compid in 0..255 do
     task =
@@ -41,6 +50,7 @@ defmodule MAVLink2.Service do
   end
 
   @doc "The message module for `msgid`, or a throw the caller turns into an error."
+  @spec message!(t(), non_neg_integer(), atom()) :: module()
   def message!(%__MODULE__{dialect: dialect}, msgid, name) do
     if Code.ensure_loaded?(dialect) and function_exported?(dialect, :message, 1) and
          dialect.message(msgid),
@@ -53,6 +63,7 @@ defmodule MAVLink2.Service do
   goes in the header, with 255 in the payload. `raw` is `[{field, bytes}]`
   written over fields' encoded bytes.
   """
+  @spec send_to(t(), non_neg_integer(), atom(), keyword(), [{atom(), binary()}]) :: :ok
   def send_to(%__MODULE__{target: {sysid, compid}} = ctx, msgid, name, fields, raw \\ []) do
     mod = message!(ctx, msgid, name)
     narrow = if sysid > 255, do: 255, else: sysid
@@ -68,6 +79,7 @@ defmodule MAVLink2.Service do
   end
 
   @doc "The encoded bytes of `field` in `payload`, a message of `mod`."
+  @spec raw(module(), binary(), atom()) :: binary()
   def raw(mod, payload, field) do
     {at, size} = place(mod, field)
     binary_part(payload, at, size)
@@ -92,6 +104,9 @@ defmodule MAVLink2.Service do
   accepts, returning `{:ok, value}` or `:timeout`. `fun` returns `{:ok,
   value}` or `:skip`.
   """
+  @spec await(t(), non_neg_integer(), (MAVLink2.Frame.t(), struct() -> {:ok, v} | :skip)) ::
+          {:ok, v} | :timeout
+        when v: term()
   def await(%__MODULE__{} = ctx, ms, fun) do
     deadline = System.monotonic_time(:millisecond) + ms
     await_until(ctx, deadline, fun)
@@ -124,6 +139,7 @@ defmodule MAVLink2.Service do
   True when a reply's own `target_system` and `target_component`, where it
   has them and they are not 0, name this end.
   """
+  @spec for_me?(t(), MAVLink2.Frame.t(), map()) :: boolean()
   def for_me?(%__MODULE__{me: {sysid, compid}}, frame, message) do
     system = frame.target_sysid || Map.get(message, :target_system, 0)
     component = Map.get(message, :target_component, 0)
@@ -135,6 +151,13 @@ defmodule MAVLink2.Service do
   timeout, up to `retries` more times. `send_fun` gets the attempt number,
   from 0.
   """
+  @spec request(
+          non_neg_integer(),
+          (non_neg_integer() -> :ok),
+          (-> {:ok, v} | :timeout),
+          non_neg_integer()
+        ) :: {:ok, v} | {:error, :timeout}
+        when v: term()
   def request(retries, send_fun, await_fun, attempt \\ 0) do
     :ok = send_fun.(attempt)
 
@@ -146,9 +169,11 @@ defmodule MAVLink2.Service do
   end
 
   @doc "An enum entry as an atom when the dialect has it, else the integer."
+  @spec entry(t(), atom(), integer()) :: atom() | integer()
   def entry(%__MODULE__{dialect: d}, enum, value), do: d.enum_entry(enum, value) || value
 
   @doc "An enum value from an atom entry or an integer."
+  @spec value!(t(), atom(), atom() | integer()) :: integer()
   def value!(_ctx, _enum, value) when is_integer(value), do: value
 
   def value!(%__MODULE__{dialect: d}, enum, entry) when is_atom(entry) do

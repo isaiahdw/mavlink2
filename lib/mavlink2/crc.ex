@@ -9,6 +9,7 @@ defmodule MAVLink2.CRC do
   @seed 0xFFFF
 
   @doc "The initial accumulator value, `0xFFFF`."
+  @spec seed() :: 0..0xFFFF
   def seed, do: @seed
 
   @doc """

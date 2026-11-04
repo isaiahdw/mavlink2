@@ -12,6 +12,7 @@ defmodule MAVLink2.Transport.Loopback do
   use Agent
 
   @impl true
+  @spec open(keyword()) :: {:ok, pid()} | {:error, term()}
   def open(opts) do
     owner = Keyword.get(opts, :owner, self())
     echo? = Keyword.get(opts, :echo, false)
@@ -20,6 +21,7 @@ defmodule MAVLink2.Transport.Loopback do
   end
 
   @impl true
+  @spec write(pid(), iodata()) :: :ok
   def write(pid, data) do
     bin = IO.iodata_to_binary(data)
 
@@ -31,12 +33,15 @@ defmodule MAVLink2.Transport.Loopback do
   end
 
   @impl true
+  @spec close(pid()) :: :ok
   def close(pid), do: Agent.stop(pid)
 
   @doc "Everything written so far, oldest first."
+  @spec written(pid()) :: binary()
   def written(pid), do: Agent.get(pid, &Enum.reverse(&1.written)) |> IO.iodata_to_binary()
 
   @doc "Deliver `bytes` to the owner as though the peer had sent them."
+  @spec inject(pid(), binary()) :: :ok
   def inject(pid, bytes) do
     Agent.get(pid, & &1.owner) |> send({:mavlink_data, bytes})
     :ok
