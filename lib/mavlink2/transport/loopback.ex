@@ -1,8 +1,10 @@
 defmodule MAVLink2.Transport.Loopback do
   @moduledoc """
   An in-memory transport for tests. With `echo: true` everything written
-  comes back to the owner; `inject/2` delivers bytes as though the peer had
-  sent them, and `written/1` returns what was written.
+  comes back to the owner; with `peer:` a pid or registered name (another
+  link), everything written goes to it, or nowhere while it is not running.
+  `inject/2` delivers bytes as though the peer had sent them, and
+  `written/1` returns what was written.
   """
 
   @behaviour MAVLink2.Transport
@@ -13,7 +15,8 @@ defmodule MAVLink2.Transport.Loopback do
   def open(opts) do
     owner = Keyword.get(opts, :owner, self())
     echo? = Keyword.get(opts, :echo, false)
-    Agent.start_link(fn -> %{owner: owner, echo: echo?, written: []} end)
+    peer = Keyword.get(opts, :peer)
+    Agent.start_link(fn -> %{owner: owner, echo: echo?, peer: peer, written: []} end)
   end
 
   @impl true
@@ -22,6 +25,7 @@ defmodule MAVLink2.Transport.Loopback do
 
     Agent.update(pid, fn s ->
       if s.echo, do: send(s.owner, {:mavlink_data, bin})
+      if pid = s.peer && GenServer.whereis(s.peer), do: send(pid, {:mavlink_data, bin})
       %{s | written: [bin | s.written]}
     end)
   end
