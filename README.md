@@ -26,11 +26,31 @@ command, parameter and mission protocols.
 
 MAVLink v1 frames are refused.
 
-## When to use MAVLink
+## What MAVLink is
 
-MAVLink is a message protocol for links between processors on and around a
-vehicle or robot: small, fixed-layout messages in checked frames, over a
-serial line, a radio or a network.
+[MAVLink](https://mavlink.io/) (Micro Air Vehicle Link) is a lightweight
+message protocol for drones, robots and the systems around them: autopilots,
+companion computers, ground stations, gimbals, cameras and microcontrollers.
+It is the protocol the PX4 and ArduPilot autopilots, and the QGroundControl
+and Mission Planner ground stations, speak.
+
+- **Messages** are defined in XML: each has an id and a fixed list of typed
+  fields, sent in small binary frames with a checksum. A set of definitions
+  is a *dialect*; `common.xml` holds the messages most systems share, and a
+  project can add its own.
+- **Systems and components** each have an id, carried in every frame, so
+  many of them can share links and messages can be routed between them.
+- **Microservices** are protocols built from messages: commands with acks,
+  parameters, missions, and more.
+- **MAVLink 2**, the version this library implements, added extension
+  fields, 24-bit message ids, payload truncation and message signing.
+
+The [MAVLink developer guide](https://mavlink.io/en/) documents the
+[frame format](https://mavlink.io/en/guide/serialization.html), the
+[message definitions](https://mavlink.io/en/messages/common.html) and the
+[microservices](https://mavlink.io/en/services/).
+
+## When to use MAVLink
 
 ### Use cases
 
