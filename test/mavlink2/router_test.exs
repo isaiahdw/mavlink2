@@ -66,11 +66,49 @@ defmodule MAVLink2.RouterTest do
     receive_on(l.a, r, any_of_3)
     assert written(l.c) == before_c <> any_of_3
 
-    unseen_component = command(2, 5)
+    # Another system's components are its own business: any component of
+    # system 2 goes where system 2 has been seen.
+    other_component = command(2, 5)
     unseen_system = command(9, 1)
-    receive_on(l.a, r, unseen_component <> unseen_system)
-    assert written(l.b) == before_b <> to_2
+    receive_on(l.a, r, other_component <> unseen_system)
+    assert written(l.b) == before_b <> to_2 <> other_component
     assert written(l.c) == before_c <> any_of_3
+  end
+
+  test "within the router's own system, a component goes only where it has been seen", %{links: l} do
+    :ok = stop_supervised(Router)
+
+    r =
+      start_supervised!(Supervisor.child_spec({Router, links: Map.values(l), sysid: 1}, id: :own))
+
+    receive_on(l.b, r, heartbeat(1, 1))
+    receive_on(l.c, r, heartbeat(1, 154))
+    before_b = written(l.b)
+
+    to_gimbal = command(1, 154)
+    receive_on(l.a, r, to_gimbal)
+    assert written(l.b) == before_b
+    assert written(l.c) =~ to_gimbal
+
+    to_all_of_1 = command(1, 0)
+    receive_on(l.a, r, to_all_of_1)
+    assert written(l.b) =~ to_all_of_1
+  end
+
+  test "SETUP_SIGNING is never forwarded", %{links: l, router: r} do
+    setup = wire(%Common.SetupSigning{target_system: 0, secret_key: [1, 2, 3]}, sysid: 255)
+    receive_on(l.a, r, setup)
+    assert written(l.b) == ""
+    assert written(l.c) == ""
+  end
+
+  test "a SYSTEM_TIME that goes back forgets the system's routes", %{links: l, router: r} do
+    time = fn ms -> wire(%Common.SystemTime{time_boot_ms: ms}, sysid: 2, compid: 1) end
+    receive_on(l.b, r, time.(50_000) <> heartbeat(2, 5))
+    assert %{{2, 1} => _, {2, 5} => _} = Router.routes(r)
+
+    receive_on(l.b, r, time.(100))
+    assert Map.keys(Router.routes(r)) == [{2, 1}]
   end
 
   test "nothing goes back out on the link it came in on", %{links: l, router: r} do
@@ -96,6 +134,30 @@ defmodule MAVLink2.RouterTest do
     receive_on(l.a, r, unknown)
     assert written(l.b) == unknown
     assert written(l.c) == unknown
+  end
+
+  test "frames a link's signing refuses are forwarded, but teach nothing" do
+    key = :binary.copy(<<1>>, 32)
+    signing = MAVLink2.Signing.new(key)
+
+    a =
+      start_supervised!(
+        Supervisor.child_spec({Link, dialect: Common, transport: Loopback, signing: signing},
+          id: :signed_a
+        )
+      )
+
+    b =
+      start_supervised!(
+        Supervisor.child_spec({Link, dialect: Common, transport: Loopback}, id: :plain_b)
+      )
+
+    r = start_supervised!(Supervisor.child_spec({Router, links: [a, b]}, id: :signed_router))
+
+    unsigned = heartbeat(7)
+    receive_on(a, r, unsigned)
+    assert written(b) == unsigned
+    assert Router.routes(r) == %{}
   end
 
   test "the router stops with a link", %{links: l, router: r} do
