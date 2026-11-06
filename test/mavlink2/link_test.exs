@@ -104,16 +104,63 @@ defmodule MAVLink2.LinkTest do
   end
 
   test "0 is refused as this end's sysid or compid" do
-    Process.flag(:trap_exit, true)
+    assert_raise ArgumentError, ~r/:sysid must be an integer from 1.*broadcast/, fn ->
+      Link.start_link(dialect: TestDialect, transport: Loopback, sysid: 0)
+    end
 
-    assert {:error, {:out_of_range, :sysid}} =
-             Link.start_link(dialect: TestDialect, transport: Loopback, sysid: 0)
-
-    assert {:error, {:out_of_range, :compid}} =
-             Link.start_link(dialect: TestDialect, transport: Loopback, compid: 0)
+    assert_raise ArgumentError, ~r/:compid must be an integer from 1 to 255/, fn ->
+      Link.start_link(dialect: TestDialect, transport: Loopback, compid: 0)
+    end
 
     link = link([])
-    assert Link.send_message(link, 300, <<1>>, compid: 0) == {:error, {:out_of_range, :compid}}
+
+    assert_raise ArgumentError, ~r/:compid must be an integer from 1 to 255/, fn ->
+      Link.send_message(link, 300, <<1>>, compid: 0)
+    end
+  end
+
+  describe "with a generated dialect" do
+    alias MAVLink2.Common
+
+    defp common_link(opts) do
+      spec = {Link, [dialect: Common, transport: Loopback, echo: true] ++ opts}
+      start_supervised!(Supervisor.child_spec(spec, id: make_ref()))
+    end
+
+    test "send/3 encodes a struct; subscribers can take it decoded, filtered" do
+      link = common_link(sysid: 7)
+      :ok = Link.subscribe(link, self(), decode: true, only: [Common.Heartbeat])
+
+      :ok = Link.send(link, %Common.SystemTime{time_boot_ms: 5})
+      :ok = Link.send(link, %Common.Heartbeat{type: 6, autopilot: 8})
+
+      assert_receive {Link, ^link, %Frame{sysid: 7}, %Common.Heartbeat{type: 6, autopilot: 8}}
+      refute_receive {Link, ^link, _, %Common.SystemTime{}}, 50
+    end
+
+    test "send/3 puts a target over 255 in the header" do
+      link = common_link([])
+      :ok = Link.subscribe(link, self(), decode: true)
+
+      :ok =
+        Link.send(link, %Common.CommandLong{
+          target_system: 100_000,
+          target_component: 1,
+          command: 400
+        })
+
+      assert_receive {Link, ^link, %Frame{target_sysid: 100_000},
+                      %Common.CommandLong{target_system: 255, command: 400}}
+    end
+
+    test "only: takes ids as well as modules" do
+      link = common_link([])
+      :ok = Link.subscribe(link, self(), only: [2])
+      :ok = Link.send(link, %Common.Heartbeat{})
+      :ok = Link.send(link, %Common.SystemTime{})
+      assert_receive {Link, ^link, %Frame{msgid: 2}}
+      refute_receive {Link, ^link, %Frame{msgid: 0}}, 50
+    end
   end
 
   test "a transport that does not open leaves the link out" do

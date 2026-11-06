@@ -9,6 +9,10 @@ defmodule MAVLink2.Transport.Loopback do
 
   @behaviour MAVLink2.Transport
 
+  @impl true
+  @spec options() :: keyword()
+  def options, do: [echo: :boolean, peer: {:or, [{:in, [nil]}, :server]}]
+
   use Agent
 
   @impl true

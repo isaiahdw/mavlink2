@@ -29,8 +29,19 @@ defmodule MAVLink2.Dialect.XML do
   """
 
   defmacro __using__(opts) do
+    where = "use MAVLink2.Dialect.XML"
+    MAVLink2.Options.validate!(opts, [file: :string], where, [:file])
     file = Keyword.fetch!(opts, :file)
     path = Path.expand(file, File.cwd!())
+
+    unless File.regular?(path) do
+      raise ArgumentError,
+            "#{where}: cannot read #{inspect(file)} (#{path}). :file is relative to the " <>
+              "project root; put the XML and every file it includes there, for example " <>
+              "common.xml, standard.xml and minimal.xml from " <>
+              "https://github.com/mavlink/mavlink/tree/master/message_definitions/v1.0"
+    end
+
     defs = MAVLink2.XML.read!(path)
     dialect = __CALLER__.module
 

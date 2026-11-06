@@ -47,6 +47,13 @@ defmodule MAVLink2.Router do
 
   @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(opts) do
+    MAVLink2.Options.validate!(
+      opts,
+      [links: {:list, :server}, sysid: :id, name: :server],
+      "MAVLink2.Router.start_link/1",
+      [:links]
+    )
+
     case Keyword.get(opts, :name) do
       nil -> GenServer.start_link(__MODULE__, opts)
       name -> GenServer.start_link(__MODULE__, opts, name: name)

@@ -10,6 +10,11 @@ defmodule MAVLink2.Transport.UART do
   @behaviour MAVLink2.Transport
 
   @impl true
+  @spec options() :: keyword()
+  def options,
+    do: [device: :string, speed: :pos_integer, flow_control: {:in, [:none, :hardware, :software]}]
+
+  @impl true
   @spec open(keyword()) :: {:ok, pid()} | {:error, term()}
   def open(opts) do
     device = Keyword.fetch!(opts, :device)

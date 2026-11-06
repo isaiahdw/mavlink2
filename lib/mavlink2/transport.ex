@@ -12,4 +12,13 @@ defmodule MAVLink2.Transport do
   @callback open(keyword()) :: {:ok, t()} | {:error, term()}
   @callback write(t(), iodata()) :: :ok | {:error, term()}
   @callback close(t()) :: :ok
+
+  @doc """
+  The options `open/1` takes, as `[{name, type}]` for `MAVLink2.Link` to
+  check before opening, so a misspelled option is an error rather than
+  ignored. Optional: without it, the link passes any option through.
+  """
+  @callback options() :: keyword()
+
+  @optional_callbacks options: 0
 end

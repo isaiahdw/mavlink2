@@ -59,13 +59,32 @@ defmodule MAVLink2.Signing do
   | `:timestamp` | the earliest timestamp, for a board that persists it; default 0 |
   """
   @spec new(<<_::256>>, keyword()) :: t()
-  def new(<<_::binary-size(32)>> = key, opts \\ []) do
+  def new(key, opts \\ [])
+
+  def new(<<_::binary-size(32)>> = key, opts) do
+    MAVLink2.Options.validate!(
+      opts,
+      [
+        link_id: :byte,
+        accept_unsigned: {:or, [{:in, [:all]}, {:list, :non_neg_integer}]},
+        timestamp: :non_neg_integer
+      ],
+      "MAVLink2.Signing.new/2"
+    )
+
     %__MODULE__{
       key: key,
       link_id: Keyword.get(opts, :link_id, 0),
       accept_unsigned: Keyword.get(opts, :accept_unsigned, []),
       timestamp: Keyword.get(opts, :timestamp, 0)
     }
+  end
+
+  def new(key, _opts) do
+    raise ArgumentError,
+          "MAVLink2.Signing.new/2: the key must be a 32-byte binary shared with the peer, " <>
+            "such as :crypto.strong_rand_bytes(32) or :crypto.hash(:sha256, passphrase); got: " <>
+            if(is_binary(key), do: "#{byte_size(key)} bytes", else: inspect(key))
   end
 
   @spec iflag_signed() :: 0x01

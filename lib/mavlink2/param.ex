@@ -62,8 +62,11 @@ defmodule MAVLink2.Param do
   @spec read(GenServer.server(), MAVLink2.target(), String.t() | non_neg_integer(), keyword()) ::
           {:ok, param()} | {:error, term()}
   def read(link, target, name_or_index, opts \\ []) do
-    Service.run(link, target, fn ctx ->
-      {id, index} = key!(name_or_index)
+    where = "MAVLink2.Param.read/4"
+    validate_opts!(opts, where)
+    {id, index} = key!(name_or_index, where)
+
+    Service.run(link, target, where, fn ctx ->
       read_one(ctx, opts, id, index)
     end)
   end
@@ -92,9 +95,16 @@ defmodule MAVLink2.Param do
           keyword()
         ) ::
           {:ok, param()} | {:error, term()}
-  def set(link, target, name, value, type, opts \\ []) when is_number(value) do
-    Service.run(link, target, fn ctx ->
-      {id, -1} = key!(name)
+  def set(link, target, name, value, type, opts \\ []) do
+    where = "MAVLink2.Param.set/6"
+    validate_opts!(opts, where)
+    {id, -1} = key!(name, where)
+
+    unless is_number(value) do
+      raise ArgumentError, "#{where}: the value must be a number, got: #{inspect(value)}"
+    end
+
+    Service.run(link, target, where, fn ctx ->
       type = Service.value!(ctx, :mav_param_type, type)
       {float, raw} = to_wire(value, type, encoding(opts))
 
@@ -128,7 +138,10 @@ defmodule MAVLink2.Param do
   @spec list(GenServer.server(), MAVLink2.target(), keyword()) ::
           {:ok, [param()]} | {:error, term()}
   def list(link, target, opts \\ []) do
-    Service.run(link, target, fn ctx ->
+    where = "MAVLink2.Param.list/3"
+    validate_opts!(opts, where)
+
+    Service.run(link, target, where, fn ctx ->
       send_fun = fn _ -> Service.send_to(ctx, @request_list, :param_request_list, []) end
 
       with {:ok, first} <-
@@ -228,26 +241,43 @@ defmodule MAVLink2.Param do
     }
   end
 
-  # Names are up to 16 bytes of 7-bit ASCII.
-  defp key!(name) when is_binary(name) and byte_size(name) > 16,
-    do: throw({:error, :name_too_long})
-
-  defp key!(name) when is_binary(name) do
-    if for(<<c <- name>>, reduce: true, do: (ok -> ok and c < 128)),
-      do: {name, -1},
-      else: throw({:error, :name_not_ascii})
+  defp validate_opts!(opts, where) do
+    MAVLink2.Options.validate!(
+      opts,
+      [encoding: {:in, [:cast, :bytewise]}, timeout: :timeout, retries: :non_neg_integer],
+      where
+    )
   end
 
-  defp key!(index) when is_integer(index) and index in 0..32_767, do: {"", index}
+  # Names are up to 16 bytes of 7-bit ASCII; indices fit an int16.
+  defp key!(name, where) when is_binary(name) do
+    cond do
+      name == "" ->
+        raise ArgumentError, "#{where}: the parameter name is empty"
+
+      byte_size(name) > 16 ->
+        raise ArgumentError,
+              "#{where}: parameter names are at most 16 bytes, got #{byte_size(name)}: #{inspect(name)}"
+
+      not for(<<c <- name>>, reduce: true, do: (ok -> ok and c < 128)) ->
+        raise ArgumentError, "#{where}: parameter names are 7-bit ASCII, got: #{inspect(name)}"
+
+      true ->
+        {name, -1}
+    end
+  end
+
+  defp key!(index, _where) when is_integer(index) and index in 0..32_767, do: {"", index}
+
+  defp key!(other, where) do
+    raise ArgumentError,
+          "#{where}: a parameter is a name (a string of up to 16 ASCII bytes, such as " <>
+            "\"SYSID_THISMAV\") or an index from 0 to 32767; got: #{inspect(other)}"
+  end
 
   defp retries(opts), do: Keyword.get(opts, :retries, 3)
 
-  defp encoding(opts) do
-    case Keyword.get(opts, :encoding, :cast) do
-      e when e in [:cast, :bytewise] -> e
-      other -> throw({:error, {:unknown_encoding, other}})
-    end
-  end
+  defp encoding(opts), do: Keyword.get(opts, :encoding, :cast)
 
   # MAV_PARAM_TYPE: 1 UINT8, 2 INT8, 3 UINT16, 4 INT16, 5 UINT32, 6 INT32,
   # 7 UINT64, 8 INT64, 9 REAL32, 10 REAL64.

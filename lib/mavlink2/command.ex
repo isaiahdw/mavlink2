@@ -41,11 +41,20 @@ defmodule MAVLink2.Command do
   @doc "Sends `COMMAND_LONG` with up to seven `params` (the rest 0.0)."
   @spec long(GenServer.server(), MAVLink2.target(), atom() | integer(), [number()], keyword()) ::
           {:ok, atom() | integer(), struct()} | {:error, term()}
-  def long(link, target, command, params \\ [], opts \\ []) when length(params) <= 7 do
+  def long(link, target, command, params \\ [], opts \\ []) do
+    where = "MAVLink2.Command.long/5"
+    validate_opts!(opts, where)
+
+    unless is_list(params) and length(params) <= 7 and Enum.all?(params, &param?/1) do
+      raise ArgumentError,
+            "#{where}: params must be a list of up to 7 numbers (param1 first; the rest are 0.0), " <>
+              "or :nan, :infinity, :neg_infinity; got: #{inspect(params)}"
+    end
+
     params = params ++ List.duplicate(0.0, 7 - length(params))
     fields = for {p, i} <- Enum.with_index(params, 1), do: {:"param#{i}", p}
 
-    Service.run(link, target, fn ctx ->
+    Service.run(link, target, where, fn ctx ->
       command = Service.value!(ctx, :mav_cmd, command)
 
       send_fun = fn attempt ->
@@ -70,7 +79,27 @@ defmodule MAVLink2.Command do
   @spec int(GenServer.server(), MAVLink2.target(), atom() | integer(), keyword(), keyword()) ::
           {:ok, atom() | integer(), struct()} | {:error, term()}
   def int(link, target, command, fields \\ [], opts \\ []) do
-    Service.run(link, target, fn ctx ->
+    where = "MAVLink2.Command.int/5"
+    validate_opts!(opts, where)
+
+    MAVLink2.Options.validate!(
+      fields,
+      [
+        frame: {:or, [:atom, :byte]},
+        param1: {:or, [{:in, [:nan, :infinity, :neg_infinity]}, :any]},
+        param2: {:or, [{:in, [:nan, :infinity, :neg_infinity]}, :any]},
+        param3: {:or, [{:in, [:nan, :infinity, :neg_infinity]}, :any]},
+        param4: {:or, [{:in, [:nan, :infinity, :neg_infinity]}, :any]},
+        x: :any,
+        y: :any,
+        z: :any,
+        current: :byte,
+        autocontinue: :byte
+      ],
+      "#{where}: fields"
+    )
+
+    Service.run(link, target, where, fn ctx ->
       command = Service.value!(ctx, :mav_cmd, command)
       fields = Keyword.update(fields, :frame, 0, &Service.value!(ctx, :mav_frame, &1))
       fields = [command: command] ++ fields
@@ -91,12 +120,27 @@ defmodule MAVLink2.Command do
   @spec cancel(GenServer.server(), MAVLink2.target(), atom() | integer()) ::
           :ok | {:error, term()}
   def cancel(link, target, command) do
-    Service.run(link, target, fn ctx ->
+    Service.run(link, target, "MAVLink2.Command.cancel/3", fn ctx ->
       Service.send_to(ctx, @command_cancel, :command_cancel,
         command: Service.value!(ctx, :mav_cmd, command)
       )
     end)
   end
+
+  defp validate_opts!(opts, where) do
+    MAVLink2.Options.validate!(
+      opts,
+      [
+        timeout: :timeout,
+        retries: :non_neg_integer,
+        progress_timeout: :timeout,
+        on_progress: {:fun, 1}
+      ],
+      where
+    )
+  end
+
+  defp param?(p), do: is_number(p) or p in [:nan, :infinity, :neg_infinity]
 
   defp exchange(ctx, command, send_fun, opts) do
     Service.message!(ctx, @command_ack, :command_ack)

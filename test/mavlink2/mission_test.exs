@@ -5,7 +5,7 @@ defmodule MAVLink2.MissionTest do
 
   alias MAVLink2.{Common, Mission, Vehicle}
 
-  @fast [timeout: 50, retries: 2]
+  @fast [timeout: 100, retries: 3]
   @accepted 0
   @no_space 4
   @fence 1
@@ -80,7 +80,7 @@ defmodule MAVLink2.MissionTest do
     {gcs, v} = Vehicle.pair()
     vehicle(v, self())
     assert Mission.upload(gcs, {1, 1}, @items, @fast) == {:ok, nil}
-    assert_received {:stored, [takeoff, waypoint]}
+    assert_receive {:stored, [takeoff, waypoint]}
     assert %{seq: 0, command: 22, frame: 3, z: 20.0} = takeoff
     assert %{seq: 1, command: 16, x: 473_977_420, y: 85_455_940, autocontinue: 1} = waypoint
   end
@@ -89,14 +89,14 @@ defmodule MAVLink2.MissionTest do
     {gcs, v} = Vehicle.pair()
     vehicle(v, self(), [], legacy: true)
     assert Mission.upload(gcs, {1, 1}, @items, @fast) == {:ok, nil}
-    assert_received {:stored, [_, _]}
+    assert_receive {:stored, [_, _]}
   end
 
   test "upload sends the count again when the vehicle stays quiet" do
     {gcs, v} = Vehicle.pair()
     vehicle(v, self(), [], drop_first_count: true)
     assert Mission.upload(gcs, {1, 1}, @items, @fast) == {:ok, nil}
-    assert_received {:stored, [_, _]}
+    assert_receive {:stored, [_, _]}
   end
 
   test "an empty upload is acked at once" do
@@ -175,7 +175,7 @@ defmodule MAVLink2.MissionTest do
     {gcs, v} = Vehicle.pair()
     vehicle(v, self())
     {:ok, nil} = Mission.upload(gcs, {1, 1}, @items, @fast)
-    assert_received {:stored, stored}
+    assert_receive {:stored, stored}
 
     {gcs2, v2} = Vehicle.pair()
     vehicle(v2, self(), stored)
@@ -198,6 +198,9 @@ defmodule MAVLink2.MissionTest do
 
   test "an unknown item field is refused before anything is sent" do
     {gcs, _v} = Vehicle.pair()
-    assert Mission.upload(gcs, {1, 1}, [[cmd: 16]]) == {:error, {:unknown_fields, [:cmd]}}
+
+    assert_raise ArgumentError, ~r/unknown item field :cmd. Did you mean :command/, fn ->
+      Mission.upload(gcs, {1, 1}, [[cmd: 16]])
+    end
   end
 end

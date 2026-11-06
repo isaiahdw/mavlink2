@@ -121,7 +121,17 @@ defmodule MAVLink2.XML do
     if path in seen do
       {[], seen}
     else
-      {doc, _} = :xmerl_scan.file(String.to_charlist(path), quiet: true)
+      doc =
+        case File.regular?(path) && :xmerl_scan.file(String.to_charlist(path), quiet: true) do
+          {doc, _rest} ->
+            doc
+
+          _ ->
+            raise ArgumentError,
+                  "MAVLink2.XML: cannot read #{path}, included from a dialect's XML. Includes " <>
+                    "are relative to the including file; copy the included file next to it"
+        end
+
       dir = Path.dirname(path)
 
       {included, seen} =

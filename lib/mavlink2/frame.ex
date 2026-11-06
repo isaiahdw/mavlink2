@@ -209,7 +209,7 @@ defmodule MAVLink2.Frame do
   def decode(<<>>, _dialect, _opts), do: {:incomplete, <<>>}
 
   def decode(<<@stx_v2, rest::binary>> = bin, dialect, opts),
-    do: decode_v2(bin, rest, dialect, Keyword.get(opts, :unknown, :skip))
+    do: decode_v2(bin, rest, dialect, unknown!(opts))
 
   def decode(<<@stx_v1, rest::binary>>, _dialect, _opts),
     do: {:error, :mavlink_v1_unsupported, rest}
@@ -314,7 +314,22 @@ defmodule MAVLink2.Frame do
   options.
   """
   @spec drain(binary(), module(), keyword()) :: {[t()], [term()], binary()}
-  def drain(bin, dialect, opts \\ []), do: drain(bin, dialect, opts, [], [])
+  def drain(bin, dialect, opts \\ []) do
+    unknown!(opts)
+    drain(bin, dialect, opts, [], [])
+  end
+
+  defp unknown!([]), do: :skip
+  defp unknown!(unknown: mode) when mode in [:skip, :keep], do: mode
+
+  defp unknown!(opts),
+    do:
+      MAVLink2.Options.validate!(
+        opts,
+        [unknown: {:in, [:skip, :keep]}],
+        "MAVLink2.Frame.decode/3"
+      )
+      |> Keyword.get(:unknown, :skip)
 
   defp drain(bin, dialect, opts, frames, errors) do
     case decode(bin, dialect, opts) do

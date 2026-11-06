@@ -7,13 +7,14 @@ defmodule MAVLink2.Service do
 
   alias MAVLink2.{Frame, Link}
 
-  defstruct [:link, :dialect, :me, :target]
+  defstruct [:link, :dialect, :me, :target, :where]
 
   @type t :: %__MODULE__{
           link: GenServer.server(),
           dialect: module(),
           me: target(),
-          target: target()
+          target: target(),
+          where: String.t()
         }
 
   @type target :: MAVLink2.target()
@@ -21,32 +22,41 @@ defmodule MAVLink2.Service do
   @doc """
   Runs `fun` with a context for `link` and `target` in a process subscribed
   to the link, and returns its result. A thrown `{:error, reason}` is
-  returned.
+  returned; an exception is raised again in the caller, so a mistake in
+  how the service was called reads as one. `where` names the public
+  function, for messages.
   """
-  @spec run(GenServer.server(), target(), (t() -> result)) :: result | {:error, term()}
+  @spec run(GenServer.server(), term(), String.t(), (t() -> result)) :: result | {:error, term()}
         when result: term()
-  def run(link, {sysid, compid} = target, fun)
-      when is_integer(sysid) and sysid > 0 and is_integer(compid) and compid in 0..255 do
+  def run(link, target, where, fun) do
+    target = MAVLink2.Options.target!(target, where)
+    info = Link.info(link)
+
+    ctx = %__MODULE__{
+      link: link,
+      dialect: info.dialect,
+      me: {info.sysid, info.compid},
+      target: target,
+      where: where
+    }
+
     task =
       Task.async(fn ->
-        info = Link.info(link)
         :ok = Link.subscribe(link)
 
-        ctx = %__MODULE__{
-          link: link,
-          dialect: info.dialect,
-          me: {info.sysid, info.compid},
-          target: target
-        }
-
         try do
-          fun.(ctx)
+          {:ok, fun.(ctx)}
+        rescue
+          e -> {:raise, e, __STACKTRACE__}
         catch
-          {:error, _} = error -> error
+          {:error, _} = error -> {:ok, error}
         end
       end)
 
-    Task.await(task, :infinity)
+    case Task.await(task, :infinity) do
+      {:ok, result} -> result
+      {:raise, e, stacktrace} -> reraise e, stacktrace
+    end
   end
 
   @doc "The message module for `msgid`, or a throw the caller turns into an error."
@@ -176,7 +186,20 @@ defmodule MAVLink2.Service do
   @spec value!(t(), atom(), atom() | integer()) :: integer()
   def value!(_ctx, _enum, value) when is_integer(value), do: value
 
-  def value!(%__MODULE__{dialect: d}, enum, entry) when is_atom(entry) do
-    d.enum_value(enum, entry) || throw({:error, {:unknown_entry, enum, entry}})
+  def value!(%__MODULE__{dialect: d, where: where}, enum, entry) when is_atom(entry) do
+    d.enum_value(enum, entry) ||
+      MAVLink2.Options.unknown!(
+        where,
+        "#{String.upcase(to_string(enum))} entry",
+        entry,
+        Map.keys(d.enum(enum) || %{}),
+        "#{enum}_"
+      )
+  end
+
+  def value!(%__MODULE__{where: where}, enum, other) do
+    raise ArgumentError,
+          "#{where}: a #{String.upcase(to_string(enum))} value must be an entry atom, such as " <>
+            ":#{enum}_..., or its integer; got: #{inspect(other)}"
   end
 end

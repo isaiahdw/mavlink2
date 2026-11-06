@@ -139,7 +139,10 @@ defmodule MAVLink2.CommandTest do
   test "an unknown command entry is refused before anything is sent" do
     {gcs, _vehicle} = Vehicle.pair()
 
-    assert Command.long(gcs, {1, 1}, :mav_cmd_no_such_thing) ==
-             {:error, {:unknown_entry, :mav_cmd, :mav_cmd_no_such_thing}}
+    assert_raise ArgumentError,
+                 ~r/unknown MAV_CMD entry :mav_cmd_arm\. Did you mean :mav_cmd_component_arm_disarm/,
+                 fn ->
+                   Command.long(gcs, {1, 1}, :mav_cmd_arm)
+                 end
   end
 end

@@ -32,6 +32,9 @@ defmodule MAVLink2.Link do
 
   use GenServer
 
+  # Link.send/3 sends a message; Kernel.send/2 is called by its full name.
+  import Kernel, except: [send: 2]
+
   require Logger
 
   alias MAVLink2.Frame
@@ -66,8 +69,49 @@ defmodule MAVLink2.Link do
     ]
   end
 
+  @options [
+    dialect: :module,
+    transport: :module,
+    sendable: {:or, [{:in, [nil]}, {:list, :non_neg_integer}]},
+    sysid: :id,
+    compid: :compid,
+    signing: {:or, [{:in, [nil]}, {:struct, MAVLink2.Signing}]},
+    clock: {:fun, 0},
+    unknown: {:in, [:skip, :keep]},
+    name: :server
+  ]
+
+  @doc """
+  Starts a link. Raises ArgumentError for an unknown option or a bad value;
+  see the module doc for the options.
+
+      MAVLink2.Link.start_link(dialect: MyDialect, device: "/dev/ttyACM0", speed: 115_200)
+  """
   @spec start_link(keyword()) :: GenServer.on_start()
   def start_link(opts) do
+    where = "MAVLink2.Link.start_link/1"
+    MAVLink2.Options.keyword!(opts, where)
+    transport = Keyword.get(opts, :transport, MAVLink2.Transport.UART)
+    MAVLink2.Options.check!(transport, :module, "#{where}: option :transport")
+
+    transport_options =
+      if function_exported?(transport, :options, 0), do: transport.options(), else: nil
+
+    schema = @options ++ (transport_options || [])
+    known = Keyword.keys(schema)
+
+    opts
+    |> then(&if(transport_options, do: &1, else: Keyword.take(&1, known)))
+    |> MAVLink2.Options.validate!(schema, where, [:dialect])
+
+    MAVLink2.Options.dialect!(Keyword.fetch!(opts, :dialect), "#{where}: option :dialect")
+
+    if transport == MAVLink2.Transport.UART and not Keyword.has_key?(opts, :device) do
+      raise ArgumentError,
+            "#{where}: option :device is required for MAVLink2.Transport.UART, " <>
+              "such as device: \"/dev/ttyACM0\" (USB) or \"/dev/ttyAMA0\" (a board UART)"
+    end
+
     case Keyword.get(opts, :name) do
       nil -> GenServer.start_link(__MODULE__, opts)
       name -> GenServer.start_link(__MODULE__, opts, name: name)
@@ -75,18 +119,121 @@ defmodule MAVLink2.Link do
   end
 
   @doc """
-  Delivers every decoded frame to `pid` as `{MAVLink2.Link, link, frame}`.
-  Subscribing again replaces the options.
+  Delivers every frame the link receives to `pid` as
+  `{MAVLink2.Link, link, frame}`, `frame` a `MAVLink2.Frame`. Subscribing
+  again replaces the options. The subscription ends when `pid` exits.
 
-  With `rejected: true`, a frame the link's `:signing` refuses also goes to
-  `pid`, as `{MAVLink2.Link, link, {:rejected, reason, frame}}` with
-  `reason` one of `:unsigned`, `:bad_signature`, `:replay`, so that it
-  cannot be mistaken for a verified one. Its timestamp moves nothing. A
-  router forwards these; an application can show them as untrusted.
+  Options:
+
+  | | |
+  | --- | --- |
+  | `decode: true` | deliver `{MAVLink2.Link, link, frame, message}` instead, `message` the decoded struct (a dialect from `MAVLink2.Dialect.XML`). Frames the dialect cannot decode are not delivered |
+  | `only: [...]` | deliver only these messages: message structs' modules (`MyDialect.Heartbeat`) or ids |
+  | `rejected: true` | also deliver frames the link's `:signing` refuses, as `{MAVLink2.Link, link, {:rejected, reason, frame}}`, `reason` one of `:unsigned`, `:bad_signature`, `:replay`, so that one cannot be mistaken for a verified frame. Its timestamp moves nothing. A router forwards these; an application can show them as untrusted |
+
+      :ok = MAVLink2.Link.subscribe(link, self(), decode: true, only: [MyDialect.Heartbeat])
+
+      receive do
+        {MAVLink2.Link, ^link, frame, %MyDialect.Heartbeat{} = heartbeat} -> {frame.sysid, heartbeat}
+      end
   """
   @spec subscribe(GenServer.server(), pid(), keyword()) :: :ok
-  def subscribe(link, pid \\ self(), opts \\ []),
-    do: GenServer.call(link, {:subscribe, pid, Keyword.get(opts, :rejected, false)})
+  def subscribe(link, pid \\ self(), opts \\ []) do
+    where = "MAVLink2.Link.subscribe/3"
+    MAVLink2.Options.check!(pid, :pid, "#{where}: the subscriber")
+
+    MAVLink2.Options.validate!(
+      opts,
+      [rejected: :boolean, decode: :boolean, only: {:list, {:or, [:non_neg_integer, :atom]}}],
+      where
+    )
+
+    decode? = Keyword.get(opts, :decode, false)
+
+    if decode? do
+      dialect = info(link).dialect
+
+      unless function_exported?(dialect, :decode, 2) do
+        raise ArgumentError,
+              "#{where}: decode: true needs a dialect with decode/2, such as one from " <>
+                "MAVLink2.Dialect.XML; #{inspect(dialect)} has none"
+      end
+    end
+
+    only =
+      case Keyword.fetch(opts, :only) do
+        {:ok, ids} -> MapSet.new(ids, &msgid!(&1, where))
+        :error -> nil
+      end
+
+    GenServer.call(
+      link,
+      {:subscribe, pid,
+       %{rejected: Keyword.get(opts, :rejected, false), decode: decode?, only: only}}
+    )
+  end
+
+  defp msgid!(id, _where) when is_integer(id), do: id
+
+  defp msgid!(mod, where) when is_atom(mod) do
+    if Code.ensure_loaded?(mod) and function_exported?(mod, :msgid, 0),
+      do: mod.msgid(),
+      else:
+        raise(
+          ArgumentError,
+          "#{where}: :only takes message ids or message modules such as MyDialect.Heartbeat; " <>
+            "#{inspect(mod)} is neither"
+        )
+  end
+
+  @doc """
+  Encodes `message`, a struct of the link's dialect, and sends it.
+  `target_system` over 255 goes in the header (`TARGET32`) with 255 in the
+  payload, as MAVLink requires. Options are `send_message/4`'s other than
+  `:target_sysid`. Raises ArgumentError for a struct that is not of the
+  link's dialect, or a field value that does not fit its type.
+
+      MAVLink2.Link.send(link, %MyDialect.Heartbeat{type: 6, autopilot: 8})
+  """
+  @spec send(GenServer.server(), struct(), keyword()) :: :ok | {:error, term()}
+  def send(link, message, opts \\ [])
+
+  def send(link, %mod{} = message, opts) do
+    where = "MAVLink2.Link.send/3"
+
+    MAVLink2.Options.validate!(
+      opts,
+      [sysid: :id, compid: :compid, force: :boolean],
+      where
+    )
+
+    dialect = info(link).dialect
+
+    unless function_exported?(dialect, :message, 1) and function_exported?(mod, :msgid, 0) and
+             dialect.message(mod.msgid()) == mod do
+      raise ArgumentError,
+            "#{where}: #{inspect(mod)} is not a message of the link's dialect " <>
+              "#{inspect(dialect)}; build it as %#{inspect(dialect)}.MessageName{...}"
+    end
+
+    {message, header} =
+      case message do
+        %{target_system: t} when is_integer(t) and t > 255 ->
+          {%{message | target_system: 255}, [target_sysid: t]}
+
+        _ ->
+          {message, []}
+      end
+
+    {msgid, payload} = dialect.encode(message)
+    send_message(link, msgid, payload, opts ++ header)
+  end
+
+  def send(_link, message, _opts) do
+    raise ArgumentError,
+          "MAVLink2.Link.send/3 takes a message struct of the link's dialect, such as " <>
+            "%MyDialect.Heartbeat{}; got: #{inspect(message)}"
+  end
 
   @spec unsubscribe(GenServer.server(), pid()) :: :ok
   def unsubscribe(link, pid \\ self()), do: GenServer.call(link, {:unsubscribe, pid})
@@ -100,8 +247,30 @@ defmodule MAVLink2.Link do
   @spec send_message(GenServer.server(), non_neg_integer(), binary(), keyword()) ::
           :ok | {:error, term()}
   def send_message(link, msgid, payload, opts \\ [])
-      when is_integer(msgid) and is_binary(payload),
-      do: GenServer.call(link, {:send, msgid, payload, opts})
+
+  def send_message(link, msgid, payload, opts)
+      when is_integer(msgid) and msgid in 0..0xFFFFFF and is_binary(payload) do
+    MAVLink2.Options.validate!(
+      opts,
+      [sysid: :id, compid: :compid, target_sysid: {:or, [{:in, [nil]}, :id]}, force: :boolean],
+      "MAVLink2.Link.send_message/4"
+    )
+
+    GenServer.call(link, {:send, msgid, payload, opts})
+  end
+
+  def send_message(_link, %_{} = message, _payload, _opts) do
+    raise ArgumentError,
+          "MAVLink2.Link.send_message/4 takes a message id and an encoded payload; " <>
+            "for a message struct (#{inspect(message.__struct__)}) use MAVLink2.Link.send/2"
+  end
+
+  def send_message(_link, msgid, payload, _opts) do
+    raise ArgumentError,
+          "MAVLink2.Link.send_message/4: the message id must be an integer up to 24 bits and " <>
+            "the payload a binary, as a dialect's encode/1 returns them; got: " <>
+            "#{inspect(msgid)}, #{inspect(payload, limit: 8)}"
+  end
 
   @doc """
   Writes a decoded frame's `raw` bytes unchanged: its sequence number,
@@ -167,14 +336,14 @@ defmodule MAVLink2.Link do
   end
 
   @impl true
-  def handle_call({:subscribe, pid, rejected?}, _from, state) do
+  def handle_call({:subscribe, pid, sub}, _from, state) do
     ref =
       case state.subscribers do
         %{^pid => {ref, _}} -> ref
         _ -> Process.monitor(pid)
       end
 
-    {:reply, :ok, %{state | subscribers: Map.put(state.subscribers, pid, {ref, rejected?})}}
+    {:reply, :ok, %{state | subscribers: Map.put(state.subscribers, pid, {ref, sub})}}
   end
 
   def handle_call({:unsubscribe, pid}, _from, state) do
@@ -287,8 +456,9 @@ defmodule MAVLink2.Link do
         fan_out(frame, %{state | signing: signing})
 
       {:error, reason} ->
-        for {pid, {_ref, true}} <- state.subscribers,
-            do: send(pid, {__MODULE__, state.name, {:rejected, reason, frame}})
+        for {pid, {_ref, %{rejected: true} = sub}} <- state.subscribers,
+            wants?(sub, frame),
+            do: Kernel.send(pid, {__MODULE__, state.name, {:rejected, reason, frame}})
 
         bump(state, reason)
     end
@@ -296,10 +466,31 @@ defmodule MAVLink2.Link do
 
   defp fan_out(frame, state) do
     state = track_peer_seq(state, frame)
-    for {pid, _} <- state.subscribers, do: send(pid, {__MODULE__, state.name, frame})
+    decoded = decode_once(state, frame)
+
+    for {pid, {_ref, sub}} <- state.subscribers, wants?(sub, frame) do
+      case {sub.decode, decoded} do
+        {false, _} -> Kernel.send(pid, {__MODULE__, state.name, frame})
+        {true, {:ok, message}} -> Kernel.send(pid, {__MODULE__, state.name, frame, message})
+        {true, _} -> :ok
+      end
+    end
+
     state = bump(state, :rx)
     if frame.known, do: state, else: bump(state, :unknown)
   end
+
+  defp wants?(%{only: nil}, _frame), do: true
+  defp wants?(%{only: ids}, frame), do: MapSet.member?(ids, frame.msgid)
+
+  # Decoded once for all the subscribers that asked, and only if one did.
+  defp decode_once(state, %Frame{known: true} = frame) do
+    if Enum.any?(state.subscribers, fn {_, {_, sub}} -> sub.decode and wants?(sub, frame) end),
+      do: state.dialect.decode(frame.msgid, frame.payload),
+      else: :none
+  end
+
+  defp decode_once(_state, _frame), do: :none
 
   defp track_peer_seq(state, %Frame{sysid: sysid, compid: compid, seq: seq}) do
     sender = {sysid, compid}

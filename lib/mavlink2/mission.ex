@@ -82,7 +82,15 @@ defmodule MAVLink2.Mission do
   @spec upload(GenServer.server(), MAVLink2.target(), [item()], keyword()) ::
           {:ok, non_neg_integer() | nil} | {:error, term()}
   def upload(link, target, items, opts \\ []) do
-    Service.run(link, target, fn ctx ->
+    where = "MAVLink2.Mission.upload/4"
+    validate_opts!(opts, where)
+
+    unless is_list(items) do
+      raise ArgumentError,
+            "#{where}: items must be a list of keyword lists or maps, got: #{inspect(items)}"
+    end
+
+    Service.run(link, target, where, fn ctx ->
       type = mission_type(ctx, opts)
       items = items |> Enum.map(&item_fields(ctx, &1)) |> List.to_tuple()
 
@@ -142,7 +150,10 @@ defmodule MAVLink2.Mission do
   @spec download(GenServer.server(), MAVLink2.target(), keyword()) ::
           {:ok, [map()], non_neg_integer() | nil} | {:error, term()}
   def download(link, target, opts \\ []) do
-    Service.run(link, target, fn ctx ->
+    where = "MAVLink2.Mission.download/3"
+    validate_opts!(opts, where)
+
+    Service.run(link, target, where, fn ctx ->
       type = mission_type(ctx, opts)
       Service.message!(ctx, @item_int, :mission_item_int)
 
@@ -189,7 +200,10 @@ defmodule MAVLink2.Mission do
   @doc "Clears the target's list of that mission type."
   @spec clear(GenServer.server(), MAVLink2.target(), keyword()) :: :ok | {:error, term()}
   def clear(link, target, opts \\ []) do
-    Service.run(link, target, fn ctx ->
+    where = "MAVLink2.Mission.clear/3"
+    validate_opts!(opts, where)
+
+    Service.run(link, target, where, fn ctx ->
       type = mission_type(ctx, opts)
       send_fun = fn -> send_to(ctx, @clear_all, :mission_clear_all, mission_type: type) end
 
@@ -245,13 +259,31 @@ defmodule MAVLink2.Mission do
 
   defp send_to(ctx, msgid, name, fields), do: Service.send_to(ctx, msgid, name, fields)
 
+  defp validate_opts!(opts, where) do
+    MAVLink2.Options.validate!(
+      opts,
+      [
+        mission_type: {:or, [:atom, :byte]},
+        timeout: :timeout,
+        item_timeout: :timeout,
+        retries: :non_neg_integer
+      ],
+      where
+    )
+  end
+
   defp item_fields(ctx, item) do
+    unless Keyword.keyword?(item) or is_map(item) do
+      raise ArgumentError,
+            "#{ctx.where}: each item is a keyword list or map of MISSION_ITEM_INT fields, " <>
+              "such as [command: :mav_cmd_nav_waypoint, frame: :mav_frame_global_relative_alt, " <>
+              "x: 473_977_420, y: 85_455_940, z: 30.0]; got: #{inspect(item)}"
+    end
+
     item = Map.new(item)
 
-    case Map.keys(item) -- @item_fields do
-      [] -> :ok
-      unknown -> throw({:error, {:unknown_fields, unknown}})
-    end
+    for name <- Map.keys(item) -- @item_fields,
+        do: MAVLink2.Options.unknown!(ctx.where, "item field", name, @item_fields)
 
     item
     |> Map.update(:frame, 0, &Service.value!(ctx, :mav_frame, &1))

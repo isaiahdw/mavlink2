@@ -177,11 +177,14 @@ defmodule MAVLink2.ParamTest do
 
   test "names are 7-bit ASCII" do
     {gcs, _v} = Vehicle.pair()
-    assert Param.read(gcs, {1, 1}, "CAFÉ") == {:error, :name_not_ascii}
+    assert_raise ArgumentError, ~r/7-bit ASCII/, fn -> Param.read(gcs, {1, 1}, "CAFÉ") end
   end
 
   test "a name longer than 16 bytes is refused" do
     {gcs, _v} = Vehicle.pair()
-    assert Param.read(gcs, {1, 1}, String.duplicate("X", 17)) == {:error, :name_too_long}
+
+    assert_raise ArgumentError, ~r/at most 16 bytes/, fn ->
+      Param.read(gcs, {1, 1}, String.duplicate("X", 17))
+    end
   end
 end
