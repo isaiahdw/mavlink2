@@ -14,10 +14,11 @@ First release.
 - `MAVLink2.Dialect.XML`: a dialect generated at compile time from MAVLink XML
   and its includes, with a typed struct per message, `encode/1`, `decode/2`
   and enum lookups.
-- `MAVLink2.Link`: a link process over a transport that numbers outgoing
-  frames, delivers decoded frames to subscribers (and refused ones, tagged,
-  to those that ask), forwards frames unchanged, and counts errors, sequence
-  gaps per sender and rejected signatures.
+- `MAVLink2.Link`: a link process over a transport that sends message
+  structs (`send/3`), numbers outgoing frames, delivers frames or decoded
+  messages to subscribers, filtered by message (and refused frames, tagged,
+  to those that ask), forwards frames unchanged, and counts errors,
+  sequence gaps per sender and rejected signatures.
 - `MAVLink2.Router`: forwarding between links by MAVLink's routing rules,
   including frames that cannot be authenticated, never `SETUP_SIGNING`, and
   forgetting a rebooted system's routes.
@@ -27,3 +28,6 @@ First release.
   `MISSION_ITEM` accepted.
 - `MAVLink2.Transport.UART` for serial and USB CDC ports through
   `Circuits.UART`, and `MAVLink2.Transport.Loopback` for tests.
+- Argument checks throughout: a mistake in a call raises `ArgumentError`
+  saying what would be right, with the closest names for a misspelling.
+- `usage-rules.md`: rules for writing code against the library.

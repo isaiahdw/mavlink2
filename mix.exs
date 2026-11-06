@@ -44,7 +44,7 @@ defmodule MAVLink2.MixProject do
     [
       licenses: ["MIT"],
       links: %{"GitHub" => @source_url, "Changelog" => "#{@source_url}/blob/main/CHANGELOG.md"},
-      files: ~w(lib mix.exs README.md LICENSE CHANGELOG.md .formatter.exs)
+      files: ~w(lib mix.exs README.md usage-rules.md LICENSE CHANGELOG.md .formatter.exs)
     ]
   end
 
@@ -52,7 +52,7 @@ defmodule MAVLink2.MixProject do
     [
       main: "readme",
       source_ref: "v#{@version}",
-      extras: ["README.md", "CHANGELOG.md", "LICENSE"],
+      extras: ["README.md", "usage-rules.md", "CHANGELOG.md", "LICENSE"],
       groups_for_modules: [
         Overview: [MAVLink2],
         Frames: [MAVLink2.Frame, MAVLink2.CRC, MAVLink2.Signing],

@@ -90,6 +90,20 @@ A protocol over a byte stream needs all of these, and MAVLink has them:
 - **Video and bulk data:** these usually go on their own stream (RTP, for example).
 - **Rich request/response APIs** with nested or variable-length types: gRPC or HTTP suit these better on an IP network.
 
+## Using it, or having an agent use it
+
+[`usage-rules.md`](usage-rules.md) is a short set of rules for writing code
+against this library, for people and coding agents alike; tools such as
+[`usage_rules`](https://hex.pm/packages/usage_rules) gather it from your
+dependencies. The library checks how it is called:
+
+- A mistake in a call raises `ArgumentError` naming what is wrong and what
+  would be right, with the closest names for a misspelt option or enum
+  entry (`:baud` suggests `:speed`; `:mav_cmd_arm` suggests
+  `:mav_cmd_component_arm_disarm`).
+- Errors from the other end of a link, timeouts and refusals, are returned
+  as `{:error, reason}`.
+
 ## Installation
 
 ```elixir
@@ -137,19 +151,17 @@ alias MyApp.MAVLink, as: D
     compid: 190
   )
 
-:ok = MAVLink2.Link.subscribe(link)
+:ok = MAVLink2.Link.subscribe(link, self(), decode: true, only: [D.Heartbeat])
 
-heartbeat = %D.Heartbeat{
-  type: D.enum_value(:mav_type, :mav_type_gcs),
-  autopilot: D.enum_value(:mav_autopilot, :mav_autopilot_invalid)
-}
-
-{msgid, payload} = D.encode(heartbeat)
-:ok = MAVLink2.Link.send_message(link, msgid, payload)
+:ok =
+  MAVLink2.Link.send(link, %D.Heartbeat{
+    type: D.enum_value(:mav_type, :mav_type_gcs),
+    autopilot: D.enum_value(:mav_autopilot, :mav_autopilot_invalid)
+  })
 
 receive do
-  {MAVLink2.Link, ^link, %MAVLink2.Frame{msgid: id, payload: payload}} ->
-    {:ok, message} = D.decode(id, payload)
+  {MAVLink2.Link, ^link, frame, %D.Heartbeat{} = heartbeat} ->
+    {frame.sysid, frame.compid, heartbeat}
 end
 
 MAVLink2.Link.stats(link)
@@ -163,7 +175,7 @@ Link options:
 | `:dialect` | the dialect module (required) |
 | `:transport` | a `MAVLink2.Transport`; default `MAVLink2.Transport.UART`. Remaining options go to its `open/1` |
 | `:device`, `:speed`, `:flow_control` | `MAVLink2.Transport.UART` options; `:speed` defaults to 115200. A USB CDC ACM port (`/dev/ttyACM0`) is a serial device too |
-| `:sysid`, `:compid` | this end's ids; default 1, 1. `:sysid` may be up to 32 bits |
+| `:sysid`, `:compid` | this end's ids; default 1, 1. `:sysid` may be up to 32 bits; 0 is refused |
 | `:unknown` | `:keep` delivers frames whose id the dialect lacks, unchecked, with `known: false`; default `:skip` |
 | `:sendable` | message ids the peer accepts; others return `{:error, {:not_sendable, id}}` |
 | `:signing` | a `MAVLink2.Signing`; see below |
@@ -198,15 +210,15 @@ refused as replays. A board that boots without real time can save
 ### A target over 255
 
 A system id over 255 goes in the header: `Frame.encode/2` sets `SYSID32` for
-a `sysid` over 255 and `TARGET32` for a `target_sysid`. A message to such a
-system has 255 in its payload `target_system`:
+a `sysid` over 255 and `TARGET32` for a `target_sysid`. `Link.send/2` does
+this for a message whose `target_system` is over 255, putting 255 in the
+payload as MAVLink requires:
 
 ```elixir
-{msgid, payload} = D.encode(%D.CommandLong{target_system: 255, target_component: 1, command: 400})
-MAVLink2.Link.send_message(link, msgid, payload, target_sysid: 100_000)
+MAVLink2.Link.send(link, %D.CommandLong{target_system: 100_000, target_component: 1, command: 400})
 ```
 
-The services below do this for any target.
+The services below do the same for any target.
 
 ### Routing
 

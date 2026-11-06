@@ -282,8 +282,10 @@ defmodule MAVLink2.Mission do
 
     item = Map.new(item)
 
-    for name <- Map.keys(item) -- @item_fields,
-        do: MAVLink2.Options.unknown!(ctx.where, "item field", name, @item_fields)
+    case Map.keys(item) -- @item_fields do
+      [] -> :ok
+      [name | _] -> MAVLink2.Options.unknown!(ctx.where, "item field", name, @item_fields)
+    end
 
     item
     |> Map.update(:frame, 0, &Service.value!(ctx, :mav_frame, &1))

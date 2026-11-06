@@ -99,6 +99,7 @@ defmodule MAVLink2.Options do
   Raises ArgumentError for an unknown `name`, listing the closest of
   `known` first.
   """
+  @spec unknown!(String.t(), String.t(), term(), [term()]) :: no_return()
   @spec unknown!(String.t(), String.t(), term(), [term()], String.t()) :: no_return()
   def unknown!(where, kind, name, known, prefix \\ "") do
     synonym = Map.get(@synonyms, name)
